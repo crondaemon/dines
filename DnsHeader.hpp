@@ -3,6 +3,7 @@
 #define __DNSHEADER_HPP__
 
 #include <cstdint>
+#include <string>
 
 typedef enum {
     R_QUESTION,
@@ -14,32 +15,28 @@ typedef enum {
 class DnsHeader {
     uint16_t _txid;
 
-    uint32_t _nquest;
-    uint32_t _nans;
-    uint32_t _nadd;
-    uint32_t _nauth;
+    uint32_t _nrecord[4];
     
+    void RecordAdd(const RecordType rt, const int value);
+
 public:
-    DnsHeader() : _txid(0), _nquest(0), _nans(0), _nadd(0), _nauth(0) {}
+    DnsHeader();
     DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t nans,
-        const uint32_t nadd, const uint32_t nauth) :
-        _txid(txid),
-        _nquest(nquest),
-        _nans(nans),
-        _nauth(nauth)
-        {}
+        const uint32_t nadd, const uint32_t nauth);
         
     uint16_t txid() const { return _txid; }
     
     void txid(const uint16_t txid) { _txid = txid; }
         
-    void RecordSet(const RecordType rt, uint32_t value);
+    void RecordSet(const RecordType rt, const uint32_t value);
     
-    void RecordGet(const RecordType rt) const;
+    uint32_t RecordGet(const RecordType rt) const;
     
     void RecordInc(const RecordType rt);
     
     void RecordDec(const RecordType rt);
+    
+    std::string data() const;
 };
 
 #endif 
