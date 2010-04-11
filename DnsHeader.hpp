@@ -12,8 +12,24 @@ typedef enum {
     R_AUTHORITATIVE
 } RecordType;
 
+typedef struct {
+    uint32_t
+        qr:1,
+        opcode:4,
+        aa:1,
+        tc:1,
+        rd:1,
+        ra:1,
+        z:1,
+        ad:1,
+        cd:1,
+        rcode:4;
+} DnsHeaderFlags;
+
 class DnsHeader {
     uint16_t _txid;
+
+    DnsHeaderFlags flags;
 
     uint32_t _nrecord[4];
     

@@ -4,7 +4,12 @@ CFLAGS=-c -Wall -std=c++0x
 
 LDFLAGS=
 
-SOURCES=main.cpp DnsPacket.cpp DnsHeader.cpp
+SOURCES=\
+    main.cpp \
+    DnsPacket.cpp \
+    DnsHeader.cpp \
+    DnsQuestion.cpp \
+    DnsDomain.cpp
 
 OBJECTS=$(SOURCES:.cpp=.o)
 

@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <stdexcept>
+#include <arpa/inet.h>
 
 using namespace std;
 
@@ -49,4 +50,22 @@ void DnsHeader::RecordAdd(const RecordType rt, const int value)
 void DnsHeader::RecordInc(const RecordType rt)
 {
     this->RecordAdd(rt, 1);
-}    
+}
+
+string DnsHeader::data() const 
+{
+    string out = "";
+    
+    uint16_t id = htons(_txid);
+    uint32_t temp;
+    
+    out += string((char*)&id, 2);
+    
+    for (int i = 0; i < 4; i++) {
+        temp = htonl(_nrecord[i]);
+        out += string((char*)&temp, 4);
+    }
+        
+    return out;
+}
+

@@ -6,15 +6,21 @@
 #include <cstdint>
 
 #include "DnsHeader.hpp"
+#include "DnsQuestion.hpp"
 
 class DnsPacket {
-    DnsHeader hdr;
-    //DnsQuestion q;
-    //vector<DnsAnswer> answers;
-    //vector<DnsAdditional> additionals;
-    //vector<DnsAuthoritative> autoritative;
 public:
-    DnsPacket();
+    DnsHeader hdr;
+    
+    DnsQuestion q;
+    
+    //vector<DnsAnswer> answers;
+    
+    //vector<DnsAdditional> additionals;
+    
+    //vector<DnsAuthoritative> autoritative;
+    
+    DnsPacket() {}
 };
 
 #endif
