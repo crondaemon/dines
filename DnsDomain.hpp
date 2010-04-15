@@ -6,6 +6,7 @@
 #include <string>
 
 class DnsDomain {
+
     std::vector<std::string> frags;
 public:
     DnsDomain();

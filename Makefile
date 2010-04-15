@@ -11,9 +11,9 @@ SOURCES=\
     DnsQuestion.cpp \
     DnsDomain.cpp
 
-OBJECTS=$(SOURCES:.cpp=.o)
-
 EXECUTABLE=dines
+
+OBJECTS=$(SOURCES:.cpp=.o)
 
 all: $(SOURCES) $(EXECUTABLE)
 	

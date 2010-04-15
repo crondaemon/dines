@@ -4,13 +4,21 @@
 
 #include <vector>
 #include <cstdint>
+#include <string>
+#include <netinet/ip.h>
+#include <netinet/udp.h>
 
 #include "DnsHeader.hpp"
 #include "DnsQuestion.hpp"
 
 class DnsPacket {
+    int _socket;
+    struct sockaddr_in _sin;
 public:
-    DnsHeader hdr;
+    struct iphdr ip_hdr;
+    struct udphdr udp_hdr;
+
+    DnsHeader dns_hdr;
     
     DnsQuestion q;
     
@@ -20,7 +28,11 @@ public:
     
     //vector<DnsAuthoritative> autoritative;
     
-    DnsPacket() {}
+    DnsPacket();
+    
+    std::string data() const;
+    
+    void send() const;
 };
 
 #endif
