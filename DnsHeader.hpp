@@ -13,7 +13,7 @@ typedef enum {
 } RecordType;
 
 typedef struct {
-    uint32_t
+    uint16_t
         qr:1,
         opcode:4,
         aa:1,
@@ -27,22 +27,18 @@ typedef struct {
 } DnsHeaderFlags;
 
 class DnsHeader {
-    uint16_t _txid;
-
-    DnsHeaderFlags flags;
-
-    uint32_t _nrecord[4];
-    
     void RecordAdd(const RecordType rt, const int value);
 
 public:
+    uint16_t txid;
+
+    DnsHeaderFlags flags;
+
+    uint32_t nrecord[4];
+    
     DnsHeader();
     DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t nans,
         const uint32_t nadd, const uint32_t nauth);
-        
-    uint16_t txid() const { return _txid; }
-    
-    void txid(const uint16_t txid) { _txid = txid; }
         
     void RecordSet(const RecordType rt, const uint32_t value);
     

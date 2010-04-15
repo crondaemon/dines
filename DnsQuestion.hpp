@@ -4,6 +4,7 @@
 
 #include "DnsDomain.hpp"
 
+#include <arpa/inet.h>
 #include <string>
 
 class DnsQuestion {
@@ -14,8 +15,8 @@ public:
     DnsQuestion() {}
     DnsQuestion(const DnsDomain d, const uint16_t type, const uint16_t cl) :
         _domain(d),
-        _type(type),
-        _class(cl) 
+        _type(htons(type)),
+        _class(htons(cl)) 
         {}
         
     std::string data() const;

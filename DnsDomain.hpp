@@ -12,6 +12,8 @@ public:
     DnsDomain();
     DnsDomain(const std::string domain);
     
+    DnsDomain(const char* domain);
+    
     std::string data() const;
 };
 

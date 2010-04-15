@@ -1,6 +1,7 @@
 
 #include "DnsQuestion.hpp"
 
+#include <iostream>
 #include <arpa/inet.h>
 
 using namespace std;

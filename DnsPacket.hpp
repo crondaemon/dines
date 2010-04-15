@@ -14,13 +14,14 @@
 class DnsPacket {
     int _socket;
     struct sockaddr_in _sin;
+    struct sockaddr_in _din;
 public:
     struct iphdr ip_hdr;
     struct udphdr udp_hdr;
 
     DnsHeader dns_hdr;
     
-    DnsQuestion q;
+    DnsQuestion question;
     
     //vector<DnsAnswer> answers;
     
@@ -32,7 +33,7 @@ public:
     
     std::string data() const;
     
-    void send() const;
+    void send();
 };
 
 #endif

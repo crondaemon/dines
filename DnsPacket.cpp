@@ -11,6 +11,7 @@
 
 #include <stdexcept>
 #include <sstream>
+#include <iostream>
 
 using namespace std;
 
@@ -36,22 +37,35 @@ DnsPacket::DnsPacket()
     _sin.sin_port = htons(53);
     _sin.sin_addr.s_addr = inet_addr("1.2.3.4");
 
+    _din.sin_family = AF_INET;
+    _din.sin_port = htons(53);
+    _din.sin_addr.s_addr = inet_addr("2.3.4.5");
+
+
     ip_hdr.ihl = 5;
     ip_hdr.version = 4;
     ip_hdr.tos = 16;
-    ip_hdr.tot_len = sizeof(struct iphdr);
+    ip_hdr.tot_len = sizeof(struct iphdr) + sizeof(struct udphdr);
     ip_hdr.id = htons(53);
     ip_hdr.frag_off = 0;
     ip_hdr.ttl = 64;
-    ip_hdr.protocol = 6;
+    ip_hdr.protocol = IPPROTO_UDP;
     ip_hdr.check = 0;
     ip_hdr.daddr = inet_addr("1.2.3.4");
     ip_hdr.saddr = inet_addr("2.3.4.5");
     
-    udp_hdr.source = 10;
-    udp_hdr.dest = 53;
-    udp_hdr.len = 100;
-    udp_hdr.check = 0x1234;
+    udp_hdr.source = htons(10);
+    udp_hdr.dest = htons(53);
+    udp_hdr.len = sizeof(udp_hdr);
+    udp_hdr.check = 0;
+    
+    if (connect(_socket, (struct sockaddr*)&_din, sizeof(_din)) < 0) {
+        stringstream ss;
+        ss << __func__;
+        ss << ": connect error: ";
+        ss << strerror(errno);
+        throw runtime_error(ss.str());
+    }
 }
 
 string DnsPacket::data() const
@@ -59,20 +73,25 @@ string DnsPacket::data() const
     string out = "";
     
     out += dns_hdr.data();
-    out += q.data();
+    out += question.data();
     
     return out;
 }
 
-void DnsPacket::send() const
+void DnsPacket::send()
 {
-    string s;
+    string output;
+    string dns_dgram = data();
     
-    s += string((char*)&ip_hdr, sizeof(ip_hdr));
-    s += string((char*)&udp_hdr, sizeof(udp_hdr));
-    s += data();
+    udp_hdr.len = htons(sizeof(udp_hdr) + dns_dgram.length());
+    ip_hdr.tot_len = htons(sizeof(ip_hdr) + sizeof(udp_hdr) + dns_dgram.length() + 1000);
+    cout << "ZZZZ " << sizeof(ip_hdr) + sizeof(udp_hdr) + dns_dgram.length()+1 << endl;
     
-    if (sendto(_socket, s.data(), s.length(), 0, (struct sockaddr *)&_sin, sizeof(_sin) < 0)) {
+    output += string((char*)&ip_hdr, sizeof(ip_hdr));
+    output += string((char*)&udp_hdr, sizeof(udp_hdr));
+    output += dns_dgram;
+    
+    if (sendto(_socket, output.data(), output.length(), 0, (struct sockaddr *)&_sin, sizeof(_sin)) < 0) {
         stringstream ss;
         ss << __func__;
         ss << ": sendto() error: ";
