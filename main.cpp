@@ -110,6 +110,7 @@ int main(int argc, char* argv[])
                 break;
             default:
                 cout << "Unknown option.\n";
+                return 1;
         }
     }
 
@@ -135,11 +136,11 @@ int main(int argc, char* argv[])
             p.send();
         }
         catch(exception& e) {
-            cout << "\n\nError: " << e.what() << "\n\n";
-            return 1;
+            cout << "\n\nError: " << e.what() << "\n";
+            //return 1;
         }
-        cout << ".";
-        cout.flush();
+        //cout << ".";
+        //cout.flush();
         usleep(delay);
         num--;
     }

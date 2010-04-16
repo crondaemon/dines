@@ -1,6 +1,6 @@
 CC=g++
 
-CFLAGS=-c -Wall -std=c++0x 
+CFLAGS=-c -Wall -std=c++0x
 
 LDFLAGS=
 
@@ -22,8 +22,8 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
 .cpp.o:
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -g -c $<
 
 clean:
-	rm -rf *.o dines
+	rm -rf *.o dines core.*
 	

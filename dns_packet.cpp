@@ -69,14 +69,16 @@ string DnsPacket::data() const
 void DnsPacket::send()
 {
     // Sanity checks   
-    if (udp_hdr.source == 0)
-        udp_hdr.source = rand();
     if (ip_hdr.saddr == 0)
         ; // XXX
-    if (udp_hdr.dest == 0)
-        udp_hdr.dest = htons(53); // put 53 if no port specified
     if (ip_hdr.daddr == 0)
         throw runtime_error("You must specify destination ip (--dst-ip)");
+
+    if (udp_hdr.source == 0)
+        udp_hdr.source = rand();
+    if (udp_hdr.dest == 0)
+        udp_hdr.dest = htons(53); // put 53 if no port specified
+
     if (question.qdomain.data().length() == 1)
         throw runtime_error("You must specify domain in question (--qdomain)");
     if (question.qtype == 0)
@@ -111,11 +113,15 @@ void DnsPacket::send()
         throw runtime_error(ss.str());
     }
 
+    stringstream ss;
+
     if (sendto(_socket, output.data(), output.length(), 0, (struct sockaddr *)&_sin, sizeof(_sin)) < 0) {
-        stringstream ss;
-        ss << __func__;
-        ss << ": sendto() error: ";
-        ss << strerror(errno);
-        throw runtime_error(ss.str());
+        if (errno == 22) {
+            cout << "Invalid parameter (probably fuzzer is shaking it).\n";
+        } else {
+            ss << "sendto() error: ";
+            ss << strerror(errno);
+            throw runtime_error(ss.str());
+        }
     }
 }
