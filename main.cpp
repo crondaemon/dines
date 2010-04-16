@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <ostream>
 #include <string>
 #include <getopt.h>
 
@@ -7,6 +8,8 @@
 #include "fuzzer.hpp"
 
 using namespace std;
+
+#define VERSION 0.1
 
 struct option opts[] = {
     {"src-ip", 1, NULL, 0},
@@ -19,18 +22,19 @@ struct option opts[] = {
     {"qclass", 1, NULL, 7},
     {"num", 1, NULL, 30}, // <<-- appeso in fondo per lasciare spazio
     {"delay", 1, NULL, 31},
-    { NULL, 0, NULL, 0}
+    {"debug", 0, NULL, 32},
+    {NULL, 0, NULL, 0}
 };
 
 Fuzzer fuzzer;
+ostream* theLog;
 
 void usage(string s)
 {
-    cout << "\nDines 0.1\n\n";
     cout << "Fields with (F) can be fuzzed. (Example --trid F)\n\n";
     cout << "Usage: " << s << " <params>\n\n";
-    cout << "Params:\n\n";
-    cout << "[IP]\n";
+    cout << "Params:\n";
+    cout << "\n[IP]\n";
     cout << "--src-ip: Source IP\n";
     cout << "--dst-ip: Destination IP\n";
     cout << "\n[UDP]\n";
@@ -44,6 +48,7 @@ void usage(string s)
     cout << "\n[MISC]\n";
     cout << "--num: number of packets (0 means infinite)\n";
     cout << "--delay: delay between packets (in usec)\n";
+    cout << "--debug: activate debug\n";
     cout << "\n";
 }
 
@@ -54,6 +59,10 @@ int main(int argc, char* argv[])
     int cl = 0;
     unsigned num = 0;
     unsigned delay = 0;
+
+    theLog = new ostream(NULL);
+
+    cout << "\nDines " << VERSION << " - The definitive DNS packet forger.\n\n";
 
     if (argc < 2) {
         usage(argv[0]);
@@ -108,6 +117,10 @@ int main(int argc, char* argv[])
             case 31:
                 delay = atoi(optarg);
                 break;
+            case 32:
+                cout << "Activating debug\n";
+                theLog = new ostream(cout.rdbuf());
+                break;
             default:
                 cout << "Unknown option.\n";
                 return 1;
@@ -128,21 +141,22 @@ int main(int argc, char* argv[])
 
     cout << "Sending";
     // Send datagram    
-    while(num > 0) {
-        if (!fuzzer.empty())
-            fuzzer.goFuzz();
+    while(num-- > 0) {
+        fuzzer.goFuzz();
+
+        //*theLog << p.ip_hdr.saddr << "->" << p.ip_hdr.daddr << endl;
             
         try {
             p.send();
         }
         catch(exception& e) {
             cout << "\n\nError: " << e.what() << "\n";
-            //return 1;
+            return 1;
         }
-        //cout << ".";
-        //cout.flush();
+
+        cout << "."; cout.flush();
+
         usleep(delay);
-        num--;
     }
     cout << endl;
 }

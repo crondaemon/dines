@@ -14,7 +14,6 @@ public:
     Fuzzer();
     void addAddress(void* addr, unsigned len);
     void goFuzz();
-    bool empty() const { return _addrs.size() == 0; }
 };
 
 #endif 

@@ -4,7 +4,7 @@
 
 extern bool dolog;
 
-void
+void ostream theLog;
 
 #endif
 
