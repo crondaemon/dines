@@ -23,6 +23,7 @@ public:
     
     DnsQuestion question;
     
+    
     //vector<DnsAnswer> answers;
     
     //vector<DnsAdditional> additionals;
