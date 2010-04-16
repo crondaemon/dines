@@ -10,6 +10,7 @@ using namespace std;
 DnsHeader::DnsHeader()
 {
     txid = 0;
+    memset(&flags, 0x0, sizeof(DnsHeaderFlags));
     memset(nrecord, 0x0, sizeof(uint32_t) * 4);
 }
 
@@ -60,7 +61,7 @@ string DnsHeader::data() const
     uint16_t temp;
     
     out += string((char*)&id, 2);
-    temp = htons(*(uint16_t*)&flags);
+    temp = *(uint16_t*)&flags;
     out += string((char*)&temp, 2);
     
     for (int i = 0; i < 4; i++) {

@@ -3,11 +3,6 @@
 
 using namespace std;
 
-DnsDomain::DnsDomain()
-{
-    frags.clear();
-}
-
 DnsDomain::DnsDomain(const string domain)
 {
     frags.clear();
@@ -41,6 +36,7 @@ string DnsDomain::data() const
         // Add the frag
         out.append(*itr);
     }
+    out.append(1, 0);
     
     return out;
 }

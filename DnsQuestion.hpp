@@ -15,8 +15,8 @@ public:
     DnsQuestion() {}
     DnsQuestion(const DnsDomain d, const uint16_t type, const uint16_t cl) :
         _domain(d),
-        _type(htons(type)),
-        _class(htons(cl)) 
+        _type(type),
+        _class(cl)
         {}
         
     std::string data() const;

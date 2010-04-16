@@ -6,13 +6,11 @@
 #include <string>
 
 class DnsDomain {
-
     std::vector<std::string> frags;
 public:
-    DnsDomain();
-    DnsDomain(const std::string domain);
+    DnsDomain(const std::string domain = "");
     
-    DnsDomain(const char* domain);
+    //DnsDomain(const char* domain);
     
     std::string data() const;
 };

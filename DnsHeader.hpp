@@ -5,31 +5,43 @@
 #include <cstdint>
 #include <string>
 
-typedef enum {
-    R_QUESTION,
-    R_ANSWER,
-    R_ADDITIONAL,
-    R_AUTHORITATIVE
-} RecordType;
-
+#pragma pack(1)
 typedef struct {
-    uint16_t
-        qr:1,
-        opcode:4,
-        aa:1,
-        tc:1,
-        rd:1,
-        ra:1,
-        z:1,
-        ad:1,
-        cd:1,
-        rcode:4;
+#if BYTE_ORDER == BIG_ENDIAN
+    uint8_t qr: 1,
+            opcode: 4,
+            aa: 1,
+            tc: 1,
+            rd: 1;
+    uint8_t ra: 1,
+            z: 1,
+            auth: 1,
+            cd: 1,
+            rcode: 4;
+#else
+    uint8_t rd: 1,
+            tc: 1,
+            aa: 1,
+            opcode: 4,
+            qr: 1;
+    uint8_t rcode: 4,
+            cd: 1,
+            auth: 1,
+            z: 1,
+            ra: 1;
+#endif
 } DnsHeaderFlags;
 
 class DnsHeader {
-    void RecordAdd(const RecordType rt, const int value);
-
 public:
+
+    typedef enum {
+        R_QUESTION = 0,
+        R_ANSWER,
+        R_ADDITIONAL,
+        R_AUTHORITATIVE
+    } RecordType;
+
     uint16_t txid;
 
     DnsHeaderFlags flags;
@@ -49,6 +61,8 @@ public:
     void RecordDec(const RecordType rt);
     
     std::string data() const;
+private:
+    void RecordAdd(const RecordType rt, const int value);
 };
 
 #endif 

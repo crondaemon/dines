@@ -85,7 +85,6 @@ void DnsPacket::send()
     
     udp_hdr.len = htons(sizeof(udp_hdr) + dns_dgram.length());
     ip_hdr.tot_len = htons(sizeof(ip_hdr) + sizeof(udp_hdr) + dns_dgram.length() + 1000);
-    cout << "ZZZZ " << sizeof(ip_hdr) + sizeof(udp_hdr) + dns_dgram.length()+1 << endl;
     
     output += string((char*)&ip_hdr, sizeof(ip_hdr));
     output += string((char*)&udp_hdr, sizeof(udp_hdr));
