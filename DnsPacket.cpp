@@ -34,38 +34,26 @@ DnsPacket::DnsPacket()
         
      memset(&_sin, 0x0, sizeof(_sin));
     _sin.sin_family = AF_INET;
-    _sin.sin_port = htons(53);
-    _sin.sin_addr.s_addr = inet_addr("1.2.3.4");
 
+    memset(&_din, 0x0, sizeof(_din));
     _din.sin_family = AF_INET;
-    _din.sin_port = htons(53);
-    _din.sin_addr.s_addr = inet_addr("2.3.4.5");
-
 
     ip_hdr.ihl = 5;
     ip_hdr.version = 4;
     ip_hdr.tos = 16;
     ip_hdr.tot_len = sizeof(struct iphdr) + sizeof(struct udphdr);
-    ip_hdr.id = htons(53);
+    ip_hdr.id = 0xbeef;
     ip_hdr.frag_off = 0;
     ip_hdr.ttl = 64;
     ip_hdr.protocol = IPPROTO_UDP;
     ip_hdr.check = 0;
-    ip_hdr.daddr = inet_addr("1.2.3.4");
-    ip_hdr.saddr = inet_addr("2.3.4.5");
+    ip_hdr.daddr = 0;
+    ip_hdr.saddr = 0;
     
-    udp_hdr.source = htons(10);
-    udp_hdr.dest = htons(53);
+    udp_hdr.source = 0;
+    udp_hdr.dest = 0;
     udp_hdr.len = sizeof(udp_hdr);
     udp_hdr.check = 0;
-    
-    if (connect(_socket, (struct sockaddr*)&_din, sizeof(_din)) < 0) {
-        stringstream ss;
-        ss << __func__;
-        ss << ": connect error: ";
-        ss << strerror(errno);
-        throw runtime_error(ss.str());
-    }
 }
 
 string DnsPacket::data() const
@@ -80,16 +68,43 @@ string DnsPacket::data() const
 
 void DnsPacket::send()
 {
+    // Sanity checks   
+    if (udp_hdr.source == 0)
+        udp_hdr.source = rand();
+    if (ip_hdr.saddr == 0)
+        ; // XXX
+    if (udp_hdr.dest == 0)
+        throw runtime_error("You must specify destination port (--dport)");
+    if (ip_hdr.daddr == 0)
+        throw runtime_error("You must specify destination ip (--dst-ip)");
+
+    // Set L3/L4
+    _sin.sin_port = udp_hdr.source;
+    _sin.sin_addr.s_addr = ip_hdr.saddr;
+        
+    _din.sin_port = udp_hdr.dest;
+    _din.sin_addr.s_addr = ip_hdr.daddr;
+    
+    // Create output to send
     string output;
     string dns_dgram = data();
-    
-    udp_hdr.len = htons(sizeof(udp_hdr) + dns_dgram.length());
-    ip_hdr.tot_len = htons(sizeof(ip_hdr) + sizeof(udp_hdr) + dns_dgram.length() + 1000);
-    
+
     output += string((char*)&ip_hdr, sizeof(ip_hdr));
     output += string((char*)&udp_hdr, sizeof(udp_hdr));
     output += dns_dgram;
     
+    // Adjust lenghts
+    udp_hdr.len = htons(sizeof(udp_hdr) + dns_dgram.length());
+    ip_hdr.tot_len = htons(sizeof(ip_hdr) + sizeof(udp_hdr) + dns_dgram.length() + 1000);
+ 
+    if (connect(_socket, (struct sockaddr*)&_din, sizeof(_din)) < 0) {
+        stringstream ss;
+        ss << __func__;
+        ss << ": connect error: ";
+        ss << strerror(errno);
+        throw runtime_error(ss.str());
+    }
+
     if (sendto(_socket, output.data(), output.length(), 0, (struct sockaddr *)&_sin, sizeof(_sin)) < 0) {
         stringstream ss;
         ss << __func__;
