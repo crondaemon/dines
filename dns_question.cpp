@@ -1,5 +1,5 @@
 
-#include "DnsQuestion.hpp"
+#include "dns_question.hpp"
 
 #include <iostream>
 #include <arpa/inet.h>
@@ -11,12 +11,12 @@ string DnsQuestion::data() const
     string out = "";
     uint16_t temp;
     
-    out += _domain.data();
+    out += qdomain.data();
     
-    temp = htons(_type);
+    temp = htons(qtype);
     out += string((char*)&temp, 2);
     
-    temp = htons(_class);
+    temp = htons(qclass);
     out += string((char*)&temp, 2);
     
     return out;

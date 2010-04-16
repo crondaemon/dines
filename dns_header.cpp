@@ -1,5 +1,5 @@
 
-#include "DnsHeader.hpp"
+#include "dns_header.hpp"
 
 #include <cstring>
 #include <stdexcept>

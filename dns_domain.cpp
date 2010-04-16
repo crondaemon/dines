@@ -1,5 +1,5 @@
 
-#include "DnsDomain.hpp"
+#include "dns_domain.hpp"
 
 using namespace std;
 

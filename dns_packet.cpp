@@ -1,5 +1,5 @@
 
-#include "DnsPacket.hpp"
+#include "dns_packet.hpp"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -74,9 +74,15 @@ void DnsPacket::send()
     if (ip_hdr.saddr == 0)
         ; // XXX
     if (udp_hdr.dest == 0)
-        throw runtime_error("You must specify destination port (--dport)");
+        udp_hdr.dest = htons(53); // put 53 if no port specified
     if (ip_hdr.daddr == 0)
         throw runtime_error("You must specify destination ip (--dst-ip)");
+    if (question.qdomain.data().length() == 1)
+        throw runtime_error("You must specify domain in question (--qdomain)");
+    if (question.qtype == 0)
+        question.qtype = 1;
+    if (question.qclass == 0)
+        question.qclass = 1;
 
     // Set L3/L4
     _sin.sin_port = udp_hdr.source;
@@ -95,7 +101,7 @@ void DnsPacket::send()
     
     // Adjust lenghts
     udp_hdr.len = htons(sizeof(udp_hdr) + dns_dgram.length());
-    ip_hdr.tot_len = htons(sizeof(ip_hdr) + sizeof(udp_hdr) + dns_dgram.length() + 1000);
+    ip_hdr.tot_len = htons(sizeof(ip_hdr) + sizeof(udp_hdr) + dns_dgram.length());
  
     if (connect(_socket, (struct sockaddr*)&_din, sizeof(_din)) < 0) {
         stringstream ss;

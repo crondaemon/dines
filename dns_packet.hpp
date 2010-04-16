@@ -8,8 +8,8 @@
 #include <netinet/ip.h>
 #include <netinet/udp.h>
 
-#include "DnsHeader.hpp"
-#include "DnsQuestion.hpp"
+#include "dns_header.hpp"
+#include "dns_question.hpp"
 
 class DnsPacket {
     int _socket;

@@ -3,7 +3,8 @@
 #include <string>
 #include <getopt.h>
 
-#include "DnsPacket.hpp"
+#include "dns_packet.hpp"
+#include "fuzzer.hpp"
 
 using namespace std;
 
@@ -21,9 +22,12 @@ struct option opts[] = {
     { NULL, 0, NULL, 0}
 };
 
+Fuzzer fuzzer;
+
 void usage(string s)
 {
     cout << "\nDines 0.1\n\n";
+    cout << "Fields with (F) can be fuzzed. (Example --trid F)\n\n";
     cout << "Usage: " << s << " <params>\n\n";
     cout << "Params:\n\n";
     cout << "[IP]\n";
@@ -33,10 +37,10 @@ void usage(string s)
     cout << "--sport: source port\n";
     cout << "--dport: destination port\n";
     cout << "\n[DNS]\n";
-    cout << "--trid: transaction id\n";
+    cout << "--trid: transaction id (F)\n";
     cout << "--qdomain: question domain\n";
-    cout << "--qtype: question type\n";
-    cout << "--qclass: question class\n";
+    cout << "--qtype: question type (F)\n";
+    cout << "--qclass: question class (F)\n";
     cout << "\n[MISC]\n";
     cout << "--num: number of packets (0 means infinite)\n";
     cout << "--delay: delay between packets (in usec)\n";
@@ -45,9 +49,9 @@ void usage(string s)
 
 int main(int argc, char* argv[])
 {
-    int c;
-    int type;
-    int cl;
+    int c = 0;
+    int type = 0;
+    int cl = 0;
     unsigned num = 0;
     unsigned delay = 0;
 
@@ -63,7 +67,10 @@ int main(int argc, char* argv[])
     while((c = getopt_long(argc, argv, "", opts, NULL)) != -1) {
         switch(c) {
             case 0:
-                p.ip_hdr.saddr = inet_addr(optarg);
+                if (optarg[0] == 'F')
+                    fuzzer.addAddress(&p.ip_hdr.saddr, 4);
+                else
+                    p.ip_hdr.saddr = inet_addr(optarg);
                 break;
             case 1:
                 p.ip_hdr.daddr = inet_addr(optarg);
@@ -75,16 +82,25 @@ int main(int argc, char* argv[])
                 p.udp_hdr.dest = htons(atoi(optarg));
                 break;
             case 4:
-                p.dns_hdr.txid = htons(atoi(optarg));
+                if (optarg[0] == 'F')
+                    fuzzer.addAddress(&p.dns_hdr.txid, 2);
+                else
+                    p.dns_hdr.txid = htons(atoi(optarg));
                 break;
             case 5:
                 domain = DnsDomain(optarg);
                 break;
             case 6:
-                type = atoi(optarg);
+                if (optarg[0] == 'F')
+                    fuzzer.addAddress(&p.question.qtype, 2);
+                else
+                    type = atoi(optarg);
                 break;
             case 7:
-                cl = atoi(optarg);
+                if (optarg[0] == 'F')
+                    fuzzer.addAddress(&p.question.qclass, 2);
+                else
+                    cl = atoi(optarg);
                 break;
             case 30:
                 num = atoi(optarg);
@@ -106,9 +122,15 @@ int main(int argc, char* argv[])
     if (num == 0)
         num = 0xFFFFFF;
 
+    if (delay == 0)
+        delay = 1000000;
+
     cout << "Sending";
     // Send datagram    
     while(num > 0) {
+        if (!fuzzer.empty())
+            fuzzer.goFuzz();
+            
         try {
             p.send();
         }

@@ -6,10 +6,11 @@ LDFLAGS=
 
 SOURCES=\
     main.cpp \
-    DnsPacket.cpp \
-    DnsHeader.cpp \
-    DnsQuestion.cpp \
-    DnsDomain.cpp
+    dns_packet.cpp \
+    dns_header.cpp \
+    dns_question.cpp \
+    dns_domain.cpp \
+    fuzzer.cpp
 
 EXECUTABLE=dines
 
