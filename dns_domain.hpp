@@ -13,6 +13,8 @@ public:
     //DnsDomain(const char* domain);
     
     std::string data() const;
+    
+    std::string str() const;
 };
 
 #endif

@@ -80,7 +80,7 @@ void DnsPacket::send()
         udp_hdr.dest = htons(53); // put 53 if no port specified
 
     if (question.qdomain.data().length() == 1)
-        throw runtime_error("You must specify domain in question (--qdomain)");
+        throw runtime_error("You must specify DNS question (--question)");
     if (question.qtype == 0)
         question.qtype = 1;
     if (question.qclass == 0)

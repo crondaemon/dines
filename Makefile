@@ -10,7 +10,8 @@ SOURCES=\
     dns_header.cpp \
     dns_question.cpp \
     dns_domain.cpp \
-    fuzzer.cpp
+    fuzzer.cpp \
+    tokenizer.cpp
 
 EXECUTABLE=dines
 
