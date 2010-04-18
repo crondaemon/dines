@@ -38,6 +38,7 @@ uint16_t DnsQuestion::stringToQclass(std::string s)
 DnsQuestion::DnsQuestion(const DnsDomain& qdomain, const string qtype, const string qclass) :
     qdomain(qdomain)
 {
+    cout << "CHIAMATO" << endl;
     this->qtype = stringToQtype(qtype);
     this->qclass = stringToQclass(qclass);
     *theLog << "Creating question: " << qdomain.str() << "/" << this->qtype << 

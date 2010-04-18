@@ -18,9 +18,10 @@ public:
     
     ResourceRecord();
     ResourceRecord(const DnsDomain& rrDomain, const std::string rrType,
-        const std::string rrClass, const std::string ttl, const std::string rdLen,
-        const Rdata& rrData);
+        const std::string rrClass, const std::string ttl, const Rdata& rrData);
         
+    ResourceRecord(const ResourceRecord& rr);
+    
     std::string data() const;
 };
 

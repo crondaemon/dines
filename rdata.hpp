@@ -5,11 +5,20 @@
 #include <string>
 
 class Rdata {
+    void* _ptr;
+    unsigned _type;
+    unsigned _len;
 public:
-    Rdata() {}
-    Rdata(const std::string dom, const unsigned type);
+    Rdata() : _ptr(NULL), _type(0), _len(0) {}
+    Rdata(const std::string data, const unsigned type);
+    
+    Rdata(const Rdata& rd);
+    
+    unsigned len() const { return _len; }
     
     std::string data() const;
+    
+    Rdata operator=(const Rdata& r);
 };
 
 #endif

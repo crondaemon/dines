@@ -3,6 +3,8 @@
 
 #include "tokenizer.hpp"
 
+#include <iostream>
+
 using namespace std;
 
 DnsDomain::DnsDomain(const string domain)

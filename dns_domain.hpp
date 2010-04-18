@@ -10,7 +10,7 @@ class DnsDomain {
 public:
     DnsDomain(const std::string domain = "");
     
-    //DnsDomain(const char* domain);
+    //DnsDomain(const DnsDomain& dom);
     
     std::string data() const;
     

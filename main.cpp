@@ -34,7 +34,9 @@ ostream* theLog;
 
 void usage(string s)
 {
-    cout << "Fields with (F) can be fuzzed. (Example --trid F)\n\n";
+    cout << "Fields with (F) can be fuzzed. (Example --trid F)\n";
+    cout << "Fields with (R) are repeatable. (Example --answer)\n";
+    cout << "\n";
     cout << "Usage: " << s << " <params>\n\n";
     cout << "Params:\n";
     cout << "\n[IP]\n";
@@ -45,7 +47,10 @@ void usage(string s)
     cout << "--dport <port>: destination port\n";
     cout << "\n[DNS]\n";
     cout << "--trid <id>: transaction id (F)\n";
+    cout << "--num-questions <n>: number of questions\n";
     cout << "--question <domain>,<type>,<class>: question domain\n";
+    cout << "--num-ans <n>: number of answers\n";
+    cout << "--answer <domain>,<type>,<class>,<ttl>,<data>: a DNS answer \n";
     cout << "\n[MISC]\n";
     cout << "--num <n>: number of packets (0 means infinite)\n";
     cout << "--delay <usec>: delay between packets\n";
@@ -72,12 +77,16 @@ int main(int argc, char* argv[])
 
     // Scan cmd line to dig for debug and activate it immediately
     for (int i = 0; i < argc; i++)
-        if (string(argv[i]) == "--debug")
+        if (string(argv[i]) == "--debug") {
+            cout << "Activating DEBUG\n";
             theLog = new ostream(cout.rdbuf());
+        }
 
     // Create a packet
     DnsPacket p;
     DnsDomain domain;
+    
+    vector<string> tokens;
     
     while((c = getopt_long(argc, argv, "", opts, NULL)) != -1) {
         switch(c) {
@@ -113,7 +122,8 @@ int main(int argc, char* argv[])
             
             case 6:
             {
-                vector<string> tokens = tokenize(optarg, ",");
+                tokens.clear();
+                tokens = tokenize(optarg, ",");
                 
                 domain = DnsDomain(tokens.at(0));
 
@@ -138,16 +148,16 @@ int main(int argc, char* argv[])
             
             case 8:
             {
-                vector<string> tokens = tokenize(optarg, ",");
+                tokens.clear();
+                tokens = tokenize(optarg, ",");
                 ResourceRecord rr = ResourceRecord(
                     DnsDomain(tokens.at(0)),
                     tokens.at(1),
                     tokens.at(2),
                     tokens.at(3),
-                    tokens.at(4),
-                    Rdata(tokens.at(5), atoi(tokens.at(1).data()))
+                    Rdata(tokens.at(4), atoi(tokens.at(1).data()))
                 );
-                    
+                
                 p.answers.push_back(rr);
                 p.dns_hdr.nrecord[DnsHeader::R_ANSWER]++;
             }    

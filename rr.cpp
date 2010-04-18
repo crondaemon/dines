@@ -1,6 +1,10 @@
 
 #include "rr.hpp"
 
+#include <iostream>
+
+#include <arpa/inet.h>
+
 using namespace std;
 
 ResourceRecord::ResourceRecord()
@@ -11,15 +15,26 @@ ResourceRecord::ResourceRecord()
     rdLen = 0;
 }
 
+ResourceRecord::ResourceRecord(const ResourceRecord& rr)
+{
+    cout << "RR COPY CALLED" << endl;
+    rrDomain = rr.rrDomain;
+    rrType = htons(rr.rrType);
+    rrClass = htons(rr.rrClass);
+    ttl = htonl(rr.ttl);
+    rdLen = htons(rr.rdLen);
+    rrData = rr.rrData;
+    cout << "MARK" << endl;
+}
+
 ResourceRecord::ResourceRecord(const DnsDomain& rrDomain, const string rrType,
-        const string rrClass, const string ttl, const string rdLen,
-        const Rdata& rrData)
+        const string rrClass, const string ttl, const Rdata& rrData)
 {
     this->rrDomain = rrDomain;
     this->rrType = atoi(rrType.data());
     this->rrClass = atoi(rrClass.data());
     this->ttl = atoi(ttl.data());
-    this->rdLen = atoi(rdLen.data());
+    this->rdLen = rrData.len();
     this->rrData = rrData;
 }
 
@@ -33,6 +48,7 @@ string ResourceRecord::data() const
     out += string((char*)&ttl, 4);
     out += string((char*)&rdLen, 2);
     out += rrData.data();
+    cout << " MO JE METTO " << rrDomain.data().length() << endl;
     
     return out;
 }
