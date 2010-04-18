@@ -24,35 +24,6 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
     nrecord[R_AUTHORITATIVE] = nauth;
 }
 
-void DnsHeader::RecordSet(const RecordType rt, const uint32_t value)
-{
-    if (rt >=4)
-        throw logic_error("Invalid RecordType " + rt);
-
-    nrecord[rt] = value;
-}
-
-uint32_t DnsHeader::RecordGet(const RecordType rt) const 
-{
-    if (rt >= 4)
-        throw logic_error("Invalid RecordType " + rt);
-        
-    return nrecord[rt];
-}
-
-void DnsHeader::RecordAdd(const RecordType rt, const int value)
-{
-    if (rt >= 4)
-        throw logic_error("Invalid RecordType " + rt);
-
-    nrecord[rt] += value;
-}    
-
-void DnsHeader::RecordInc(const RecordType rt)
-{
-    this->RecordAdd(rt, 1);
-}
-
 string DnsHeader::data() const 
 {
     string out = "";

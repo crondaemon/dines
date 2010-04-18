@@ -10,6 +10,9 @@
 
 #include "dns_header.hpp"
 #include "dns_question.hpp"
+#include "rr.hpp"
+
+#include <vector>
 
 class DnsPacket {
     int _socket;
@@ -23,7 +26,7 @@ public:
     
     DnsQuestion question;
     
-    //vector<DnsAnswer> answers;
+    std::vector<ResourceRecord> answers;
     
     //vector<DnsAdditional> additionals;
     

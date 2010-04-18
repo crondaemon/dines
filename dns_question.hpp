@@ -16,7 +16,7 @@ public:
     uint16_t qclass;
 
     DnsQuestion() {}
-    DnsQuestion(const DnsDomain qdomain, const std::string qtype, const std::string qclass);
+    DnsQuestion(const DnsDomain& qdomain, const std::string qtype, const std::string qclass);
         
     std::string data() const;
 };

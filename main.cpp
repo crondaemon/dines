@@ -7,6 +7,7 @@
 #include "dns_packet.hpp"
 #include "fuzzer.hpp"
 #include "tokenizer.hpp"
+#include "rr.hpp"
 
 using namespace std;
 
@@ -18,9 +19,10 @@ struct option opts[] = {
     {"sport", 1, NULL, 2},
     {"dport", 1, NULL, 3},
     {"trid", 1, NULL, 4},
-    {"question", 1, NULL, 5},
-    {"num-ans", 1, NULL, 6},
-    {"answer", 1, NULL, 7},
+    {"num-questions", 1, NULL, 5},
+    {"question", 1, NULL, 6},
+    {"num-ans", 1, NULL, 7},
+    {"answer", 1, NULL, 8},
     {"num", 1, NULL, 30}, // <<-- appeso in fondo per lasciare spazio
     {"delay", 1, NULL, 31},
     {"debug", 0, NULL, 32},
@@ -68,6 +70,11 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
+    // Scan cmd line to dig for debug and activate it immediately
+    for (int i = 0; i < argc; i++)
+        if (string(argv[i]) == "--debug")
+            theLog = new ostream(cout.rdbuf());
+
     // Create a packet
     DnsPacket p;
     DnsDomain domain;
@@ -101,6 +108,10 @@ int main(int argc, char* argv[])
             break;
             
             case 5:
+                p.dns_hdr.nrecord[DnsHeader::R_QUESTION] = atoi(optarg);
+            break;
+            
+            case 6:
             {
                 vector<string> tokens = tokenize(optarg, ",");
                 
@@ -116,9 +127,30 @@ int main(int argc, char* argv[])
                 else
                     qclass = tokens.at(2);
                     
-                p.dns_hdr.RecordSet(DnsHeader::R_QUESTION, 1);
+                p.dns_hdr.nrecord[DnsHeader::R_QUESTION] = 1;
                 p.question = DnsQuestion(domain, qtype, qclass);
             }
+            break;
+            
+            case 7:
+                p.dns_hdr.nrecord[DnsHeader::R_ANSWER] = atoi(optarg);
+            break;
+            
+            case 8:
+            {
+                vector<string> tokens = tokenize(optarg, ",");
+                ResourceRecord rr = ResourceRecord(
+                    DnsDomain(tokens.at(0)),
+                    atoi(tokens.at(1).data()),
+                    atoi(tokens.at(2).data()),
+                    atoi(tokens.at(3).data()),
+                    atoi(tokens.at(4).data()),
+                    Rdata(tokens.at(5), atoi(tokens.at(1).data()))
+                );
+                    
+                p.answers.push_back(rr);
+                p.dns_hdr.nrecord[DnsHeader::R_ANSWER]++;
+            }    
             break;
             
             case 30:
@@ -131,7 +163,7 @@ int main(int argc, char* argv[])
             
             case 32:
                 cout << "Activating debug\n";
-                theLog = new ostream(cout.rdbuf());
+                //theLog = new ostream(cout.rdbuf());
             break;
             
             default:

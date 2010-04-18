@@ -52,17 +52,7 @@ public:
     DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t nans,
         const uint32_t nadd, const uint32_t nauth);
         
-    void RecordSet(const RecordType rt, const uint32_t value);
-    
-    uint32_t RecordGet(const RecordType rt) const;
-    
-    void RecordInc(const RecordType rt);
-    
-    void RecordDec(const RecordType rt);
-    
     std::string data() const;
-private:
-    void RecordAdd(const RecordType rt, const int value);
 };
 
 #endif 

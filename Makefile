@@ -11,7 +11,9 @@ SOURCES=\
     dns_question.cpp \
     dns_domain.cpp \
     fuzzer.cpp \
-    tokenizer.cpp
+    tokenizer.cpp \
+    rr.cpp \
+    rdata.cpp
 
 EXECUTABLE=dines
 

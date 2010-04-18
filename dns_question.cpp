@@ -35,7 +35,7 @@ uint16_t DnsQuestion::stringToQclass(std::string s)
     return 1;
 }
 
-DnsQuestion::DnsQuestion(const DnsDomain qdomain, const string qtype, const string qclass) :
+DnsQuestion::DnsQuestion(const DnsDomain& qdomain, const string qtype, const string qclass) :
     qdomain(qdomain)
 {
     this->qtype = stringToQtype(qtype);
