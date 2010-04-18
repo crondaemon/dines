@@ -141,10 +141,10 @@ int main(int argc, char* argv[])
                 vector<string> tokens = tokenize(optarg, ",");
                 ResourceRecord rr = ResourceRecord(
                     DnsDomain(tokens.at(0)),
-                    atoi(tokens.at(1).data()),
-                    atoi(tokens.at(2).data()),
-                    atoi(tokens.at(3).data()),
-                    atoi(tokens.at(4).data()),
+                    tokens.at(1),
+                    tokens.at(2),
+                    tokens.at(3),
+                    tokens.at(4),
                     Rdata(tokens.at(5), atoi(tokens.at(1).data()))
                 );
                     

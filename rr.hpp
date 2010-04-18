@@ -17,8 +17,8 @@ public:
     Rdata rrData;
     
     ResourceRecord();
-    ResourceRecord(const DnsDomain& rrDomain, const uint16_t rrType,
-        const uint16_t rrClass, const uint32_t ttl, const uint16_t rdLen,
+    ResourceRecord(const DnsDomain& rrDomain, const std::string rrType,
+        const std::string rrClass, const std::string ttl, const std::string rdLen,
         const Rdata& rrData);
         
     std::string data() const;

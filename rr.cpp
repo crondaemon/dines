@@ -11,15 +11,15 @@ ResourceRecord::ResourceRecord()
     rdLen = 0;
 }
 
-ResourceRecord::ResourceRecord(const DnsDomain& rrDomain, const uint16_t rrType,
-        const uint16_t rrClass, const uint32_t ttl, const uint16_t rdLen,
+ResourceRecord::ResourceRecord(const DnsDomain& rrDomain, const string rrType,
+        const string rrClass, const string ttl, const string rdLen,
         const Rdata& rrData)
 {
     this->rrDomain = rrDomain;
-    this->rrType = rrType;
-    this->rrClass = rrClass;
-    this->ttl = ttl;
-    this->rdLen = rdLen;
+    this->rrType = atoi(rrType.data());
+    this->rrClass = atoi(rrClass.data());
+    this->ttl = atoi(ttl.data());
+    this->rdLen = atoi(rdLen.data());
     this->rrData = rrData;
 }
 
