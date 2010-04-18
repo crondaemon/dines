@@ -17,14 +17,15 @@ ResourceRecord::ResourceRecord()
 
 ResourceRecord::ResourceRecord(const ResourceRecord& rr)
 {
-    cout << "RR COPY CALLED" << endl;
+    cout << "rr copy constr" << endl;
     rrDomain = rr.rrDomain;
+    cout << "MARK" << endl;
     rrType = htons(rr.rrType);
     rrClass = htons(rr.rrClass);
     ttl = htonl(rr.ttl);
     rdLen = htons(rr.rdLen);
     rrData = rr.rrData;
-    cout << "MARK" << endl;
+    cout << "rr copy end" << endl;
 }
 
 ResourceRecord::ResourceRecord(const DnsDomain& rrDomain, const string rrType,
@@ -36,6 +37,13 @@ ResourceRecord::ResourceRecord(const DnsDomain& rrDomain, const string rrType,
     this->ttl = atoi(ttl.data());
     this->rdLen = rrData.len();
     this->rrData = rrData;
+}
+
+ResourceRecord ResourceRecord::operator=(const ResourceRecord& rr)
+{
+    cout << "RR operator = " << endl;
+    return ResourceRecord(rr);
+    cout << "RR operator = done" << endl;
 }
 
 string ResourceRecord::data() const

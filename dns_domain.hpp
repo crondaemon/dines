@@ -6,15 +6,17 @@
 #include <string>
 
 class DnsDomain {
-    std::vector<std::string> frags;
+    std::vector<std::string> _frags;
 public:
     DnsDomain(const std::string domain = "");
     
-    //DnsDomain(const DnsDomain& dom);
+    DnsDomain(const DnsDomain& domain);
     
     std::string data() const;
     
     std::string str() const;
+    
+    DnsDomain& operator=(const DnsDomain& domain);
 };
 
 #endif

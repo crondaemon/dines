@@ -23,6 +23,8 @@ public:
     ResourceRecord(const ResourceRecord& rr);
     
     std::string data() const;
+    
+    ResourceRecord operator=(const ResourceRecord& rr);
 };
 
 #endif

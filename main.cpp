@@ -150,6 +150,7 @@ int main(int argc, char* argv[])
             {
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
+                cout << "Prima di creare rr" << endl;
                 ResourceRecord rr = ResourceRecord(
                     DnsDomain(tokens.at(0)),
                     tokens.at(1),
@@ -158,7 +159,13 @@ int main(int argc, char* argv[])
                     Rdata(tokens.at(4), atoi(tokens.at(1).data()))
                 );
                 
+                cout << "Fake" << endl;
+                ResourceRecord rx(rr);
+                cout << "end fake" << endl;
+                
+                cout << "PRima di copia\n";
                 p.answers.push_back(rr);
+                cout << "Dopo copia" << endl;
                 p.dns_hdr.nrecord[DnsHeader::R_ANSWER]++;
             }    
             break;
