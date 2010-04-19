@@ -7,7 +7,7 @@
 
 using namespace std;
 
-DnsDomain::DnsDomain(const string domain)
+DnsDomain::DnsDomain(const string& domain)
 {
     _frags.clear();
     _frags = tokenize(domain, ".");
@@ -15,17 +15,18 @@ DnsDomain::DnsDomain(const string domain)
 
 DnsDomain::DnsDomain(const DnsDomain& domain)
 {
-    for (vector<string>::const_iterator itr = domain._frags.begin(); itr != domain._frags.end(); ++itr) {
-        _frags.push_back(string(itr->data(), itr->length()));
-    }
+    *this = domain;
 }
 
 DnsDomain& DnsDomain::operator=(const DnsDomain& domain)
 {
-    for (vector<string>::const_iterator itr = domain._frags.begin(); itr != domain._frags.end(); ++itr) {
-        //cout << "ROUND" << endl;
-        _frags.push_back(string(*itr, itr->size()));
-    }
+    //cout << "DnsDomain " <<  __func__ << &domain << endl;
+    //cout << " ci sono " << domain._frags.size() << endl;
+    //for (vector<string>::const_iterator itr = domain._frags.begin(); itr != domain._frags.end(); ++itr) {
+        //cout << "ROUND " << *itr << endl;
+    //    _frags.push_back(*itr);
+    //}
+    _frags = domain._frags;
     return *this;
 }
 

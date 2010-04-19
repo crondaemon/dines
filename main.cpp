@@ -85,8 +85,9 @@ int main(int argc, char* argv[])
     // Create a packet
     DnsPacket p;
     DnsDomain domain;
-    
     vector<string> tokens;
+    ResourceRecord rr;
+    Rdata rd;
     
     while((c = getopt_long(argc, argv, "", opts, NULL)) != -1) {
         switch(c) {
@@ -121,7 +122,6 @@ int main(int argc, char* argv[])
             break;
             
             case 6:
-            {
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
                 
@@ -139,7 +139,6 @@ int main(int argc, char* argv[])
                     
                 p.dns_hdr.nrecord[DnsHeader::R_QUESTION] = 1;
                 p.question = DnsQuestion(domain, qtype, qclass);
-            }
             break;
             
             case 7:
@@ -147,27 +146,16 @@ int main(int argc, char* argv[])
             break;
             
             case 8:
-            {
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
-                cout << "Prima di creare rr" << endl;
-                ResourceRecord rr = ResourceRecord(
-                    DnsDomain(tokens.at(0)),
-                    tokens.at(1),
-                    tokens.at(2),
-                    tokens.at(3),
-                    Rdata(tokens.at(4), atoi(tokens.at(1).data()))
-                );
                 
-                cout << "Fake" << endl;
-                ResourceRecord rx(rr);
-                cout << "end fake" << endl;
+                rd = Rdata(tokens.at(4), atoi(tokens.at(1).data()));
+                domain = DnsDomain(tokens.at(0));
+                rr = ResourceRecord(domain, tokens.at(1), tokens.at(2), 
+                    tokens.at(3), rd);
                 
-                cout << "PRima di copia\n";
                 p.answers.push_back(rr);
-                cout << "Dopo copia" << endl;
                 p.dns_hdr.nrecord[DnsHeader::R_ANSWER]++;
-            }    
             break;
             
             case 30:

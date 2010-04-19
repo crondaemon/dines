@@ -17,14 +17,14 @@ public:
     Rdata rrData;
     
     ResourceRecord();
-    ResourceRecord(const DnsDomain& rrDomain, const std::string rrType,
-        const std::string rrClass, const std::string ttl, const Rdata& rrData);
+    ResourceRecord(const DnsDomain& rrDomain, const std::string& rrType,
+        const std::string& rrClass, const std::string& ttl, const Rdata& rrData);
         
     ResourceRecord(const ResourceRecord& rr);
     
     std::string data() const;
     
-    ResourceRecord operator=(const ResourceRecord& rr);
+    ResourceRecord& operator=(const ResourceRecord& rr);
 };
 
 #endif

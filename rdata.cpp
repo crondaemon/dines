@@ -17,24 +17,27 @@ using namespace std;
 
 string Rdata::data() const
 {
-//    printf("%.4X zanzan\n", *(uint32_t*)_ptr);
-    cout << "RDATA data " << _len << endl;
     return string((char*)_ptr, _len);;
 }
 
-Rdata::Rdata(const Rdata& rd)
+Rdata::Rdata(const Rdata& r)
 {
-    cout << "RDATA COPY " << endl;
-    _ptr = malloc(rd._len);
-    memcpy(_ptr, rd._ptr, rd._len);
-    _type = rd._type;
-    _len = rd._len;
-    cout << "LEJ = " << rd._len << endl;
+    *this = r;    
 }
 
-Rdata Rdata::operator=(const Rdata& r)
+Rdata& Rdata::operator=(const Rdata& r)
 {
-    return Rdata(r);
+    _type = r._type;
+    _len = r._len;
+    _ptr = malloc(r._len);
+    if (_ptr == NULL)
+        throw runtime_error("Rdata malloc failed");
+        
+    cout << "ALLOCO " << r._len << endl;
+    cout << "Sto per copiare da " << r._ptr << " a " << _ptr << endl;
+    memcpy(_ptr, r._ptr, r._len);
+    
+    return *this;
 }
 
 Rdata::Rdata(const std::string data, const unsigned type)
@@ -63,3 +66,9 @@ Rdata::Rdata(const std::string data, const unsigned type)
     }
     _type = type;
 }
+
+//Rdata::~Rdata()
+//{
+//    free(_ptr);
+//}
+
