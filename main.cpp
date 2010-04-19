@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
     DnsPacket p;
     DnsDomain domain;
     vector<string> tokens;
-    ResourceRecord rr;
+    ResourceRecord* rr;
     Rdata rd;
     
     while((c = getopt_long(argc, argv, "", opts, NULL)) != -1) {
@@ -146,16 +146,20 @@ int main(int argc, char* argv[])
             break;
             
             case 8:
+                cout << "CASE 8" << endl;
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
-                
+
                 rd = Rdata(tokens.at(4), atoi(tokens.at(1).data()));
                 domain = DnsDomain(tokens.at(0));
-                rr = ResourceRecord(domain, tokens.at(1), tokens.at(2), 
+                rr = new ResourceRecord(domain, tokens.at(1), tokens.at(2), 
                     tokens.at(3), rd);
+
+//                cout << "Metto in lista " << rr << " con domain " << rr->rrDomain << endl;
                 
-                p.answers.push_back(rr);
+                p.answers.push_back(*rr);
                 p.dns_hdr.nrecord[DnsHeader::R_ANSWER]++;
+                delete rr;                
             break;
             
             case 30:

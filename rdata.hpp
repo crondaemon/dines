@@ -20,7 +20,7 @@ public:
     
     Rdata& operator=(const Rdata& r);
     
-    //~Rdata();
+    ~Rdata();
 };
 
 #endif

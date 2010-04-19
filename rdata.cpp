@@ -33,8 +33,8 @@ Rdata& Rdata::operator=(const Rdata& r)
     if (_ptr == NULL)
         throw runtime_error("Rdata malloc failed");
         
-    cout << "ALLOCO " << r._len << endl;
-    cout << "Sto per copiare da " << r._ptr << " a " << _ptr << endl;
+    //cout << "ALLOCO " << r._len << endl;
+    //cout << "Sto per copiare da " << r._ptr << " a " << _ptr << endl;
     memcpy(_ptr, r._ptr, r._len);
     
     return *this;
@@ -67,8 +67,9 @@ Rdata::Rdata(const std::string data, const unsigned type)
     _type = type;
 }
 
-//Rdata::~Rdata()
-//{
-//    free(_ptr);
-//}
+Rdata::~Rdata()
+{
+    cout << "Distruggo rdata" << endl;
+    //free(_ptr);
+}
 

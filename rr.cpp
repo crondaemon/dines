@@ -34,10 +34,10 @@ ResourceRecord::ResourceRecord(const DnsDomain& rrDomain, const string& rrType,
 ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
 {
     rrDomain = rr.rrDomain;
-    rrType = htons(rr.rrType);
-    rrClass = htons(rr.rrClass);
-    ttl = htonl(rr.ttl);
-    rdLen = htons(rr.rdLen);
+    rrType = rr.rrType;
+    rrClass = rr.rrClass;
+    ttl = rr.ttl;
+    rdLen = rr.rdLen;
     rrData = rr.rrData;
     
     return *this;
@@ -46,7 +46,7 @@ ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
 string ResourceRecord::data() const
 {
     string out = "";
-    
+
     out += rrDomain.data();
     out += string((char*)&rrType, 2);
     out += string((char*)&rrClass, 2);

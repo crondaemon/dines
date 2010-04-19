@@ -8,7 +8,7 @@
 class DnsDomain {
     std::vector<std::string> _frags;
 public:
-    DnsDomain(const std::string& domain = "");
+    DnsDomain(const std::string& domain = "azz");
     
     DnsDomain(const DnsDomain& domain);
     

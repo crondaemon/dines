@@ -63,9 +63,14 @@ string DnsPacket::data() const
     out += dns_hdr.data();
     out += question.data();
 
-    for (vector<ResourceRecord>::const_iterator itr = answers.begin(); itr != answers.end(); ++itr) {
-        out += itr->data();
-    }
+    cout << "DEVO APPENDERE " << answers.size() << endl;
+
+//    out += answers.at(0).data();
+    out += answers.at(1).data();
+    
+//    for (vector<ResourceRecord>::const_iterator itr = answers.begin(); itr != answers.end(); ++itr) {
+//        out += itr->data();
+//    }
     
     return out;
 }
