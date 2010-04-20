@@ -9,11 +9,9 @@ SOURCES=\
     dns_packet.cpp \
     dns_header.cpp \
     dns_question.cpp \
-    dns_domain.cpp \
     fuzzer.cpp \
     tokenizer.cpp \
-    rr.cpp \
-    rdata.cpp
+    rr.cpp
 
 EXECUTABLE=dines
 

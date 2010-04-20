@@ -15,6 +15,8 @@
 
 using namespace std;
 
+extern ostream* theLog;
+
 DnsPacket::DnsPacket()
 {
     int on = 1;
@@ -63,14 +65,9 @@ string DnsPacket::data() const
     out += dns_hdr.data();
     out += question.data();
 
-    cout << "DEVO APPENDERE " << answers.size() << endl;
-
-//    out += answers.at(0).data();
-    out += answers.at(1).data();
-    
-//    for (vector<ResourceRecord>::const_iterator itr = answers.begin(); itr != answers.end(); ++itr) {
-//        out += itr->data();
-//    }
+    for (vector<ResourceRecord>::const_iterator itr = answers.begin(); itr != answers.end(); ++itr) {
+        out += itr->data();
+    }
     
     return out;
 }
@@ -88,7 +85,7 @@ void DnsPacket::send()
     if (udp_hdr.dest == 0)
         udp_hdr.dest = htons(53); // put 53 if no port specified
 
-    if (question.qdomain.data().length() == 1)
+    if (question.qdomain.size() == 1)
         throw runtime_error("You must specify DNS question (--question)");
     if (question.qtype == 0)
         question.qtype = 1;
@@ -99,6 +96,7 @@ void DnsPacket::send()
     _sin.sin_port = udp_hdr.source;
     _sin.sin_addr.s_addr = ip_hdr.saddr;
         
+    *theLog << "Invio " << ip_hdr.daddr << endl;
     _din.sin_port = udp_hdr.dest;
     _din.sin_addr.s_addr = ip_hdr.daddr;
     
@@ -134,3 +132,21 @@ void DnsPacket::send()
         }
     }
 }
+
+std::string convertDomain(const std::string& s)
+{
+    string out = "";
+    vector<string> frags = tokenize(s, ".");
+    
+    for (vector<string>::const_iterator itr = frags.begin(); itr != frags.end(); ++itr) {
+        // Add the len
+        out.append(1, itr->length());
+        // Add the frag
+        out.append(*itr);
+    }
+    out.append(1, 0);
+    
+    return out;
+}
+
+

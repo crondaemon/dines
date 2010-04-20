@@ -5,6 +5,6 @@
 #include <string>
 #include <vector>
 
-std::vector<std::string> tokenize(const std::string str, const std::string sep);
+std::vector<std::string> tokenize(const std::string& str, const std::string& sep);
 
 #endif

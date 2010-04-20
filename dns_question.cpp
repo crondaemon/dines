@@ -4,6 +4,8 @@
 #include <iostream>
 #include <arpa/inet.h>
 
+#include "dns_packet.hpp"
+
 using namespace std;
 
 extern ostream* theLog;
@@ -35,13 +37,12 @@ uint16_t DnsQuestion::stringToQclass(std::string s)
     return 1;
 }
 
-DnsQuestion::DnsQuestion(const DnsDomain& qdomain, const string qtype, const string qclass) :
-    qdomain(qdomain)
+DnsQuestion::DnsQuestion(const string& qdomain, const string& qtype, const string& qclass)
 {
-    cout << "CHIAMATO" << endl;
+    this->qdomain = convertDomain(qdomain);
     this->qtype = stringToQtype(qtype);
     this->qclass = stringToQclass(qclass);
-    *theLog << "Creating question: " << qdomain.str() << "/" << this->qtype << 
+    *theLog << "Creating question: " << qdomain << "/" << this->qtype << 
         "/" << this->qclass << endl;
 }
 
@@ -50,7 +51,7 @@ string DnsQuestion::data() const
     string out = "";
     uint16_t temp;
     
-    out += qdomain.data();
+    out += qdomain;
     
     temp = htons(qtype);
     out += string((char*)&temp, 2);

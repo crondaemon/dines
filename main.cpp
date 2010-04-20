@@ -84,10 +84,9 @@ int main(int argc, char* argv[])
 
     // Create a packet
     DnsPacket p;
-    DnsDomain domain;
     vector<string> tokens;
-    ResourceRecord* rr;
-    Rdata rd;
+    ResourceRecord rr;
+
     
     while((c = getopt_long(argc, argv, "", opts, NULL)) != -1) {
         switch(c) {
@@ -125,8 +124,6 @@ int main(int argc, char* argv[])
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
                 
-                domain = DnsDomain(tokens.at(0));
-
                 if (tokens.at(1).at(0) == 'F')
                     fuzzer.addAddress(&p.question.qtype, 2);
                 else
@@ -138,7 +135,7 @@ int main(int argc, char* argv[])
                     qclass = tokens.at(2);
                     
                 p.dns_hdr.nrecord[DnsHeader::R_QUESTION] = 1;
-                p.question = DnsQuestion(domain, qtype, qclass);
+                p.question = DnsQuestion(tokens.at(0), qtype, qclass);
             break;
             
             case 7:
@@ -146,20 +143,14 @@ int main(int argc, char* argv[])
             break;
             
             case 8:
-                cout << "CASE 8" << endl;
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
 
-                rd = Rdata(tokens.at(4), atoi(tokens.at(1).data()));
-                domain = DnsDomain(tokens.at(0));
-                rr = new ResourceRecord(domain, tokens.at(1), tokens.at(2), 
-                    tokens.at(3), rd);
+                rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2), 
+                    tokens.at(3), tokens.at(4));
 
-//                cout << "Metto in lista " << rr << " con domain " << rr->rrDomain << endl;
-                
-                p.answers.push_back(*rr);
+                p.answers.push_back(rr);
                 p.dns_hdr.nrecord[DnsHeader::R_ANSWER]++;
-                delete rr;                
             break;
             
             case 30:

@@ -2,8 +2,10 @@
 #include "rr.hpp"
 
 #include <iostream>
-
 #include <arpa/inet.h>
+#include <cstring>
+
+#include "dns_packet.hpp"
 
 using namespace std;
 
@@ -20,15 +22,23 @@ ResourceRecord::ResourceRecord(const ResourceRecord& rr)
     *this = rr;
 }
 
-ResourceRecord::ResourceRecord(const DnsDomain& rrDomain, const string& rrType,
-        const string& rrClass, const string& ttl, const Rdata& rrData)
+ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
+        const string& rrClass, const string& ttl, const string& rdata)
 {
-    this->rrDomain = rrDomain;
+    uint32_t ip;
+    
+    this->rrDomain = convertDomain(rrDomain);
     this->rrType = htons(atoi(rrType.data()));
     this->rrClass = htons(atoi(rrClass.data()));
     this->ttl = htonl(atoi(ttl.data()));
-    this->rdLen = htons(rrData.len());
-    this->rrData = rrData;
+
+    switch(this->rrType) {
+        case 1:
+            rdLen = 4;
+            this->rdata = malloc(4);
+            memcpy(this->rdata, &ip, 4);
+        break;
+    }
 }
 
 ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
@@ -38,7 +48,8 @@ ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
     rrClass = rr.rrClass;
     ttl = rr.ttl;
     rdLen = rr.rdLen;
-    rrData = rr.rrData;
+    rdata = malloc(rdLen);
+    //memcpy(rdata, rr.rdata, rdLen);
     
     return *this;
 }
@@ -47,12 +58,12 @@ string ResourceRecord::data() const
 {
     string out = "";
 
-    out += rrDomain.data();
+    out += rrDomain;
     out += string((char*)&rrType, 2);
     out += string((char*)&rrClass, 2);
     out += string((char*)&ttl, 4);
     out += string((char*)&rdLen, 2);
-    out += rrData.data();
+    out += string((char*)rdata, rdLen);
     
     return out;
 }

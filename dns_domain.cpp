@@ -10,7 +10,8 @@ using namespace std;
 DnsDomain::DnsDomain(const string& domain)
 {
     cout << "ELEMENTI " << _frags.size() << endl;
-    _frags.clear();
+    if (_frags.size() > 0)
+        _frags.clear();
     _frags = tokenize(domain, ".");
     cout << "DNSDOMAIN " << this << " " << domain << " con " << _frags.size() << endl;
 }
@@ -18,13 +19,13 @@ DnsDomain::DnsDomain(const string& domain)
 DnsDomain::DnsDomain(const DnsDomain& domain)
 {
     cout << "DNSDOMAIN copy costructor" << endl;
-    _frags.clear();
+        if (_frags.size() > 0) _frags.clear();
     *this = domain;
 }
 
 DnsDomain& DnsDomain::operator=(const DnsDomain& domain)
 {
-    _frags.clear();
+        if (_frags.size() > 0) _frags.clear();
     cout << __func__ << "dnsdomain start" << endl;
     for (vector<string>::const_iterator i = domain._frags.begin(); i != domain._frags.end(); i++) {
         cout << "Processo " << *i << endl;

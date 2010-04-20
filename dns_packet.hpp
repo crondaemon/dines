@@ -11,8 +11,7 @@
 #include "dns_header.hpp"
 #include "dns_question.hpp"
 #include "rr.hpp"
-
-#include <vector>
+#include "tokenizer.hpp"
 
 class DnsPacket {
     int _socket;
@@ -38,5 +37,7 @@ public:
     
     void send();
 };
+
+std::string convertDomain(const std::string& s);
 
 #endif
