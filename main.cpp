@@ -55,15 +55,16 @@ void usage(string s)
     cout << "--num-questions <n>: number of questions (A)\n";
     cout << "--question <domain>,<type>,<class>: question domain\n";
     cout << "--num-ans <n>: number of answers (A)\n";
-    cout << "--answer <domain>,<type>,<class>,<ttl>,<data>: a DNS answer\n";
-    cout << "--num-auth <n>: number of answers (A)\n";
-    cout << "--auth <domain>,<type>,<class>,<ttl>,<data>: a DNS authoritative record\n";
-    cout << "--num-add <n>: number of answers (A)\n";
-    cout << "--additional <domain>,<type>,<class>,<ttl>,<data>: a DNS additional record\n";  
+    cout << "--answer(R) <domain>,<type>,<class>,<ttl>,<data>: a DNS answer\n";
+    cout << "--num-auth <n>: number of authoritative records (A)\n";
+    cout << "--auth(R) <domain>,<type>,<class>,<ttl>,<data>: a DNS authoritative record\n";
+    cout << "--num-add <n>: number of additional records (A)\n";
+    cout << "--additional(R) <domain>,<type>,<class>,<ttl>,<data>: a DNS additional record\n";  
     cout << "\n[MISC]\n";
     cout << "--num <n>: number of packets (0 means infinite)\n";
     cout << "--delay <usec>: delay between packets\n";
     cout << "--debug: activate debug\n";
+    cout << "--help: this help\n";
     cout << "\n";
 }
 
@@ -85,11 +86,16 @@ int main(int argc, char* argv[])
     }
 
     // Scan cmd line to dig for debug and activate it immediately
-    for (int i = 0; i < argc; i++)
+    for (int i = 0; i < argc; i++) {
         if (string(argv[i]) == "--debug") {
             cout << "Activating DEBUG\n";
             theLog = new ostream(cout.rdbuf());
         }
+        if (string(argv[i]) == "--help") {
+            usage(argv[0]);
+            return 1;
+        }
+    }
 
     // Create a packet
     DnsPacket p;
