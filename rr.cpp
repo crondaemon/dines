@@ -47,6 +47,7 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
             this->rdata = string((char*)&int32, 4);
         break;
         
+        case 2: // NS
         case 5: // CNAME
             this->rdata = convertDomain(rdata);
             cout << "RDATA " << this->rdata.size() << endl;

@@ -65,9 +65,17 @@ string DnsPacket::data() const
     out += dns_hdr.data();
     out += question.data();
 
-    for (vector<ResourceRecord>::const_iterator itr = answers.begin(); itr != answers.end(); ++itr) {
+    for (vector<ResourceRecord>::const_iterator itr = answers.begin(); 
+            itr != answers.end(); ++itr)
         out += itr->data();
-    }
+
+    for (vector<ResourceRecord>::const_iterator itr = authoritative.begin(); 
+            itr != authoritative.end(); ++itr)
+        out += itr->data();
+
+    for (vector<ResourceRecord>::const_iterator itr = additionals.begin(); 
+            itr != additionals.end(); ++itr)
+        out += itr->data();
     
     return out;
 }
@@ -85,6 +93,8 @@ void DnsPacket::send()
     if (udp_hdr.dest == 0)
         udp_hdr.dest = htons(53); // put 53 if no port specified
 
+    if (dns_hdr.txid == 0)
+        dns_hdr.txid = rand() % 0xFFFF;
     if (question.qdomain.size() == 1)
         throw runtime_error("You must specify DNS question (--question)");
     if (question.qtype == 0)

@@ -23,6 +23,10 @@ struct option opts[] = {
     {"question", 1, NULL, 6},
     {"num-ans", 1, NULL, 7},
     {"answer", 1, NULL, 8},
+    {"num-auth", 1, NULL, 9},
+    {"auth", 1, NULL, 10},
+    {"num-add", 1, NULL, 11},
+    {"additional", 1, NULL, 12},
     {"num", 1, NULL, 30}, // <<-- appeso in fondo per lasciare spazio
     {"delay", 1, NULL, 31},
     {"debug", 0, NULL, 32},
@@ -36,6 +40,7 @@ void usage(string s)
 {
     cout << "Fields with (F) can be fuzzed. (Example --trid F)\n";
     cout << "Fields with (R) are repeatable. (Example --answer)\n";
+    cout << "Fields with (A) are calculated automatically.\n";
     cout << "\n";
     cout << "Usage: " << s << " <params>\n\n";
     cout << "Params:\n";
@@ -47,10 +52,14 @@ void usage(string s)
     cout << "--dport <port>: destination port\n";
     cout << "\n[DNS]\n";
     cout << "--trid <id>: transaction id (F)\n";
-    cout << "--num-questions <n>: number of questions\n";
+    cout << "--num-questions <n>: number of questions (A)\n";
     cout << "--question <domain>,<type>,<class>: question domain\n";
-    cout << "--num-ans <n>: number of answers\n";
-    cout << "--answer <domain>,<type>,<class>,<ttl>,<data>: a DNS answer \n";
+    cout << "--num-ans <n>: number of answers (A)\n";
+    cout << "--answer <domain>,<type>,<class>,<ttl>,<data>: a DNS answer\n";
+    cout << "--num-auth <n>: number of answers (A)\n";
+    cout << "--auth <domain>,<type>,<class>,<ttl>,<data>: a DNS authoritative record\n";
+    cout << "--num-add <n>: number of answers (A)\n";
+    cout << "--additional <domain>,<type>,<class>,<ttl>,<data>: a DNS additional record\n";  
     cout << "\n[MISC]\n";
     cout << "--num <n>: number of packets (0 means infinite)\n";
     cout << "--delay <usec>: delay between packets\n";
@@ -153,6 +162,37 @@ int main(int argc, char* argv[])
                 p.answers.push_back(rr);
                 p.dns_hdr.nrecord[DnsHeader::R_ANSWER]++;
             break;
+
+            case 9:
+                p.dns_hdr.nrecord[DnsHeader::R_AUTHORITATIVE] = atoi(optarg);
+            break;
+            
+            case 10:
+                tokens.clear();
+                tokens = tokenize(optarg, ",");
+
+                rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2), 
+                    tokens.at(3), tokens.at(4));
+
+                p.dns_hdr.flags.qr = 1;
+                p.authoritative.push_back(rr);
+                p.dns_hdr.nrecord[DnsHeader::R_AUTHORITATIVE]++;
+            break;
+
+            case 11:
+                p.dns_hdr.nrecord[DnsHeader::R_ADDITIONAL] = atoi(optarg);
+            break;
+            
+            case 12:
+                tokens.clear();
+                tokens = tokenize(optarg, ",");
+
+                rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2), 
+                    tokens.at(3), tokens.at(4));
+
+                p.additionals.push_back(rr);
+                p.dns_hdr.nrecord[DnsHeader::R_ADDITIONAL]++;
+            break;
             
             case 30:
                 num = atoi(optarg);
@@ -188,8 +228,6 @@ int main(int argc, char* argv[])
     while(num-- > 0) {
         fuzzer.goFuzz();
 
-        //*theLog << p.ip_hdr.saddr << "->" << p.ip_hdr.daddr << endl;
-            
         try {
             p.send();
         }

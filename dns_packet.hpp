@@ -27,9 +27,9 @@ public:
     
     std::vector<ResourceRecord> answers;
     
-    //vector<DnsAdditional> additionals;
+    std::vector<ResourceRecord> authoritative;
     
-    //vector<DnsAuthoritative> autoritative;
+    std::vector<ResourceRecord> additionals;
     
     DnsPacket();
     
