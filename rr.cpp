@@ -50,7 +50,6 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
         case 2: // NS
         case 5: // CNAME
             this->rdata = convertDomain(rdata);
-            cout << "RDATA " << this->rdata.size() << endl;
         break;
         
         default:

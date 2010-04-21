@@ -113,13 +113,13 @@ void DnsPacket::send()
     string output;
     string dns_dgram = data();
 
-    output += string((char*)&ip_hdr, sizeof(ip_hdr));
-    output += string((char*)&udp_hdr, sizeof(udp_hdr));
-    output += dns_dgram;
-    
     // Adjust lenghts
     udp_hdr.len = htons(sizeof(udp_hdr) + dns_dgram.length());
     ip_hdr.tot_len = htons(sizeof(ip_hdr) + sizeof(udp_hdr) + dns_dgram.length());
+
+    output += string((char*)&ip_hdr, sizeof(ip_hdr));
+    output += string((char*)&udp_hdr, sizeof(udp_hdr));
+    output += dns_dgram;
  
     if (connect(_socket, (struct sockaddr*)&_din, sizeof(_din)) < 0) {
         stringstream ss;
@@ -130,7 +130,6 @@ void DnsPacket::send()
     }
 
     stringstream ss;
-
     if (sendto(_socket, output.data(), output.length(), 0, (struct sockaddr *)&_sin, sizeof(_sin)) < 0) {
         if (errno == 22) {
             cout << "Invalid parameter (probably fuzzer is shaking it).\n";
