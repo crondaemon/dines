@@ -10,8 +10,7 @@ public:
     uint16_t rrType;
     uint16_t rrClass;
     uint32_t ttl;
-    uint16_t rdLen;
-    void* rdata;
+    std::string rdata;
         
     ResourceRecord();
     ResourceRecord(const std::string& rrDomain, const std::string& rrType,

@@ -149,6 +149,7 @@ int main(int argc, char* argv[])
                 rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2), 
                     tokens.at(3), tokens.at(4));
 
+                p.dns_hdr.flags.qr = 1;
                 p.answers.push_back(rr);
                 p.dns_hdr.nrecord[DnsHeader::R_ANSWER]++;
             break;
@@ -162,7 +163,7 @@ int main(int argc, char* argv[])
             break;
             
             case 32:
-                cout << "Activating debug\n";
+                //cout << "Activating debug\n";
                 //theLog = new ostream(cout.rdbuf());
             break;
             

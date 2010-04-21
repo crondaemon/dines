@@ -96,7 +96,6 @@ void DnsPacket::send()
     _sin.sin_port = udp_hdr.source;
     _sin.sin_addr.s_addr = ip_hdr.saddr;
         
-    *theLog << "Invio " << ip_hdr.daddr << endl;
     _din.sin_port = udp_hdr.dest;
     _din.sin_addr.s_addr = ip_hdr.daddr;
     
