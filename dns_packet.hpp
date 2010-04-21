@@ -35,7 +35,7 @@ public:
     
     std::string data() const;
     
-    void send();
+    void sendNet();
 };
 
 std::string convertDomain(const std::string& s);

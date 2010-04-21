@@ -80,7 +80,7 @@ string DnsPacket::data() const
     return out;
 }
 
-void DnsPacket::send()
+void DnsPacket::sendNet()
 {
     // Sanity checks   
     if (ip_hdr.saddr == 0)
@@ -104,7 +104,7 @@ void DnsPacket::send()
 
     // Set L3/L4
     _sin.sin_port = udp_hdr.source;
-    _sin.sin_addr.s_addr = ip_hdr.saddr;
+    _sin.sin_addr.s_addr = ip_hdr.saddr;    
         
     _din.sin_port = udp_hdr.dest;
     _din.sin_addr.s_addr = ip_hdr.daddr;
@@ -130,7 +130,7 @@ void DnsPacket::send()
     }
 
     stringstream ss;
-    if (sendto(_socket, output.data(), output.length(), 0, (struct sockaddr *)&_sin, sizeof(_sin)) < 0) {
+    if (send(_socket, output.data(), output.length(), 0) < 0) {
         if (errno == 22) {
             cout << "Invalid parameter (probably fuzzer is shaking it).\n";
         } else {

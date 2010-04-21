@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
         fuzzer.goFuzz();
 
         try {
-            p.send();
+            p.sendNet();
         }
         catch(exception& e) {
             cout << "\n\nError: " << e.what() << "\n";
@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
 
         cout << "."; cout.flush();
 
-        usleep(delay);
+        if (num > 0) usleep(delay);
     }
     cout << endl;
 }
