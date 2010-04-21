@@ -1,16 +1,18 @@
 
 #include "dns_question.hpp"
 
+#include "dns_packet.hpp"
+#include "fuzzer.hpp"
+
 #include <iostream>
 #include <arpa/inet.h>
 
-#include "dns_packet.hpp"
 
 using namespace std;
 
 extern ostream* theLog;
 
-uint16_t DnsQuestion::stringToQtype(std::string s)
+uint16_t DnsQuestion::stringToQtype(const std::string& s)
 {
     if (s == "A") return 1;
     if (s == "NS") return 2;
@@ -25,14 +27,14 @@ uint16_t DnsQuestion::stringToQtype(std::string s)
     unsigned n = atoi(s.c_str());
     
     if (n > 0xFFFF || n == 0) {
-        *theLog << "Invalid qtype: " << s << endl;
+        //*theLog << "Invalid qtype: " << s << endl;
         return 0;
     }
     
     return n;
 }
 
-uint16_t DnsQuestion::stringToQclass(std::string s)
+uint16_t DnsQuestion::stringToQclass(const std::string& s)
 {
     return 1;
 }
@@ -42,8 +44,8 @@ DnsQuestion::DnsQuestion(const string& qdomain, const string& qtype, const strin
     this->qdomain = convertDomain(qdomain);
     this->qtype = stringToQtype(qtype);
     this->qclass = stringToQclass(qclass);
-    *theLog << "Creating question: " << qdomain << "/" << this->qtype << 
-        "/" << this->qclass << endl;
+
+    //*theLog << "Creating question: " << qdomain << "/" << qtype << "/" << qclass << endl;
 }
 
 string DnsQuestion::data() const

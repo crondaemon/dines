@@ -6,8 +6,8 @@
 #include <string>
 
 class DnsQuestion {
-    uint16_t stringToQtype(std::string s);
-    uint16_t stringToQclass(std::string s);
+    uint16_t stringToQtype(const std::string& s);
+    uint16_t stringToQclass(const std::string& s);
 public:
     std::string qdomain;
     uint16_t qtype;

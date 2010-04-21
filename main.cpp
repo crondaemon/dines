@@ -52,7 +52,7 @@ void usage(string s)
     cout << "\n[DNS]\n";
     cout << "--trid <id>: transaction id (F)\n";
     cout << "--num-questions <n>: number of questions (A)\n";
-    cout << "--question <domain>,<type>,<class>: question domain\n";
+    cout << "--question <domain>,<type (F)>,<class>: question domain\n";
     cout << "--num-ans <n>: number of answers (A)\n";
     cout << "--answer(R) <domain>,<type>,<class>,<ttl>,<data>: a DNS answer\n";
     cout << "--num-auth <n>: number of authoritative records (A)\n";
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
     int c = 0;
     string qtype = "";
     string qclass = "";
-    unsigned num = 0;
+    unsigned num = 1;
     unsigned delay = 1000000;
 
     theLog = new ostream(NULL);
@@ -142,13 +142,17 @@ int main(int argc, char* argv[])
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
                 
-                if (tokens.at(1).at(0) == 'F')
+                if (tokens.at(1).at(0) == 'F') {
                     fuzzer.addAddress(&p.question.qtype, 2);
+                    qtype = "0";
+                }
                 else
                     qtype = tokens.at(1);
 
-                if (tokens.at(2).at(0) == 'F')
+                if (tokens.at(2).at(0) == 'F') {
                     fuzzer.addAddress(&p.question.qclass, 2);
+                    qclass = "0";
+                }
                 else
                     qclass = tokens.at(2);
                     
