@@ -84,6 +84,11 @@ int main(int argc, char* argv[])
         usage(argv[0]);
         exit(1);
     }
+    
+    if (getuid() != 0) {
+        cout << "You need to be root." << endl;
+        return 1;
+    }
 
     // Scan cmd line to dig for debug and activate it immediately
     for (int i = 0; i < argc; i++) {
@@ -101,7 +106,6 @@ int main(int argc, char* argv[])
     DnsPacket p;
     vector<string> tokens;
     ResourceRecord rr;
-
     
     while((c = getopt_long(argc, argv, "", opts, NULL)) != -1) {
         switch(c) {
