@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
     string qtype = "";
     string qclass = "";
     unsigned num = 0;
-    unsigned delay = 0;
+    unsigned delay = 1000000;
 
     theLog = new ostream(NULL);
 
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    // Scan cmd line to dig for debug and activate it immediately
+    // Scan cmd line to dig for options and activate them immediately
     for (int i = 0; i < argc; i++) {
         if (string(argv[i]) == "--debug") {
             cout << "Activating DEBUG\n";
@@ -205,10 +205,12 @@ int main(int argc, char* argv[])
             
             case 30:
                 num = atoi(optarg);
+                *theLog << "About to send " << num << " packets." << endl;
             break;
             
             case 31:
                 delay = atoi(optarg);
+                *theLog << "Inter packet gap set to " << delay << endl;
             break;
             
             case 32:
@@ -228,9 +230,6 @@ int main(int argc, char* argv[])
 
     if (num == 0)
         num = 0xFFFFFF;
-
-    if (delay == 0)
-        delay = 1000000;
 
     cout << "Sending";
     // Send datagram    
