@@ -163,10 +163,15 @@ int main(int argc, char* argv[])
             case 8:
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
-
-                rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2), 
-                    tokens.at(3), tokens.at(4));
-
+                
+                try { 
+                    rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2), 
+                        tokens.at(3), tokens.at(4));
+                } catch(exception& e) {
+                    cout << "Unable to create answer: " << e.what() << endl;
+                    return 1;
+                }
+                
                 p.dns_hdr.flags.qr = 1;
                 p.answers.push_back(rr);
                 p.dns_hdr.nrecord[DnsHeader::R_ANSWER]++;

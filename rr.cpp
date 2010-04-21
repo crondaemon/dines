@@ -33,8 +33,8 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
     //string str;
     unsigned type = atoi(rrType.data());
     
-    *theLog << "Creating a resource record: " << rrDomain << "/" << rrType <<
-        "/" << rrClass << "/" << ttl << "/" << rdata << endl;
+    //*theLog << "Creating a resource record: " << rrDomain << "/" << rrType <<
+    //    "/" << rrClass << "/" << ttl << "/" << rdata << endl;
     
     this->rrDomain = convertDomain(rrDomain);
     this->rrType = htons(type);
@@ -50,6 +50,11 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
         case 2: // NS
         case 5: // CNAME
             this->rdata = convertDomain(rdata);
+        break;
+        
+        case 15: // MX
+            this->rdata = string("\x00\x00", 2);
+            this->rdata += convertDomain(rdata);
         break;
         
         default:
