@@ -8,10 +8,9 @@
 #include "fuzzer.hpp"
 #include "tokenizer.hpp"
 #include "rr.hpp"
+#include "version.hpp"
 
 using namespace std;
-
-#define VERSION 0.1
 
 struct option opts[] = {
     {"src-ip", 1, NULL, 0},

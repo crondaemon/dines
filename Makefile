@@ -26,5 +26,14 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CFLAGS) -g -c $<
 
 clean:
-	rm -rf *.o dines core.*
+	@rm -rf *.o dines core.*
 	
+VERSION=`cat version.hpp | cut -d ' ' -f 3`
+	
+tar:
+	@mkdir dines-$(VERSION)
+	@cp *.cpp *.hpp dines-$(VERSION)
+	@cp Makefile dines-$(VERSION)
+	@tar czf dines-$(VERSION).tar.gz dines-$(VERSION)
+	@rm -rf dines-$(VERSION)
+
