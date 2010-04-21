@@ -32,7 +32,8 @@ string DnsHeader::data() const
     uint16_t temp;
     
     out += string((char*)&id, 2);
-    temp = *(uint16_t*)&flags;
+    //temp = *(uint16_t*)&flags;
+    memcpy(&temp, &flags, 2);
     out += string((char*)&temp, 2);
     
     for (int i = 0; i < 4; i++) {
