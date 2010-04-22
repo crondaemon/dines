@@ -80,6 +80,10 @@ string DnsPacket::data() const
     return out;
 }
 
+void DnsPacket::doUdpCksum()
+{
+}
+
 void DnsPacket::sendNet()
 {
     // Sanity checks   
@@ -109,9 +113,12 @@ void DnsPacket::sendNet()
     _din.sin_port = udp_hdr.dest;
     _din.sin_addr.s_addr = ip_hdr.daddr;
     
+    // Calculate udp checksum
+    this->doUdpCksum();
+    
     // Create output to send
     string output;
-    string dns_dgram = data();
+    string dns_dgram = this->data();
 
     // Adjust lenghts
     udp_hdr.len = htons(sizeof(udp_hdr) + dns_dgram.length());

@@ -52,13 +52,16 @@ void usage(string s)
     cout << "\n[DNS]\n";
     cout << "--trid <id>: transaction id (F)\n";
     cout << "--num-questions <n>: number of questions (A)\n";
-    cout << "--question <domain>,<type (F)>,<class>: question domain\n";
+    cout << "--question <domain>,<type(F)>,<class>: question domain\n";
+    cout << "\n";
     cout << "--num-ans <n>: number of answers (A)\n";
-    cout << "--answer(R) <domain>,<type>,<class>,<ttl>,<data>: a DNS answer\n";
+    cout << "--answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<data>: a DNS answer\n";
+    cout << "\n";
     cout << "--num-auth <n>: number of authoritative records (A)\n";
-    cout << "--auth(R) <domain>,<type>,<class>,<ttl>,<data>: a DNS authoritative record\n";
+    cout << "--auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<data(F)>: a DNS authoritative record\n";
+    cout << "\n";    
     cout << "--num-add <n>: number of additional records (A)\n";
-    cout << "--additional(R) <domain>,<type>,<class>,<ttl>,<data>: a DNS additional record\n";  
+    cout << "--additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<data>: a DNS additional record\n";  
     cout << "\n[MISC]\n";
     cout << "--num <n>: number of packets (0 means infinite)\n";
     cout << "--delay <usec>: delay between packets\n";
@@ -105,7 +108,7 @@ int main(int argc, char* argv[])
     DnsPacket p;
     vector<string> tokens;
     ResourceRecord rr;
-    
+
     while((c = getopt_long(argc, argv, "", opts, NULL)) != -1) {
         switch(c) {
             case 0:
@@ -141,23 +144,9 @@ int main(int argc, char* argv[])
             case 6:
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
-                
-                if (tokens.at(1).at(0) == 'F') {
-                    fuzzer.addAddress(&p.question.qtype, 2);
-                    qtype = "0";
-                }
-                else
-                    qtype = tokens.at(1);
-
-                if (tokens.at(2).at(0) == 'F') {
-                    fuzzer.addAddress(&p.question.qclass, 2);
-                    qclass = "0";
-                }
-                else
-                    qclass = tokens.at(2);
-                    
                 p.dns_hdr.nrecord[DnsHeader::R_QUESTION] = 1;
-                p.question = DnsQuestion(tokens.at(0), qtype, qclass);
+                
+                p.question = DnsQuestion(tokens.at(0), tokens.at(1), tokens.at(2));
             break;
             
             case 7:

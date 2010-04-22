@@ -17,7 +17,7 @@ public:
         const std::string& rrClass, const std::string& ttl, const std::string& rdata);
         
     ResourceRecord(const ResourceRecord& rr);
-    
+      
     std::string data() const;
     
     ResourceRecord& operator=(const ResourceRecord& rr);

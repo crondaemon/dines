@@ -2,6 +2,7 @@
 #include "rr.hpp"
 
 #include "dns_packet.hpp"
+#include "fuzzer.hpp"
 
 #include <iostream>
 #include <arpa/inet.h>
@@ -11,6 +12,7 @@
 using namespace std;
 
 extern ostream* theLog;
+extern Fuzzer fuzzer;
 
 ResourceRecord::ResourceRecord()
 {
@@ -30,16 +32,38 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
         const string& rrClass, const string& ttl, const string& rdata)
 {
     uint32_t int32;
-    //string str;
     unsigned type = atoi(rrType.data());
     
     //*theLog << "Creating a resource record: " << rrDomain << "/" << rrType <<
     //    "/" << rrClass << "/" << ttl << "/" << rdata << endl;
     
+    // Domain
     this->rrDomain = convertDomain(rrDomain);
-    this->rrType = htons(type);
-    this->rrClass = htons(atoi(rrClass.data()));
-    this->ttl = htonl(atoi(ttl.data()));
+    
+    // type
+    if (rrType.at(0) == 'F') {
+        fuzzer.addAddress(&this->rrType, 2);
+        this->rrType = 1;
+        type = 1;
+    } else {
+        this->rrType = htons(type);
+    }
+    
+    // class
+    if (rrClass.at(0) == 'F') {
+        fuzzer.addAddress(&this->rrClass, 2);
+        this->rrClass = 1;
+    } else {
+        this->rrClass = htons(atoi(rrClass.data()));
+    }
+    
+    // ttl
+    if (ttl.at(0) == 'F') {
+        fuzzer.addAddress(&this->ttl, 4);
+        this->ttl = 1;
+    } else {
+        this->ttl = htonl(atoi(ttl.data()));
+    }
 
     switch(type) {
         case 1: // A
@@ -65,9 +89,25 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
 ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
 {
     rrDomain = rr.rrDomain;
+    
     rrType = rr.rrType;
+    if (fuzzer.hasAddress(&rr.rrType)) {
+        fuzzer.delAddress(&rr.rrType);
+        fuzzer.addAddress(&rrType, 2);
+    }
+    
     rrClass = rr.rrClass;
+    if (fuzzer.hasAddress(&rr.rrClass)) {
+        fuzzer.delAddress(&rr.rrClass);
+        fuzzer.addAddress(&rrClass, 2);
+    }
+    
     ttl = rr.ttl;
+    if (fuzzer.hasAddress(&rr.ttl)) {
+        fuzzer.delAddress(&rr.ttl);
+        fuzzer.addAddress(&ttl, 4);
+    }
+    
     rdata = rr.rdata;
     
     return *this;

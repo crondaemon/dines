@@ -15,18 +15,37 @@ Fuzzer::Fuzzer()
     srand(time(NULL));
 }
 
-void Fuzzer::addAddress(void* addr, unsigned len)
+void Fuzzer::addAddress(const void* addr, const unsigned len)
 {
     cout << "Adding address " << addr << " len=" << len << " to fuzzer.\n";
-    _addrs.push_back(make_pair(addr, len));
+    _addrs[(void*)addr] = len;
+}
+
+void Fuzzer::delAddress(const void* addr)
+{
+    _addrs.erase(_addrs.find((void*)addr));
 }
 
 void Fuzzer::goFuzz()
 {
-    for (vector<FuzzAddress>::iterator itr = _addrs.begin(); itr != _addrs.end(); ++itr) {
+    for (map<void*,unsigned>::iterator itr = _addrs.begin(); itr != _addrs.end(); ++itr) {
         for (unsigned i = 0; i < itr->second; i++) {
             ((char*)itr->first)[i] = rand() % 255;
         }
     }
 }
 
+bool Fuzzer::hasAddress(const void* addr)
+{
+    if (_addrs.find((void*)addr) != _addrs.end())
+        return true;
+    
+    return false;
+}
+
+Fuzzer::~Fuzzer()
+{
+//    cout << "distruggo fuzzer " << _addrs.size() << endl;
+    _addrs.~map<void*,unsigned>();
+
+}

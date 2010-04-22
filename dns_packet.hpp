@@ -33,6 +33,8 @@ public:
     
     DnsPacket();
     
+    void doUdpCksum();
+    
     std::string data() const;
     
     void sendNet();

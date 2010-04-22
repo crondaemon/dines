@@ -11,6 +11,7 @@
 using namespace std;
 
 extern ostream* theLog;
+extern Fuzzer fuzzer;
 
 uint16_t DnsQuestion::stringToQtype(const std::string& s)
 {
@@ -39,11 +40,50 @@ uint16_t DnsQuestion::stringToQclass(const std::string& s)
     return 1;
 }
 
+DnsQuestion::DnsQuestion(DnsQuestion& q)
+{
+    *this = q;
+}
+
+DnsQuestion& DnsQuestion::operator=(const DnsQuestion& q)
+{
+    qdomain = q.qdomain;
+    qtype = q.qtype;
+    qclass = q.qclass;
+    
+    if (fuzzer.hasAddress((void*)&q.qtype)) {
+        fuzzer.delAddress((void*)&q.qtype);
+        fuzzer.addAddress((void*)&qtype, 2);
+    }
+    
+    if (fuzzer.hasAddress((void*)&q.qclass)) {
+        fuzzer.delAddress((void*)&q.qclass);
+        fuzzer.addAddress((void*)&qclass, 2);
+    }
+    
+    return *this;
+}
+
 DnsQuestion::DnsQuestion(const string& qdomain, const string& qtype, const string& qclass)
 {
+    // Domain
     this->qdomain = convertDomain(qdomain);
-    this->qtype = stringToQtype(qtype);
-    this->qclass = stringToQclass(qclass);
+    
+    // qtype
+    if (qtype.at(0) == 'F') {
+        fuzzer.addAddress(&this->qtype, 2);
+        this->qtype = 1;
+    } else {
+        this->qtype = stringToQtype(qtype);
+    }
+    
+    // qclass
+    if (qclass.at(0) == 'F') {
+        fuzzer.addAddress(&this->qclass, 2);
+        this->qclass = 1;
+    } else {
+        this->qclass = stringToQclass(qclass);
+    }
 
     //*theLog << "Creating question: " << qdomain << "/" << qtype << "/" << qclass << endl;
 }

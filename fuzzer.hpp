@@ -2,18 +2,20 @@
 #ifndef __FUZZER_HPP__
 #define __FUZZER_HPP__
 
-//#include <pair>
+#include <map>
 #include <vector>
 
-typedef std::pair<void*, unsigned> FuzzAddress;
-
 class Fuzzer {
-    std::vector<FuzzAddress> _addrs;
+    std::map<void*,unsigned> _addrs;
     int _random;
 public:
     Fuzzer();
-    void addAddress(void* addr, unsigned len);
+    void addAddress(const void* addr, const unsigned len);
+    void delAddress(const void* addr);
+    bool hasAddress(const void* addr);
     void goFuzz();
+    
+    ~Fuzzer();
 };
 
 #endif 
