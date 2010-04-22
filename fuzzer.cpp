@@ -18,12 +18,12 @@ Fuzzer::Fuzzer()
 void Fuzzer::addAddress(const void* addr, const unsigned len)
 {
     cout << "Adding address " << addr << " len=" << len << " to fuzzer.\n";
-    _addrs[(void*)addr] = len;
+    _addrs[const_cast<void*>(addr)] = len;
 }
 
 void Fuzzer::delAddress(const void* addr)
 {
-    _addrs.erase(_addrs.find((void*)addr));
+    _addrs.erase(_addrs.find(const_cast<void*>(addr)));
 }
 
 void Fuzzer::goFuzz()
@@ -37,7 +37,7 @@ void Fuzzer::goFuzz()
 
 bool Fuzzer::hasAddress(const void* addr)
 {
-    if (_addrs.find((void*)addr) != _addrs.end())
+    if (_addrs.find(const_cast<void*>(addr)) != _addrs.end())
         return true;
     
     return false;
