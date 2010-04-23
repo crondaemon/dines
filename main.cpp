@@ -144,8 +144,13 @@ int main(int argc, char* argv[])
             case 6:
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
-                p.dns_hdr.nrecord[DnsHeader::R_QUESTION] = 1;
                 
+                if (tokens.size() != 3) {
+                    cout << "Syntax: --question <domain>,<type>,<class>\n";
+                    return 1;
+                }
+                
+                p.dns_hdr.nrecord[DnsHeader::R_QUESTION] = 1;
                 p.question = DnsQuestion(tokens.at(0), tokens.at(1), tokens.at(2));
             break;
             
