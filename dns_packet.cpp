@@ -1,6 +1,8 @@
 
 #include "dns_packet.hpp"
 
+#include "in_cksum.hpp"
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -8,7 +10,6 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <cstring>
-
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
@@ -82,6 +83,9 @@ string DnsPacket::data() const
 
 void DnsPacket::doUdpCksum()
 {
+    string pkt = data();
+    
+    udp_hdr.check = in_cksum((u_short*)pkt.c_str(), pkt.length());
 }
 
 void DnsPacket::sendNet()
@@ -114,7 +118,7 @@ void DnsPacket::sendNet()
     _din.sin_addr.s_addr = ip_hdr.daddr;
     
     // Calculate udp checksum
-    this->doUdpCksum();
+    doUdpCksum();
     
     // Create output to send
     string output;
