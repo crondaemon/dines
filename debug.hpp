@@ -1,0 +1,13 @@
+
+#ifndef __DEBUG_HPP__
+#define __DEBUG_HPP__
+
+#define PRINT_HEX(buf, len, separator) \
+{ \
+    unsigned i; \
+    for (i = 0; i < len; i++) { \
+        printf("%.2X%c", *((u_char*)&((char*)buf)[i]), separator); \
+    } \
+}
+
+#endif

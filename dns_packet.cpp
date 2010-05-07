@@ -2,6 +2,7 @@
 #include "dns_packet.hpp"
 
 #include "in_cksum.hpp"
+#include "debug.hpp"
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -83,32 +84,46 @@ string DnsPacket::data() const
 
 void DnsPacket::doUdpCksum()
 {
-    string pkt = data();
+    string dns = data();
+
+    struct pseudo {
+        uint32_t saddr;
+        uint32_t daddr;
+        uint8_t zero;
+        uint8_t proto;
+        uint16_t len;
+    } phdr;
+
+    phdr.saddr = this->ip_hdr.saddr;
+    phdr.daddr = this->ip_hdr.daddr;
+    phdr.zero = 0;
+    phdr.proto = this->ip_hdr.protocol;
+    phdr.len = this->udp_hdr.len;
+
+    this->udp_hdr.check = 0;
+
+//    printf("\n\n");
+//    PRINT_HEX(&phdr, sizeof(struct pseudo), '\0');
+//    PRINT_HEX(&this->udp_hdr, sizeof(struct udphdr), '\0');
+//    PRINT_HEX(dns.c_str(), dns.length(), '\0');
+//    printf("\n\n");
+
+    char* temp = (char*)malloc(
+        sizeof(struct pseudo) + sizeof(struct udphdr) + dns.length());
     
-    udp_hdr.check = in_cksum((u_short*)pkt.c_str(), pkt.length());
+    memcpy(temp, &phdr, sizeof(phdr));
+    memcpy(temp + sizeof(phdr), &this->udp_hdr, sizeof(struct udphdr));
+    memcpy(temp + sizeof(phdr) + sizeof(struct udphdr), dns.c_str(), dns.length());
+    udp_hdr.check = in_cksum((u_short*)temp, 
+        sizeof(struct pseudo) + sizeof(struct udphdr) + dns.length());
 }
 
 void DnsPacket::sendNet()
 {
     // Sanity checks   
-    if (ip_hdr.saddr == 0)
-        ; // XXX
+
     if (ip_hdr.daddr == 0)
         throw runtime_error("You must specify destination ip (--dst-ip)");
-
-    if (udp_hdr.source == 0)
-        udp_hdr.source = rand();
-    if (udp_hdr.dest == 0)
-        udp_hdr.dest = htons(53); // put 53 if no port specified
-
-    if (dns_hdr.txid == 0)
-        dns_hdr.txid = rand() % 0xFFFF;
-    if (question.qdomain.size() == 1)
-        throw runtime_error("You must specify DNS question (--question)");
-    if (question.qtype == 0)
-        question.qtype = 1;
-    if (question.qclass == 0)
-        question.qclass = 1;
 
     // Set L3/L4
     _sin.sin_port = udp_hdr.source;
@@ -117,21 +132,6 @@ void DnsPacket::sendNet()
     _din.sin_port = udp_hdr.dest;
     _din.sin_addr.s_addr = ip_hdr.daddr;
     
-    // Calculate udp checksum
-    doUdpCksum();
-    
-    // Create output to send
-    string output;
-    string dns_dgram = this->data();
-
-    // Adjust lenghts
-    udp_hdr.len = htons(sizeof(udp_hdr) + dns_dgram.length());
-    ip_hdr.tot_len = htons(sizeof(ip_hdr) + sizeof(udp_hdr) + dns_dgram.length());
-
-    output += string((char*)&ip_hdr, sizeof(ip_hdr));
-    output += string((char*)&udp_hdr, sizeof(udp_hdr));
-    output += dns_dgram;
- 
     if (connect(_socket, (struct sockaddr*)&_din, sizeof(_din)) < 0) {
         stringstream ss;
         ss << __func__;
@@ -140,6 +140,39 @@ void DnsPacket::sendNet()
         throw runtime_error(ss.str());
     }
 
+    if (ip_hdr.saddr == 0) {
+        struct sockaddr_in sa;
+        unsigned sa_len = sizeof(sa);
+        getsockname(_socket, (struct sockaddr*)&sa, &sa_len);
+        //printf("LOCAL IS %s\n", inet_ntop(AF_INET, &sa.sin_addr.s_addr, (char*)malloc(100), 100));
+        this->ip_hdr.saddr = sa.sin_addr.s_addr;
+    }
+
+    if (udp_hdr.source == 0)
+        udp_hdr.source = rand() % 0xFFFF;
+    if (udp_hdr.dest == 0)
+        udp_hdr.dest = htons(53); // put 53 if no port specified
+
+    if (dns_hdr.txid == 0)
+        dns_hdr.txid = rand() % 0xFFFF;
+    if (question.qdomain.size() == 1)
+        throw runtime_error("You must specify DNS question (--question)");
+
+    // Create output to send
+    string output;
+    string dns_dgram = this->data();
+
+    // Adjust lenghts
+    udp_hdr.len = htons(sizeof(udp_hdr) + dns_dgram.length());
+    ip_hdr.tot_len = htons(sizeof(ip_hdr) + sizeof(udp_hdr) + dns_dgram.length());
+
+    // Calculate udp checksum
+    doUdpCksum();
+    
+    output += string((char*)&ip_hdr, sizeof(ip_hdr));
+    output += string((char*)&udp_hdr, sizeof(udp_hdr));
+    output += dns_dgram;
+ 
     stringstream ss;
     if (send(_socket, output.data(), output.length(), 0) < 0) {
         if (errno == 22) {
