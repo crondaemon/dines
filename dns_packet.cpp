@@ -116,6 +116,8 @@ void DnsPacket::doUdpCksum()
     memcpy(temp + sizeof(phdr) + sizeof(struct udphdr), dns.c_str(), dns.length());
     udp_hdr.check = in_cksum((u_short*)temp, 
         sizeof(struct pseudo) + sizeof(struct udphdr) + dns.length());
+        
+    free(temp);
 }
 
 void DnsPacket::sendNet()

@@ -44,11 +44,11 @@ void usage(string s)
     cout << "Usage: " << s << " <params>\n\n";
     cout << "Params:\n";
     cout << "\n[IP]\n";
-    cout << "--src-ip <ip>: Source IP\n";
+    cout << "--src-ip <ip>: Source IP (default: local address)\n";
     cout << "--dst-ip <ip>: Destination IP\n";
     cout << "\n[UDP]\n";
     cout << "--sport <port>: source port\n";
-    cout << "--dport <port>: destination port\n";
+    cout << "--dport <port>: destination port (default: 53)\n";
     cout << "\n[DNS]\n";
     cout << "--trid <id>: transaction id (F)\n";
     cout << "--num-questions <n>: number of questions (A)\n";
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
     int c = 0;
     string qtype = "";
     string qclass = "";
-    unsigned num = 1;
+    unsigned num = 0;
     unsigned delay = 1000000;
 
     theLog = new ostream(NULL);
@@ -87,11 +87,6 @@ int main(int argc, char* argv[])
         exit(1);
     }
     
-    if (getuid() != 0) {
-        cout << "You need to be root." << endl;
-        return 1;
-    }
-
     // Scan cmd line to dig for options and activate them immediately
     for (int i = 0; i < argc; i++) {
         if (string(argv[i]) == "--debug") {
@@ -102,6 +97,11 @@ int main(int argc, char* argv[])
             usage(argv[0]);
             return 1;
         }
+    }
+
+    if (getuid() != 0) {
+        cout << "You need to be root." << endl;
+        return 1;
     }
 
     // Create a packet
@@ -236,20 +236,20 @@ int main(int argc, char* argv[])
 
     cout << "Sending";
     // Send datagram    
-    while(num-- > 0) {
+    while (num-- > 0) {
         fuzzer.goFuzz();
 
         try {
             p.sendNet();
-        }
-        catch(exception& e) {
+        } catch(exception& e) {
             cout << "\n\nError: " << e.what() << "\n";
             return 1;
         }
 
-        cout << "."; cout.flush();
+        //cout << "."; cout.flush();
 
-        if (num > 0) usleep(delay);
+        if (num > 0)
+            usleep(delay);
     }
     cout << endl;
 }
