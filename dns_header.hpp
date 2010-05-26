@@ -1,4 +1,3 @@
-
 #ifndef __DNSHEADER_HPP__
 #define __DNSHEADER_HPP__
 
