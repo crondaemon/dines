@@ -18,6 +18,7 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
         const uint32_t nadd, const uint32_t nauth)
 {
     this->txid = txid;
+    memset(&flags, 0x0, sizeof(DnsHeaderFlags));
     nrecord[R_QUESTION] = nquest;
     nrecord[R_ANSWER] = nans;
     nrecord[R_ADDITIONAL] = nadd;
