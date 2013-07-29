@@ -63,10 +63,10 @@ MY_CFLAGS =
 MY_LIBS   =
 
 # The pre-processor options used by the cpp (man cpp for more).
-CPPFLAGS  = -Wall -std=c++0x
+CPPFLAGS  = -Wall -std=c++0x -O3
 
 # The options used in linking as well as in any direct use of ld.
-LDFLAGS   = #-lprofiler
+LDFLAGS   =
 
 # The directories in which source files reside.
 # If not specified, only the current directory will be serached.
@@ -242,7 +242,7 @@ distclean: clean
 	$(RM) $(DEPS) TAGS
 
 VERSION=`cat version.hpp | cut -d ' ' -f 3`
-        
+
 tar:
 	@echo "Creating dines-$(VERSION).tar.gz"
 	@mkdir dines-$(VERSION)
