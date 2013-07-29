@@ -22,9 +22,9 @@ extern ostream* theLog;
 DnsPacket::DnsPacket()
 {
     int on = 1;
-    
+
     _socket = socket(PF_INET, SOCK_RAW, IPPROTO_UDP);
-    
+
     if (_socket == -1) {
         stringstream ss;
         ss << __func__;
@@ -32,10 +32,10 @@ DnsPacket::DnsPacket()
         ss << strerror(errno);
         throw runtime_error(ss.str());
     }
-        
+
     if (setsockopt(_socket, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
         throw runtime_error(string(__func__) + ": unable to set option IP_HDRINCL");
-        
+
      memset(&_sin, 0x0, sizeof(_sin));
     _sin.sin_family = AF_INET;
 
@@ -53,7 +53,7 @@ DnsPacket::DnsPacket()
     ip_hdr.check = 0;
     ip_hdr.daddr = 0;
     ip_hdr.saddr = 0;
-    
+
     udp_hdr.source = 0;
     udp_hdr.dest = 0;
     udp_hdr.len = sizeof(udp_hdr);
@@ -63,22 +63,22 @@ DnsPacket::DnsPacket()
 string DnsPacket::data() const
 {
     string out = "";
-    
+
     out += dns_hdr.data();
     out += question.data();
 
-    for (vector<ResourceRecord>::const_iterator itr = answers.begin(); 
+    for (vector<ResourceRecord>::const_iterator itr = answers.begin();
             itr != answers.end(); ++itr)
         out += itr->data();
 
-    for (vector<ResourceRecord>::const_iterator itr = authoritative.begin(); 
+    for (vector<ResourceRecord>::const_iterator itr = authoritative.begin();
             itr != authoritative.end(); ++itr)
         out += itr->data();
 
-    for (vector<ResourceRecord>::const_iterator itr = additionals.begin(); 
+    for (vector<ResourceRecord>::const_iterator itr = additionals.begin();
             itr != additionals.end(); ++itr)
         out += itr->data();
-    
+
     return out;
 }
 
@@ -110,30 +110,30 @@ void DnsPacket::doUdpCksum()
 
     char* temp = (char*)malloc(
         sizeof(struct pseudo) + sizeof(struct udphdr) + dns.length());
-    
+
     memcpy(temp, &phdr, sizeof(phdr));
     memcpy(temp + sizeof(phdr), &this->udp_hdr, sizeof(struct udphdr));
     memcpy(temp + sizeof(phdr) + sizeof(struct udphdr), dns.c_str(), dns.length());
-    udp_hdr.check = in_cksum((u_short*)temp, 
+    udp_hdr.check = in_cksum((u_short*)temp,
         sizeof(struct pseudo) + sizeof(struct udphdr) + dns.length());
-        
+
     free(temp);
 }
 
 void DnsPacket::sendNet()
 {
-    // Sanity checks   
+    // Sanity checks
 
     if (ip_hdr.daddr == 0)
         throw runtime_error("You must specify destination ip (--dst-ip)");
 
     // Set L3/L4
     _sin.sin_port = udp_hdr.source;
-    _sin.sin_addr.s_addr = ip_hdr.saddr;    
-        
+    _sin.sin_addr.s_addr = ip_hdr.saddr;
+
     _din.sin_port = udp_hdr.dest;
     _din.sin_addr.s_addr = ip_hdr.daddr;
-    
+
     if (connect(_socket, (struct sockaddr*)&_din, sizeof(_din)) < 0) {
         stringstream ss;
         ss << __func__;
@@ -170,16 +170,16 @@ void DnsPacket::sendNet()
 
     // Calculate udp checksum
     doUdpCksum();
-    
+
     output += string((char*)&ip_hdr, sizeof(ip_hdr));
     output += string((char*)&udp_hdr, sizeof(udp_hdr));
     output += dns_dgram;
- 
-    stringstream ss;
+
     if (send(_socket, output.data(), output.length(), 0) < 0) {
         if (errno == 22) {
             cout << "Invalid parameter (probably fuzzer is shaking it).\n";
         } else {
+            stringstream ss;
             ss << "sendto() error: ";
             ss << strerror(errno);
             throw runtime_error(ss.str());
@@ -191,7 +191,7 @@ std::string convertDomain(const std::string& s)
 {
     string out = "";
     vector<string> frags = tokenize(s, ".");
-    
+
     for (vector<string>::const_iterator itr = frags.begin(); itr != frags.end(); ++itr) {
         // Add the len
         out.append(1, itr->length());
@@ -199,8 +199,6 @@ std::string convertDomain(const std::string& s)
         out.append(*itr);
     }
     out.append(1, 0);
-    
+
     return out;
 }
-
-
