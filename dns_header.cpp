@@ -25,23 +25,27 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
     nrecord[R_AUTHORITATIVE] = nauth;
 }
 
-string DnsHeader::data() const 
+string DnsHeader::data() const
 {
     string out = "";
-    
+
     uint16_t id = htons(txid);
     uint16_t temp;
-    
+
     out += string((char*)&id, 2);
     //temp = *(uint16_t*)&flags;
     memcpy(&temp, &flags, 2);
     out += string((char*)&temp, 2);
-    
+
     for (int i = 0; i < 4; i++) {
         temp = htons(nrecord[i]);
         out += string((char*)&temp, 2);
     }
-        
+
     return out;
 }
 
+bool DnsHeader::question() const
+{
+    return flags.qr == 0;
+}

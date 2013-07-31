@@ -46,12 +46,14 @@ public:
     DnsHeaderFlags flags;
 
     uint32_t nrecord[4];
-    
+
     DnsHeader();
     DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t nans,
         const uint32_t nadd, const uint32_t nauth);
-        
+
     std::string data() const;
+
+    bool question() const;
 };
 
 #endif 
