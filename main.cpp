@@ -6,12 +6,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 
-#include "dns_packet.hpp"
-#include "fuzzer.hpp"
-#include "tokenizer.hpp"
-#include "rr.hpp"
-#include "version.hpp"
-//#include <google/profiler.h>
+#include <dns_packet.hpp>
+#include <tokenizer.hpp>
+#include <rr.hpp>
+#include <version.hpp>
 
 using namespace std;
 
@@ -29,13 +27,14 @@ struct option opts[] = {
     {"auth", 1, NULL, 10},
     {"num-add", 1, NULL, 11},
     {"additional", 1, NULL, 12},
-    {"num", 1, NULL, 30}, // <<-- appeso in fondo per lasciare spazio
+    // some space here for new params
+    {"num", 1, NULL, 30},
     {"delay", 1, NULL, 31},
     {"debug", 0, NULL, 32},
+    {"verbose", 0, NULL, 33},
     {NULL, 0, NULL, 0}
 };
 
-Fuzzer fuzzer;
 ostream* theLog;
 
 void usage(string s)
@@ -69,6 +68,7 @@ void usage(string s)
     cout << "--num <n>: number of packets (0 means infinite)\n";
     cout << "--delay <usec>: delay between packets\n";
     cout << "--debug: activate debug\n";
+    cout << "--verbose: be verbose\n";
     cout << "--help: this help\n";
     cout << "\n";
 }
@@ -80,6 +80,7 @@ int main(int argc, char* argv[])
     string qclass = "";
     unsigned num = 0;
     unsigned delay = 1000000;
+    bool verbose = false;
 
     theLog = new ostream(NULL);
 
@@ -116,33 +117,33 @@ int main(int argc, char* argv[])
         switch(c) {
             case 0:
                 if (optarg[0] == 'F')
-                    fuzzer.addAddress(&p.ip_hdr.saddr, 4);
+                    p.fuzzer.addAddress(&p.ip_hdr.saddr, 4);
                 else
                     p.ip_hdr.saddr = inet_addr(optarg);
-            break;
+                break;
 
             case 1:
                 p.ip_hdr.daddr = inet_addr(optarg);
-            break;
+                break;
 
             case 2:
                 p.udp_hdr.source = htons(atoi(optarg));
-            break;
+                break;
 
             case 3:
                 p.udp_hdr.dest = htons(atoi(optarg));
-            break;
+                break;
 
             case 4:
                 if (optarg[0] == 'F')
-                    fuzzer.addAddress(&p.dns_hdr.txid, 2);
+                    p.fuzzer.addAddress(&p.dnsHdr.txid, 2);
                 else
-                    p.dns_hdr.txid = htons(atoi(optarg));
-            break;
+                    p.dnsHdr.txid = htons(atoi(optarg));
+                break;
 
             case 5:
-                p.dns_hdr.nrecord[DnsHeader::R_QUESTION] = atoi(optarg);
-            break;
+                p.dnsHdr.nrecord[DnsHeader::R_QUESTION] = atoi(optarg);
+                break;
 
             case 6:
                 tokens.clear();
@@ -153,13 +154,12 @@ int main(int argc, char* argv[])
                     return 1;
                 }
 
-                p.dns_hdr.nrecord[DnsHeader::R_QUESTION] = 1;
-                p.question = DnsQuestion(tokens.at(0), tokens.at(1), tokens.at(2));
-            break;
+                p.addQuestion(tokens.at(0), tokens.at(1), tokens.at(2));
+                break;
 
             case 7:
-                p.dns_hdr.nrecord[DnsHeader::R_ANSWER] = atoi(optarg);
-            break;
+                p.dnsHdr.nrecord[DnsHeader::R_ANSWER] = atoi(optarg);
+                break;
 
             case 8:
                 tokens.clear();
@@ -173,14 +173,14 @@ int main(int argc, char* argv[])
                     return 1;
                 }
 
-                p.dns_hdr.flags.qr = 1;
+                p.dnsHdr.flags.qr = 1;
                 p.answers.push_back(rr);
-                p.dns_hdr.nrecord[DnsHeader::R_ANSWER]++;
-            break;
+                p.dnsHdr.nrecord[DnsHeader::R_ANSWER]++;
+                break;
 
             case 9:
-                p.dns_hdr.nrecord[DnsHeader::R_AUTHORITATIVE] = atoi(optarg);
-            break;
+                p.dnsHdr.nrecord[DnsHeader::R_AUTHORITATIVE] = atoi(optarg);
+                break;
 
             case 10:
                 tokens.clear();
@@ -189,14 +189,14 @@ int main(int argc, char* argv[])
                 rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2),
                     tokens.at(3), tokens.at(4));
 
-                p.dns_hdr.flags.qr = 1;
+                p.dnsHdr.flags.qr = 1;
                 p.authoritative.push_back(rr);
-                p.dns_hdr.nrecord[DnsHeader::R_AUTHORITATIVE]++;
-            break;
+                p.dnsHdr.nrecord[DnsHeader::R_AUTHORITATIVE]++;
+                break;
 
             case 11:
-                p.dns_hdr.nrecord[DnsHeader::R_ADDITIONAL] = atoi(optarg);
-            break;
+                p.dnsHdr.nrecord[DnsHeader::R_ADDITIONAL] = atoi(optarg);
+                break;
 
             case 12:
                 tokens.clear();
@@ -206,24 +206,28 @@ int main(int argc, char* argv[])
                     tokens.at(3), tokens.at(4));
 
                 p.additionals.push_back(rr);
-                p.dns_hdr.nrecord[DnsHeader::R_ADDITIONAL]++;
-            break;
+                p.dnsHdr.nrecord[DnsHeader::R_ADDITIONAL]++;
+                break;
 
             case 30:
                 num = atoi(optarg);
                 *theLog << "About to send " << num << " packets." << endl;
-            break;
+                break;
 
             case 31:
                 delay = atoi(optarg);
                 *theLog << "Inter packet gap set to " << delay << endl;
-            break;
+                break;
 
             case 32:
                 //cout << "Activating debug\n";
                 //theLog = new ostream(cout.rdbuf());
-            break;
+                break;
 
+            case 33:
+                cout << "Verbose: ON" << endl;
+                verbose = true;
+                break;
             default:
                 cout << "Unknown option.\n";
                 return 1;
@@ -232,26 +236,25 @@ int main(int argc, char* argv[])
 
 
     // Other options
-    p.dns_hdr.flags.rd = 1;
+    p.dnsHdr.flags.rd = 1;
 
     if (num == 0)
         num = 0xFFFFFF;
 
-    cout << "Sending";
+    cout << "Sending " << num << " datagrams" << endl;
     // Send datagram
     while (num-- > 0) {
-        fuzzer.goFuzz();
-
+        p.fuzzer.goFuzz();
         try {
-            //ProfilerStart("SEND");
             p.sendNet();
-            //ProfilerStop();
         } catch(exception& e) {
             cout << "\n\nError: " << e.what() << "\n";
             return 1;
         }
 
-        //cout << "."; cout.flush();
+        if (verbose) {
+            cout << p.to_string() << endl;
+        }
 
         if (num > 0)
             usleep(delay);
