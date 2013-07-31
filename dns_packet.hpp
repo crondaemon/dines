@@ -8,36 +8,69 @@
 #include <netinet/ip.h>
 #include <netinet/udp.h>
 
-#include "dns_header.hpp"
-#include "dns_question.hpp"
-#include "rr.hpp"
-#include "tokenizer.hpp"
+#include <dns_header.hpp>
+#include <dns_question.hpp>
+#include <rr.hpp>
+#include <tokenizer.hpp>
+#include <fuzzer.hpp>
 
 class DnsPacket {
     int _socket;
     struct sockaddr_in _sin;
     struct sockaddr_in _din;
+
+    //! Creates the socket
+    void socketCreate();
 public:
+    //! Constructor
+    DnsPacket();
+
+    //! The fuzzer
+    Fuzzer fuzzer;
+
+    //! IP layer
     struct iphdr ip_hdr;
+
+    //! UDP layer
     struct udphdr udp_hdr;
 
-    DnsHeader dns_hdr;
-    
+    //! DNS SECTION
+
+    //! DNS header
+    DnsHeader dnsHdr;
+
+    //! DNS question
     DnsQuestion question;
-    
+
+    //! DNS answers
     std::vector<ResourceRecord> answers;
-    
+
+    //! DNS authoritative
     std::vector<ResourceRecord> authoritative;
-    
+
+    //! DNS additionals
     std::vector<ResourceRecord> additionals;
-    
-    DnsPacket();
-    
+
+    //! Compute the UDP checksum
     void doUdpCksum();
-    
+
+    //! Raw data getter
     std::string data() const;
-    
+
+    //! Sends the packet into the network
     void sendNet();
+
+    //! to_string
+    std::string to_string() const;
+
+    //! IP source as string
+    std::string ipFrom() const;
+
+    //! IP dest as string
+    std::string ipTo() const;
+
+    //! Adds a question
+    void addQuestion(const std::string& qdomain, const std::string& qtype, const std::string& qclass);
 };
 
 std::string convertDomain(const std::string& s);
