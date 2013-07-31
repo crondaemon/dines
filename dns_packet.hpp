@@ -71,8 +71,8 @@ public:
 
     //! Adds a question
     void addQuestion(const std::string& qdomain, const std::string& qtype, const std::string& qclass);
+    void addQuestion(const std::string& qdomain, unsigned qtype, unsigned qclass);
 };
 
-std::string convertDomain(const std::string& s);
 
 #endif

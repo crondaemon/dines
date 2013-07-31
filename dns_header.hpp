@@ -54,6 +54,7 @@ public:
     std::string data() const;
 
     bool question() const;
+    bool recursive() const;
 };
 
 #endif 

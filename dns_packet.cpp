@@ -164,7 +164,7 @@ void DnsPacket::sendNet()
 
     if (dnsHdr.txid == 0)
         dnsHdr.txid = rand() % 0xFFFF;
-    if (question.qdomain.size() == 1)
+    if (question.qdomain().size() == 1)
         throw runtime_error("You must specify DNS question (--question)");
 
     // Create output to send
@@ -192,22 +192,6 @@ void DnsPacket::sendNet()
             throw runtime_error(ss.str());
         }
     }
-}
-
-string convertDomain(const std::string& s)
-{
-    string out = "";
-    vector<string> frags = tokenize(s, ".");
-
-    for (vector<string>::const_iterator itr = frags.begin(); itr != frags.end(); ++itr) {
-        // Add the len
-        out.append(1, itr->length());
-        // Add the frag
-        out.append(*itr);
-    }
-    out.append(1, 0);
-
-    return out;
 }
 
 string DnsPacket::ipFrom() const
@@ -242,6 +226,12 @@ string DnsPacket::to_string() const
 }
 
 void DnsPacket::addQuestion(const std::string& qdomain, const std::string& qtype, const std::string& qclass)
+{
+    dnsHdr.nrecord[DnsHeader::R_QUESTION]++;
+    question = DnsQuestion(qdomain, qtype, qclass);
+}
+
+void DnsPacket::addQuestion(const std::string& qdomain, unsigned qtype, unsigned qclass)
 {
     dnsHdr.nrecord[DnsHeader::R_QUESTION]++;
     question = DnsQuestion(qdomain, qtype, qclass);

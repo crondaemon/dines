@@ -234,10 +234,6 @@ int main(int argc, char* argv[])
         }
     }
 
-
-    // Other options
-    p.dnsHdr.flags.rd = 1;
-
     if (num == 0)
         num = 0xFFFFFF;
 

@@ -11,6 +11,7 @@ DnsHeader::DnsHeader()
 {
     txid = 0;
     memset(&flags, 0x0, sizeof(DnsHeaderFlags));
+    flags.rd = 1;
     memset(nrecord, 0x0, sizeof(uint32_t) * 4);
 }
 
@@ -18,6 +19,7 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
         const uint32_t nadd, const uint32_t nauth)
 {
     this->txid = txid;
+    flags.rd = 1;
     memset(&flags, 0x0, sizeof(DnsHeaderFlags));
     nrecord[R_QUESTION] = nquest;
     nrecord[R_ANSWER] = nans;
@@ -48,4 +50,9 @@ string DnsHeader::data() const
 bool DnsHeader::question() const
 {
     return flags.qr == 0;
+}
+
+bool DnsHeader::recursive() const
+{
+    return flags.rd == 1;
 }

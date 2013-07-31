@@ -1,8 +1,9 @@
 
-#include "rr.hpp"
+#include <rr.hpp>
 
-#include "dns_packet.hpp"
-#include "fuzzer.hpp"
+#include <dns_packet.hpp>
+#include <fuzzer.hpp>
+#include <convert.hpp>
 
 #include <iostream>
 #include <arpa/inet.h>
@@ -37,7 +38,7 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
     //    "/" << rrClass << "/" << ttl << "/" << rdata << endl;
 
     // Domain
-    this->rrDomain = convertDomain(rrDomain);
+    //this->rrDomain = convertDomain(rrDomain);
 
     // type
     if (rrType.at(0) == 'F') {
@@ -75,12 +76,12 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
 
         case 2: // NS
         case 5: // CNAME
-            this->rdata = convertDomain(rdata);
+            //this->rdata = convertDomain(rdata);
         break;
 
         case 15: // MX
             this->rdata = string("\x00\x00", 2);
-            this->rdata += convertDomain(rdata);
+            //this->rdata += convertDomain(rdata);
         break;
 
         default:
