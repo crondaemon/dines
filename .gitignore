@@ -3,6 +3,16 @@
 *.lo
 *.o
 
+# backups
+*~
+
+# logs
+*.log
+
+# status
+config.status
+*cache
+
 # Compiled Dynamic libraries
 *.so
 *.dylib
@@ -14,6 +24,8 @@
 
 # deps
 *.d
+.deps
 
 # exe
 dines
+test_dines

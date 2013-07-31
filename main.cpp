@@ -9,7 +9,7 @@
 #include <dns_packet.hpp>
 #include <tokenizer.hpp>
 #include <rr.hpp>
-#include <version.hpp>
+#include <config.h>
 
 using namespace std;
 
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
 
     theLog = new ostream(NULL);
 
-    cout << "\nDines " << VERSION << " - The definitive DNS packet forger.\n\n";
+    cout << "\nDines " << PACKAGE_VERSION << " - The definitive DNS packet forger.\n\n";
 
     if (argc < 2) {
         usage(argv[0]);
