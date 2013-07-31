@@ -6,12 +6,11 @@
 
 #include <iostream>
 #include <arpa/inet.h>
-
+#include <stdexcept>
 
 using namespace std;
 
 extern ostream* theLog;
-extern Fuzzer fuzzer;
 
 uint16_t DnsQuestion::stringToQtype(const std::string& s)
 {
@@ -26,12 +25,12 @@ uint16_t DnsQuestion::stringToQtype(const std::string& s)
     if (s == "ANY") return 255;
 
     unsigned n = atoi(s.c_str());
-    
+
     if (n > 0xFFFF || n == 0) {
         //*theLog << "Invalid qtype: " << s << endl;
         return 0;
     }
-    
+
     return n;
 }
 
@@ -50,57 +49,69 @@ DnsQuestion& DnsQuestion::operator=(const DnsQuestion& q)
     qdomain = q.qdomain;
     qtype = q.qtype;
     qclass = q.qclass;
-    
-    if (fuzzer.hasAddress((void*)&q.qtype)) {
-        fuzzer.delAddress((void*)&q.qtype);
-        fuzzer.addAddress((void*)&qtype, 2);
-    }
-    
-    if (fuzzer.hasAddress((void*)&q.qclass)) {
-        fuzzer.delAddress((void*)&q.qclass);
-        fuzzer.addAddress((void*)&qclass, 2);
-    }
-    
+
+    // TODO
+//    if (fuzzer.hasAddress((void*)&q.qtype)) {
+//        fuzzer.delAddress((void*)&q.qtype);
+//        fuzzer.addAddress((void*)&qtype, 2);
+//    }
+
+//    if (fuzzer.hasAddress((void*)&q.qclass)) {
+//        fuzzer.delAddress((void*)&q.qclass);
+//        fuzzer.addAddress((void*)&qclass, 2);
+//    }
+
     return *this;
 }
 
 DnsQuestion::DnsQuestion(const string& qdomain, const string& qtype, const string& qclass)
 {
-    // Domain
-    this->qdomain = convertDomain(qdomain);
-    
-    // qtype
+    unsigned myqtype;
+    unsigned myqclass;
+
     if (qtype.at(0) == 'F') {
-        fuzzer.addAddress(&this->qtype, 2);
-        this->qtype = 1;
+        throw runtime_error("NOT IMPLEMENTED");
+        //fuzzer.addAddress(&this->qtype, 2);
+        myqtype = 1;
     } else {
-        this->qtype = stringToQtype(qtype);
-    }
-    
-    // qclass
-    if (qclass.at(0) == 'F') {
-        fuzzer.addAddress(&this->qclass, 2);
-        this->qclass = 1;
-    } else {
-        this->qclass = stringToQclass(qclass);
+        myqtype = stringToQtype(qtype);
     }
 
-    //*theLog << "Creating question: " << qdomain << "/" << qtype << "/" << qclass << endl;
+    if (qclass.at(0) == 'F') {
+        throw runtime_error("NOT IMPLEMENTED");
+        //fuzzer.addAddress(&this->qclass, 2);
+        myqclass = 1;
+    } else {
+        myqclass = stringToQclass(qclass);
+    }
+
+    DnsQuestion(qdomain, myqtype, myqclass);
+}
+
+DnsQuestion::DnsQuestion(const string& qdomain, unsigned qtype, unsigned qclass)
+{
+    // Domain
+    this->qdomain = convertDomain(qdomain);
+
+    // qtype
+    this->qtype = qtype;
+
+    // qclass
+    this->qclass = qclass;
 }
 
 string DnsQuestion::data() const
 {
     string out = "";
     uint16_t temp;
-    
+
     out += qdomain;
-    
+
     temp = htons(qtype);
     out += string((char*)&temp, 2);
-    
+
     temp = htons(qclass);
     out += string((char*)&temp, 2);
-    
+
     return out;
 }
-

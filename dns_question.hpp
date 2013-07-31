@@ -15,10 +15,11 @@ public:
 
     DnsQuestion() {}
     DnsQuestion(DnsQuestion& q);
+    DnsQuestion(const std::string& qdomain, unsigned qtype, unsigned qclass);
     DnsQuestion(const std::string& qdomain, const std::string& qtype, const std::string& qclass);
-        
+
     DnsQuestion& operator=(const DnsQuestion& q);
-    
+
     std::string data() const;
 };
 
