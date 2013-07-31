@@ -1,8 +1,8 @@
 
-#include "dns_packet.hpp"
+#include <dns_packet.hpp>
 
-#include "in_cksum.hpp"
-#include "debug.hpp"
+#include <in_cksum.hpp>
+#include <debug.hpp>
 
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -19,7 +19,7 @@ using namespace std;
 
 extern ostream* theLog;
 
-DnsPacket::DnsPacket()
+void DnsPacket::socketCreate()
 {
     int on = 1;
 
@@ -60,11 +60,16 @@ DnsPacket::DnsPacket()
     udp_hdr.check = 0;
 }
 
+DnsPacket::DnsPacket()
+{
+
+}
+
 string DnsPacket::data() const
 {
     string out = "";
 
-    out += dns_hdr.data();
+    out += dnsHdr.data();
     out += question.data();
 
     for (vector<ResourceRecord>::const_iterator itr = answers.begin();
@@ -122,6 +127,8 @@ void DnsPacket::doUdpCksum()
 
 void DnsPacket::sendNet()
 {
+    this->socketCreate();
+
     // Sanity checks
 
     if (ip_hdr.daddr == 0)
@@ -155,8 +162,8 @@ void DnsPacket::sendNet()
     if (udp_hdr.dest == 0)
         udp_hdr.dest = htons(53); // put 53 if no port specified
 
-    if (dns_hdr.txid == 0)
-        dns_hdr.txid = rand() % 0xFFFF;
+    if (dnsHdr.txid == 0)
+        dnsHdr.txid = rand() % 0xFFFF;
     if (question.qdomain.size() == 1)
         throw runtime_error("You must specify DNS question (--question)");
 
@@ -187,7 +194,7 @@ void DnsPacket::sendNet()
     }
 }
 
-std::string convertDomain(const std::string& s)
+string convertDomain(const std::string& s)
 {
     string out = "";
     vector<string> frags = tokenize(s, ".");
@@ -201,4 +208,41 @@ std::string convertDomain(const std::string& s)
     out.append(1, 0);
 
     return out;
+}
+
+string DnsPacket::ipFrom() const
+{
+    char buf[INET_ADDRSTRLEN];
+
+    if (!inet_ntop(AF_INET, &this->_sin.sin_addr.s_addr, buf, INET_ADDRSTRLEN))
+        throw runtime_error("Error converting address");
+
+    return string(buf);
+}
+
+string DnsPacket::ipTo() const
+{
+    char buf[INET_ADDRSTRLEN];
+
+    if (!inet_ntop(AF_INET, &this->_din.sin_addr.s_addr, buf, INET_ADDRSTRLEN))
+        throw runtime_error("Error converting address");
+
+    return string(buf);
+}
+
+string DnsPacket::to_string() const
+{
+    string s;
+
+    s += "[" + this->ipFrom();
+    s += " -> ";
+    s += this->ipTo() + "]";
+
+    return s;
+}
+
+void DnsPacket::addQuestion(const std::string& qdomain, const std::string& qtype, const std::string& qclass)
+{
+    dnsHdr.nrecord[DnsHeader::R_QUESTION]++;
+    question = DnsQuestion(qdomain, qtype, qclass);
 }
