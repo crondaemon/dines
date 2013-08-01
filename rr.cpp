@@ -34,7 +34,7 @@ ResourceRecord::ResourceRecord(const std::string& rrDomain, unsigned rrType,
         unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen)
 {
     string rd(rdata, rdatalen);
-    ResourceRecord(rrDomain, rrType, rrClass, ttl, rd);
+    *this = ResourceRecord(rrDomain, rrType, rrClass, ttl, rd);
 }
 
 ResourceRecord::ResourceRecord(const string& rrDomain, unsigned rrType,
@@ -87,7 +87,7 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
         int_ttl = htonl(atoi(ttl.data()));
     }
 
-    ResourceRecord(rrDomain, type, klass, int_ttl, rdata);
+    *this = ResourceRecord(rrDomain, type, klass, int_ttl, rdata);
 }
 
 ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
