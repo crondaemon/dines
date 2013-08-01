@@ -60,7 +60,7 @@ void usage(string s)
     cout << "--answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<data>: a DNS answer\n";
     cout << "\n";
     cout << "--num-auth <n>: number of authoritative records (A)\n";
-    cout << "--auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<data(F)>: a DNS authoritative record\n";
+    cout << "--auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<data>: a DNS authoritative record\n";
     cout << "\n";
     cout << "--num-add <n>: number of additional records (A)\n";
     cout << "--additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<data>: a DNS additional record\n";
