@@ -7,7 +7,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-       
+#include <stdlib.h>
+
 using namespace std;
 
 Fuzzer::Fuzzer()
@@ -39,7 +40,7 @@ bool Fuzzer::hasAddress(const void* addr)
 {
     if (_addrs.find(const_cast<void*>(addr)) != _addrs.end())
         return true;
-    
+
     return false;
 }
 

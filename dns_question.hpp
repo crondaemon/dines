@@ -6,8 +6,6 @@
 #include <string>
 
 class DnsQuestion {
-    uint16_t stringToQtype(const std::string& s);
-    uint16_t stringToQclass(const std::string& s);
     //! plain version of the domain name
     std::string _qdomain_str;
     //! encoded version of the domain name
@@ -18,8 +16,8 @@ public:
 
     DnsQuestion() {}
     DnsQuestion(DnsQuestion& q);
-    DnsQuestion(const std::string& qdomain, unsigned qtype, unsigned qclass);
-    DnsQuestion(const std::string& qdomain, const std::string& qtype, const std::string& qclass);
+    DnsQuestion(const std::string qdomain, unsigned qtype, unsigned qclass);
+    DnsQuestion(const std::string qdomain, const std::string qtype, const std::string qclass);
 
     DnsQuestion& operator=(const DnsQuestion& q);
 

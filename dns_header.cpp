@@ -47,12 +47,12 @@ string DnsHeader::data() const
     return out;
 }
 
-bool DnsHeader::question() const
+bool DnsHeader::isQuestion() const
 {
     return flags.qr == 0;
 }
 
-bool DnsHeader::recursive() const
+bool DnsHeader::isRecursive() const
 {
     return flags.rd == 1;
 }

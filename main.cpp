@@ -5,6 +5,7 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <stdlib.h>
 
 #include <dns_packet.hpp>
 #include <tokenizer.hpp>

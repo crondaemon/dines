@@ -1,7 +1,7 @@
 #ifndef __DNSHEADER_HPP__
 #define __DNSHEADER_HPP__
 
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 
 #pragma pack(1)
@@ -53,8 +53,8 @@ public:
 
     std::string data() const;
 
-    bool question() const;
-    bool recursive() const;
+    bool isQuestion() const;
+    bool isRecursive() const;
 };
 
 #endif 

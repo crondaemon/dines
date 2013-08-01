@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <sstream>
 #include <iostream>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -113,8 +114,7 @@ void DnsPacket::doUdpCksum()
 //    PRINT_HEX(dns.c_str(), dns.length(), '\0');
 //    printf("\n\n");
 
-    char* temp = (char*)malloc(
-        sizeof(struct pseudo) + sizeof(struct udphdr) + dns.length());
+    char* temp = new char[sizeof(struct pseudo) + sizeof(struct udphdr) + dns.length()];
 
     memcpy(temp, &phdr, sizeof(phdr));
     memcpy(temp + sizeof(phdr), &this->udp_hdr, sizeof(struct udphdr));
@@ -122,7 +122,7 @@ void DnsPacket::doUdpCksum()
     udp_hdr.check = in_cksum((u_short*)temp,
         sizeof(struct pseudo) + sizeof(struct udphdr) + dns.length());
 
-    free(temp);
+    delete temp;
 }
 
 void DnsPacket::sendNet()
@@ -225,13 +225,13 @@ string DnsPacket::to_string() const
     return s;
 }
 
-void DnsPacket::addQuestion(const std::string& qdomain, const std::string& qtype, const std::string& qclass)
+void DnsPacket::addQuestion(const std::string qdomain, const std::string& qtype, const std::string& qclass)
 {
     dnsHdr.nrecord[DnsHeader::R_QUESTION]++;
     question = DnsQuestion(qdomain, qtype, qclass);
 }
 
-void DnsPacket::addQuestion(const std::string& qdomain, unsigned qtype, unsigned qclass)
+void DnsPacket::addQuestion(const std::string qdomain, unsigned qtype, unsigned qclass)
 {
     dnsHdr.nrecord[DnsHeader::R_QUESTION]++;
     question = DnsQuestion(qdomain, qtype, qclass);

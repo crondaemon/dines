@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <cstring>
 #include <stdexcept>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -41,7 +42,7 @@ ResourceRecord::ResourceRecord(const string& rrDomain, unsigned rrType,
 {
     // Domain
     _rrDomain_str = rrDomain;
-    _rrDomain_enc = convertDomain(rrDomain);
+    _rrDomain_enc = domainEncode(rrDomain);
 
     this->rrType = rrType;
     this->rrClass = rrClass;
@@ -53,7 +54,7 @@ ResourceRecord::ResourceRecord(const string& rrDomain, unsigned rrType,
 ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
         const string& rrClass, const string& ttl, const string& rdata)
 {
-    uint32_t int32;
+//    uint32_t int32;
     unsigned type = atoi(rrType.data());
     unsigned klass;
     unsigned int_ttl;

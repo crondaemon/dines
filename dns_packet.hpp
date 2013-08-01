@@ -3,7 +3,7 @@
 #define __DNSPACKET_HPP__
 
 #include <vector>
-#include <cstdint>
+#include <stdint.h>
 #include <string>
 #include <netinet/ip.h>
 #include <netinet/udp.h>
@@ -70,8 +70,8 @@ public:
     std::string ipTo() const;
 
     //! Adds a question
-    void addQuestion(const std::string& qdomain, const std::string& qtype, const std::string& qclass);
-    void addQuestion(const std::string& qdomain, unsigned qtype, unsigned qclass);
+    void addQuestion(const std::string qdomain, const std::string& qtype, const std::string& qclass);
+    void addQuestion(const std::string qdomain, unsigned qtype, unsigned qclass);
 
     //! Adds a RR
     void addRR(DnsHeader::RecordSection section, const std::string rrDomain, const std::string& rrType,

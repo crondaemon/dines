@@ -8,37 +8,11 @@
 #include <iostream>
 #include <arpa/inet.h>
 #include <stdexcept>
+#include <stdio.h>
 
 using namespace std;
 
 extern ostream* theLog;
-
-uint16_t DnsQuestion::stringToQtype(const std::string& s)
-{
-    if (s == "A") return 1;
-    if (s == "NS") return 2;
-    if (s == "CNAME") return 5;
-    if (s == "PTR") return 12;
-    if (s == "HINFO") return 13;
-    if (s == "MX") return 15;
-    if (s == "TXT") return 16;
-    if (s == "AXFR") return 252;
-    if (s == "ANY") return 255;
-
-    unsigned n = atoi(s.c_str());
-
-    if (n > 0xFFFF || n == 0) {
-        return 0;
-    }
-
-    return n;
-}
-
-uint16_t DnsQuestion::stringToQclass(const std::string& s)
-{
-    // TODO
-    return 1;
-}
 
 DnsQuestion::DnsQuestion(DnsQuestion& q)
 {
@@ -66,7 +40,7 @@ DnsQuestion& DnsQuestion::operator=(const DnsQuestion& q)
     return *this;
 }
 
-DnsQuestion::DnsQuestion(const string& qdomain, const string& qtype, const string& qclass)
+DnsQuestion::DnsQuestion(const string qdomain, const string qtype, const string qclass)
 {
     unsigned myqtype;
     unsigned myqclass;
@@ -87,14 +61,14 @@ DnsQuestion::DnsQuestion(const string& qdomain, const string& qtype, const strin
         myqclass = stringToQclass(qclass);
     }
 
-    DnsQuestion(qdomain, myqtype, myqclass);
+    *this = DnsQuestion(qdomain, myqtype, myqclass);
 }
 
-DnsQuestion::DnsQuestion(const string& qdomain, unsigned qtype, unsigned qclass)
+DnsQuestion::DnsQuestion(const string qdomain, unsigned qtype, unsigned qclass)
 {
     // Domain
     _qdomain_str = qdomain;
-    _qdomain_enc = convertDomain(qdomain);
+    _qdomain_enc = domainEncode(qdomain);
 
     // qtype
     this->qtype = qtype;

@@ -3,6 +3,7 @@
 #define __RR_HPP__
 
 #include <string>
+#include <stdint.h>
 
 class ResourceRecord {
     std::string _rrDomain_str;
