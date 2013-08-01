@@ -2,6 +2,7 @@ AC_INIT([Dines], [0.3], [lomato@gmail.com], [dines], [http://github.com/crondaem
 AC_PREREQ([2.59])
 AM_INIT_AUTOMAKE([1.10 no-define])
 AC_CONFIG_HEADERS([config.h])
+CXXFLAGS="-g"
 AC_PROG_CXX
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
