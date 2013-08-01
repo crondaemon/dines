@@ -39,7 +39,7 @@ public:
         R_ANSWER = 1,
         R_ADDITIONAL = 2,
         R_AUTHORITATIVE = 3
-    } RecordType;
+    } RecordSection;
 
     uint16_t txid;
 

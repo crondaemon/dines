@@ -19,8 +19,8 @@ uint16_t DnsQuestion::stringToQtype(const std::string& s)
     if (s == "NS") return 2;
     if (s == "CNAME") return 5;
     if (s == "PTR") return 12;
-    if (s == "HINFO")  return 13;
-    if (s == "MX")  return 15;
+    if (s == "HINFO") return 13;
+    if (s == "MX") return 15;
     if (s == "TXT") return 16;
     if (s == "AXFR") return 252;
     if (s == "ANY") return 255;
@@ -36,6 +36,7 @@ uint16_t DnsQuestion::stringToQtype(const std::string& s)
 
 uint16_t DnsQuestion::stringToQclass(const std::string& s)
 {
+    // TODO
     return 1;
 }
 

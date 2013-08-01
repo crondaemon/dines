@@ -72,6 +72,14 @@ public:
     //! Adds a question
     void addQuestion(const std::string& qdomain, const std::string& qtype, const std::string& qclass);
     void addQuestion(const std::string& qdomain, unsigned qtype, unsigned qclass);
+
+    //! Adds a RR
+    void addRR(DnsHeader::RecordSection section, const std::string rrDomain, const std::string& rrType,
+        const std::string& rrClass, const std::string& ttl, const std::string& rdata);
+    void addRR(DnsHeader::RecordSection section, const std::string& rrDomain, unsigned rrType,
+        unsigned rrClass, unsigned ttl, const std::string& rdata);
+    void addRR(DnsHeader::RecordSection section, const std::string& rrDomain, unsigned rrType,
+        unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen);
 };
 
 

@@ -236,3 +236,45 @@ void DnsPacket::addQuestion(const std::string& qdomain, unsigned qtype, unsigned
     dnsHdr.nrecord[DnsHeader::R_QUESTION]++;
     question = DnsQuestion(qdomain, qtype, qclass);
 }
+
+void DnsPacket::addRR(DnsHeader::RecordSection section, const std::string& rrDomain, unsigned rrType,
+        unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen)
+{
+    string rd(rdata, rdatalen);
+    addRR(section, rrDomain, rrType, rrClass, ttl, rd);
+}
+
+void DnsPacket::addRR(DnsHeader::RecordSection section, const std::string rrDomain, const std::string& rrType,
+        const std::string& rrClass, const std::string& ttl, const std::string& rdata)
+{
+    unsigned type = atoi(rrType.data());
+    unsigned klass = atoi(rrClass.data());
+    unsigned int_ttl = atoi(ttl.data());
+
+    addRR(section, rrDomain, type,
+    klass, int_ttl, rdata);
+}
+
+void DnsPacket::addRR(DnsHeader::RecordSection section, const std::string& rrDomain, unsigned rrType,
+        unsigned rrClass, unsigned ttl, const std::string& rdata)
+{
+    std::vector<ResourceRecord> *rrPtr;
+
+    switch (section) {
+        case DnsHeader::R_ANSWER:
+            rrPtr = &answers;
+            break;
+        case DnsHeader::R_AUTHORITATIVE:
+            rrPtr = &authoritative;
+            break;
+        case DnsHeader::R_ADDITIONAL:
+            rrPtr = &additionals;
+            break;
+        default:
+            throw runtime_error("Unexpected section");
+    }
+
+    ResourceRecord rr(rrDomain, rrType, rrClass, ttl, rdata);
+    dnsHdr.nrecord[section]++;
+    rrPtr->push_back(rr);
+}

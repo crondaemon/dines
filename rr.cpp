@@ -16,7 +16,8 @@ extern ostream* theLog;
 
 ResourceRecord::ResourceRecord()
 {
-    rrDomain = "";
+    _rrDomain_str = "";
+    _rrDomain_enc = "";
     rrType = 0;
     rrClass = 0;
     ttl = 0;
@@ -28,17 +29,34 @@ ResourceRecord::ResourceRecord(const ResourceRecord& rr)
     *this = rr;
 }
 
+ResourceRecord::ResourceRecord(const std::string& rrDomain, unsigned rrType,
+        unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen)
+{
+    string rd(rdata, rdatalen);
+    ResourceRecord(rrDomain, rrType, rrClass, ttl, rd);
+}
+
+ResourceRecord::ResourceRecord(const string& rrDomain, unsigned rrType,
+        unsigned rrClass, unsigned ttl, const string& rdata)
+{
+    // Domain
+    _rrDomain_str = rrDomain;
+    _rrDomain_enc = convertDomain(rrDomain);
+
+    this->rrType = rrType;
+    this->rrClass = rrClass;
+    this->ttl = ttl;
+
+    this->rdata = rdata;
+}
+
 ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
         const string& rrClass, const string& ttl, const string& rdata)
 {
     uint32_t int32;
     unsigned type = atoi(rrType.data());
-
-    //*theLog << "Creating a resource record: " << rrDomain << "/" << rrType <<
-    //    "/" << rrClass << "/" << ttl << "/" << rdata << endl;
-
-    // Domain
-    //this->rrDomain = convertDomain(rrDomain);
+    unsigned klass;
+    unsigned int_ttl;
 
     // type
     if (rrType.at(0) == 'F') {
@@ -54,44 +72,27 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
     if (rrClass.at(0) == 'F') {
         throw runtime_error("NOT IMPLEMENTED");
         //fuzzer.addAddress(&this->rrClass, 2);
-        this->rrClass = 1;
+        klass = 1;
     } else {
-        this->rrClass = htons(atoi(rrClass.data()));
+        klass = htons(atoi(rrClass.data()));
     }
 
     // ttl
     if (ttl.at(0) == 'F') {
         throw runtime_error("NOT IMPLEMENTED");
         //fuzzer.addAddress(&this->ttl, 4);
-        this->ttl = 1;
+        int_ttl = 1;
     } else {
-        this->ttl = htonl(atoi(ttl.data()));
+        int_ttl = htonl(atoi(ttl.data()));
     }
 
-    switch(type) {
-        case 1: // A
-            int32 = inet_addr(rdata.c_str());
-            this->rdata = string((char*)&int32, 4);
-        break;
-
-        case 2: // NS
-        case 5: // CNAME
-            //this->rdata = convertDomain(rdata);
-        break;
-
-        case 15: // MX
-            this->rdata = string("\x00\x00", 2);
-            //this->rdata += convertDomain(rdata);
-        break;
-
-        default:
-            throw runtime_error("Resource record type " + rrType + " not supported.");
-    }
+    ResourceRecord(rrDomain, type, klass, int_ttl, rdata);
 }
 
 ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
 {
-    rrDomain = rr.rrDomain;
+    _rrDomain_str = rr._rrDomain_str;
+    _rrDomain_enc = rr._rrDomain_enc;
 
     rrType = rr.rrType;
     //TODO
@@ -100,13 +101,13 @@ ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
 //        fuzzer.addAddress(&rrType, 2);
 //    }
 
-//    rrClass = rr.rrClass;
+    rrClass = rr.rrClass;
 //    if (fuzzer.hasAddress(&rr.rrClass)) {
 //        fuzzer.delAddress(&rr.rrClass);
 //        fuzzer.addAddress(&rrClass, 2);
 //    }
 
-//    ttl = rr.ttl;
+    ttl = rr.ttl;
 //    if (fuzzer.hasAddress(&rr.ttl)) {
 //        fuzzer.delAddress(&rr.ttl);
 //        fuzzer.addAddress(&ttl, 4);
@@ -123,7 +124,7 @@ string ResourceRecord::data() const
 
     uint16_t size;
 
-    out += rrDomain;
+    out += _rrDomain_enc;
     out += string((char*)&rrType, 2);
     out += string((char*)&rrClass, 2);
     out += string((char*)&ttl, 4);
@@ -133,4 +134,9 @@ string ResourceRecord::data() const
 
     out += string(rdata.c_str(), rdata.size());
     return out;
+}
+
+string ResourceRecord::rrDomain() const
+{
+    return _rrDomain_str;
 }
