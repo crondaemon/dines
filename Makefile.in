@@ -650,7 +650,7 @@ uninstall-am: uninstall-binPROGRAMS
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am uninstall-binPROGRAMS
 
-test:
+test: test_dines
 	./test_dines
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
