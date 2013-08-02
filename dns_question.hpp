@@ -10,10 +10,10 @@ class DnsQuestion {
     std::string _qdomain_str;
     //! encoded version of the domain name
     std::string _qdomain_enc;
-public:
-    uint16_t qtype;
-    uint16_t qclass;
 
+    uint16_t _qtype;
+    uint16_t _qclass;
+public:
     DnsQuestion() {}
     DnsQuestion(DnsQuestion& q);
     DnsQuestion(const std::string qdomain, unsigned qtype, unsigned qclass);
@@ -21,9 +21,12 @@ public:
 
     DnsQuestion& operator=(const DnsQuestion& q);
 
+
     std::string data() const;
 
     std::string qdomain() const;
+    uint16_t qtype() const;
+    uint16_t qclass() const;
 };
 
 #endif

@@ -34,13 +34,6 @@ typedef struct {
 class DnsHeader {
 public:
 
-    typedef enum {
-        R_QUESTION = 0,
-        R_ANSWER = 1,
-        R_ADDITIONAL = 2,
-        R_AUTHORITATIVE = 3
-    } RecordSection;
-
     uint16_t txid;
 
     DnsHeaderFlags flags;

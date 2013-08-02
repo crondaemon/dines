@@ -2,6 +2,7 @@
 #include <iostream>
 #include <ostream>
 #include <string>
+#include <stdexcept>
 #include <getopt.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -117,33 +118,37 @@ int main(int argc, char* argv[])
     while((c = getopt_long(argc, argv, "", opts, NULL)) != -1) {
         switch(c) {
             case 0:
-                if (optarg[0] == 'F')
-                    p.fuzzer.addAddress(&p.ip_hdr.saddr, 4);
-                else
-                    p.ip_hdr.saddr = inet_addr(optarg);
+                if (optarg[0] == 'F') {
+                    throw runtime_error("Fuzzer unsupported");
+                    //p.fuzzer.addAddress(&p.ip_hdr.saddr, 4);
+                } else {
+                    p.ipFrom(optarg);
+                }
                 break;
 
             case 1:
-                p.ip_hdr.daddr = inet_addr(optarg);
+                p.ipTo(optarg);
                 break;
 
             case 2:
-                p.udp_hdr.source = htons(atoi(optarg));
+                p.sport(optarg);
                 break;
 
             case 3:
-                p.udp_hdr.dest = htons(atoi(optarg));
+                p.dport(optarg);
                 break;
 
             case 4:
-                if (optarg[0] == 'F')
-                    p.fuzzer.addAddress(&p.dnsHdr.txid, 2);
-                else
-                    p.dnsHdr.txid = htons(atoi(optarg));
+                if (optarg[0] == 'F') {
+                    throw runtime_error("Fuzzer unsupported");
+                    //p.fuzzer.addAddress(&p.dnsHdr.txid, 2);
+                } else {
+                    p.txid(optarg);
+                }
                 break;
 
             case 5:
-                p.dnsHdr.nrecord[DnsHeader::R_QUESTION] = atoi(optarg);
+                p.nrecord(DnsPacket::R_QUESTION, atoi(optarg));
                 break;
 
             case 6:
@@ -159,55 +164,41 @@ int main(int argc, char* argv[])
                 break;
 
             case 7:
-                p.dnsHdr.nrecord[DnsHeader::R_ANSWER] = atoi(optarg);
+                p.nrecord(DnsPacket::R_ANSWER, atoi(optarg));
                 break;
 
             case 8:
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
 
-                try {
-                    rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2),
+                p.isQuestion(false);
+                p.addRR(DnsPacket::R_ANSWER, tokens.at(0), tokens.at(1), tokens.at(2),
                         tokens.at(3), tokens.at(4));
-                } catch(exception& e) {
-                    cout << "Unable to create answer: " << e.what() << endl;
-                    return 1;
-                }
-
-                p.dnsHdr.flags.qr = 1;
-                p.answers.push_back(rr);
-                p.dnsHdr.nrecord[DnsHeader::R_ANSWER]++;
                 break;
 
             case 9:
-                p.dnsHdr.nrecord[DnsHeader::R_AUTHORITATIVE] = atoi(optarg);
+                p.nrecord(DnsPacket::R_AUTHORITIES, atoi(optarg));
                 break;
 
             case 10:
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
 
-                rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2),
+                p.isQuestion(false);
+                p.addRR(DnsPacket::R_AUTHORITIES, tokens.at(0), tokens.at(1), tokens.at(2),
                     tokens.at(3), tokens.at(4));
-
-                p.dnsHdr.flags.qr = 1;
-                p.authoritative.push_back(rr);
-                p.dnsHdr.nrecord[DnsHeader::R_AUTHORITATIVE]++;
                 break;
 
             case 11:
-                p.dnsHdr.nrecord[DnsHeader::R_ADDITIONAL] = atoi(optarg);
+                p.nrecord(DnsPacket::R_ADDITIONAL, atoi(optarg));
                 break;
 
             case 12:
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
 
-                rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2),
+                p.addRR(DnsPacket::R_ADDITIONAL, tokens.at(0), tokens.at(1), tokens.at(2),
                     tokens.at(3), tokens.at(4));
-
-                p.additionals.push_back(rr);
-                p.dnsHdr.nrecord[DnsHeader::R_ADDITIONAL]++;
                 break;
 
             case 30:
@@ -241,7 +232,7 @@ int main(int argc, char* argv[])
     cout << "Sending " << num << " datagrams" << endl;
     // Send datagram
     while (num-- > 0) {
-        p.fuzzer.goFuzz();
+        //p.fuzzer.goFuzz();
         try {
             p.sendNet();
         } catch(exception& e) {

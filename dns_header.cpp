@@ -1,6 +1,8 @@
 
 #include "dns_header.hpp"
 
+#include <dns_packet.hpp>
+
 #include <cstring>
 #include <stdexcept>
 #include <arpa/inet.h>
@@ -21,10 +23,10 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
     this->txid = txid;
     flags.rd = 1;
     memset(&flags, 0x0, sizeof(DnsHeaderFlags));
-    nrecord[R_QUESTION] = nquest;
-    nrecord[R_ANSWER] = nans;
-    nrecord[R_ADDITIONAL] = nadd;
-    nrecord[R_AUTHORITATIVE] = nauth;
+    nrecord[DnsPacket::R_QUESTION] = nquest;
+    nrecord[DnsPacket::R_ANSWER] = nans;
+    nrecord[DnsPacket::R_ADDITIONAL] = nadd;
+    nrecord[DnsPacket::R_AUTHORITIES] = nauth;
 }
 
 string DnsHeader::data() const
