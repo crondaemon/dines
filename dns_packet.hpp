@@ -92,8 +92,10 @@ public:
 
     void txid(std::string txid);
 
+    void txid(uint16_t txid);
+
     //! Nrecord
-    uint16_t nrecord(DnsPacket::RecordSection section) const;
+    uint16_t nRecord(DnsPacket::RecordSection section) const;
 
     void nrecord(DnsPacket::RecordSection section, uint32_t value);
 

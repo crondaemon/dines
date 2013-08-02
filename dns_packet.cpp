@@ -3,6 +3,7 @@
 
 #include <in_cksum.hpp>
 #include <debug.hpp>
+#include <convert.hpp>
 
 #include <stdio.h>
 #include <sys/socket.h>
@@ -130,8 +131,8 @@ void DnsPacket::sendNet()
     if (_udpHdr.dest == 0)
         _udpHdr.dest = htons(53); // put 53 if no port specified
 
-    if (_dnsHdr.txid == 0)
-        _dnsHdr.txid = rand() % 0xFFFF;
+    if (_dnsHdr.txid() == 0)
+        _dnsHdr.txid(rand() % 0xFFFF);
     if (_question.qdomain().size() == 1)
         throw runtime_error("You must specify DNS question (--question)");
 
@@ -219,13 +220,13 @@ string DnsPacket::to_string() const
 
 void DnsPacket::addQuestion(const std::string qdomain, const std::string& qtype, const std::string& qclass)
 {
-    _dnsHdr.nrecord[DnsPacket::R_QUESTION]++;
+    _dnsHdr.nRecordAdd(DnsPacket::R_QUESTION, 1);
     _question = DnsQuestion(qdomain, qtype, qclass);
 }
 
 void DnsPacket::addQuestion(const std::string qdomain, unsigned qtype, unsigned qclass)
 {
-    _dnsHdr.nrecord[DnsPacket::R_QUESTION]++;
+    _dnsHdr.nRecordAdd(DnsPacket::R_QUESTION, 1);
     _question = DnsQuestion(qdomain, qtype, qclass);
 }
 
@@ -236,15 +237,14 @@ void DnsPacket::addRR(DnsPacket::RecordSection section, const std::string& rrDom
     addRR(section, rrDomain, rrType, rrClass, ttl, rd);
 }
 
-void DnsPacket::addRR(DnsPacket::RecordSection section, const std::string rrDomain, const std::string& rrType,
-        const std::string& rrClass, const std::string& ttl, const std::string& rdata)
+void DnsPacket::addRR(DnsPacket::RecordSection section, const std::string rrDomain,
+        const std::string& rrType, const std::string& rrClass, const std::string& ttl, const std::string& rdata)
 {
-    unsigned type = atoi(rrType.data());
-    unsigned klass = atoi(rrClass.data());
+    unsigned type = stringToQtype(rrType);
+    unsigned klass = stringToQclass(rrClass);
     unsigned int_ttl = atoi(ttl.data());
 
-    addRR(section, rrDomain, type,
-    klass, int_ttl, rdata);
+    addRR(section, rrDomain, type, klass, int_ttl, rdata);
 }
 
 void DnsPacket::addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
@@ -267,8 +267,9 @@ void DnsPacket::addRR(DnsPacket::RecordSection section, const std::string& rrDom
     }
 
     ResourceRecord rr(rrDomain, rrType, rrClass, ttl, rdata);
-    _dnsHdr.nrecord[section]++;
+    _dnsHdr.nRecordAdd(section, 1);
     rrPtr->push_back(rr);
+    isQuestion(false);
 }
 
 bool DnsPacket::isRecursive() const
@@ -281,9 +282,9 @@ bool DnsPacket::isQuestion() const
     return _dnsHdr.isQuestion();
 }
 
-uint16_t DnsPacket::nrecord(DnsPacket::RecordSection section) const
+uint16_t DnsPacket::nRecord(DnsPacket::RecordSection section) const
 {
-    return _dnsHdr.nrecord[section];
+    return _dnsHdr.nRecord(section);
 }
 
 const DnsQuestion& DnsPacket::question() const
@@ -338,17 +339,22 @@ void DnsPacket::dport(string dport)
 
 uint16_t DnsPacket::txid() const
 {
-    return ntohs(_dnsHdr.txid);
+    return _dnsHdr.txid();
 }
 
 void DnsPacket::txid(string txid)
 {
-    _dnsHdr.txid = htons(atoi(optarg));
+    _dnsHdr.txid(atoi(optarg));
+}
+
+void DnsPacket::txid(uint16_t txid)
+{
+    _dnsHdr.txid(txid);
 }
 
 void DnsPacket::nrecord(DnsPacket::RecordSection section, uint32_t value)
 {
-    _dnsHdr.nrecord[section] = value;
+    _dnsHdr.nRecord(section, value);
 }
 
 void DnsPacket::isQuestion(bool isQuestion)

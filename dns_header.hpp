@@ -33,15 +33,24 @@ typedef struct {
 
 class DnsHeader {
     DnsHeaderFlags _flags;
+    uint32_t _nRecord[4];
+    uint16_t _txid;
+    void _checkSection(unsigned section) const;
 public:
-
-    uint16_t txid;
-
-    uint32_t nrecord[4];
 
     DnsHeader();
     DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t nans,
         const uint32_t nadd, const uint32_t nauth);
+
+    void nRecord(unsigned section, uint32_t value);
+
+    uint32_t nRecord(unsigned section) const;
+
+    void nRecordAdd(unsigned section, unsigned n);
+
+    uint16_t txid() const;
+
+    void txid(uint16_t txid);
 
     std::string data() const;
 

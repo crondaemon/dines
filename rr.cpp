@@ -13,8 +13,6 @@
 
 using namespace std;
 
-extern ostream* theLog;
-
 ResourceRecord::ResourceRecord()
 {
     _rrDomain_str = "";
