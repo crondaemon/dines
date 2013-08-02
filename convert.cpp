@@ -52,13 +52,12 @@ uint16_t stringToQtype(const std::string& s)
 
 uint16_t stringToQclass(const std::string& s)
 {
-    if (s == "IN") return 0x0001;
-    if (s == "CSNET") return 0x0002;
-    if (s == "CHAOS") return 0x0003;
-    if (s == "HESIOD") return 0x0004;
-    if (s == "NONE") return 0x00fe;
-    if (s == "ALL") return 0x00ff;
-    if (s == "ANY") return 0x00ff;
+    if (s == "IN" || s == "1") return 0x0001;
+    if (s == "CSNET" || s == "2") return 0x0002;
+    if (s == "CHAOS" || s == "3") return 0x0003;
+    if (s == "HESIOD" || s == "4") return 0x0004;
+    if (s == "NONE" || s == "254") return 0x00fe;
+    if (s == "ALL" || s == "ANY" || s == "255") return 0x00ff;
 
     // Invalid class
     throw runtime_error("Invalid qclass");

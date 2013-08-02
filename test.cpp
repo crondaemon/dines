@@ -23,7 +23,7 @@ int test_header()
     CHECK(h.nrecord[DnsPacket::R_ADDITIONAL] == 3);
     CHECK(h.nrecord[DnsPacket::R_AUTHORITIES] == 4);
 
-    h.flags.qr = 0;
+    h.isQuestion(true);
 
     CHECK(h.isQuestion() == true);
 
@@ -56,6 +56,19 @@ int test_question()
     return 0;
 }
 
+int test_rr()
+{
+    ResourceRecord rr("www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+
+    CHECK(rr.rrDomain() == "www.test.com");
+    CHECK(rr.rrType() == 1);
+    CHECK(rr.rrClass() == 1);
+    CHECK(rr.ttl() == 64);
+    CHECK(rr.rdatalen() == 4);
+
+    return 0;
+}
+
 int test_query()
 {
     DnsPacket p;
@@ -67,7 +80,7 @@ int test_query()
     return 0;
 }
 
-int test_rr()
+int test_answer()
 {
     DnsPacket p;
 
@@ -77,8 +90,19 @@ int test_rr()
 
     CHECK(p.nrecord(DnsPacket::R_ANSWER) == 1);
     CHECK(p.answers(0).rrDomain() == "www.test.com");
-    CHECK(*(unsigned*)p.answers(0).rdata.data() == 0x0101A8C0);
-    CHECK(p.answers(0).ttl == 64);
+    CHECK(*(unsigned*)p.answers(0).rdata().data() == 0x0101A8C0);
+    CHECK(p.answers(0).ttl() == 64);
+
+    addr = inet_addr("192.168.1.2");
+    p.addRR(DnsPacket::R_ANSWER, "www.test.com", 1, 1, 64, (const char*)&addr, 4);
+    CHECK(p.nrecord(DnsPacket::R_ANSWER) == 2);
+    return 0;
+}
+
+int test_raw()
+{
+    DnsPacket p;
+    p.addQuestion("www.test.com", "A", "IN");
     return 0;
 }
 
@@ -87,7 +111,8 @@ int main()
     cout << "Tests running";
     TEST(test_header());
     TEST(test_question());
-    TEST(test_query());
     TEST(test_rr());
+    TEST(test_query());
+    TEST(test_answer());
     cout << "done" << endl;
 }

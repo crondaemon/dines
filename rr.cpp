@@ -19,10 +19,10 @@ ResourceRecord::ResourceRecord()
 {
     _rrDomain_str = "";
     _rrDomain_enc = "";
-    rrType = 0;
-    rrClass = 0;
-    ttl = 0;
-    rdata = "";
+    _rrType = 0;
+    _rrClass = 0;
+    _ttl = 0;
+    _rdata = "";
 }
 
 ResourceRecord::ResourceRecord(const ResourceRecord& rr)
@@ -30,43 +30,40 @@ ResourceRecord::ResourceRecord(const ResourceRecord& rr)
     *this = rr;
 }
 
-ResourceRecord::ResourceRecord(const std::string& rrDomain, unsigned rrType,
-        unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen)
+ResourceRecord::ResourceRecord(const std::string& rrDomain, uint16_t rrType,
+        uint16_t rrClass, uint32_t ttl, const char* rdata, unsigned rdatalen)
 {
     string rd(rdata, rdatalen);
     *this = ResourceRecord(rrDomain, rrType, rrClass, ttl, rd);
 }
 
-ResourceRecord::ResourceRecord(const string& rrDomain, unsigned rrType,
-        unsigned rrClass, unsigned ttl, const string& rdata)
+ResourceRecord::ResourceRecord(const string& rrDomain, uint16_t rrType,
+        uint16_t rrClass, uint32_t ttl, const string& rdata)
 {
     // Domain
     _rrDomain_str = rrDomain;
     _rrDomain_enc = domainEncode(rrDomain);
 
-    this->rrType = rrType;
-    this->rrClass = rrClass;
-    this->ttl = ttl;
-
-    this->rdata = rdata;
+    _rrType = htons(rrType);
+    _rrClass = htons(rrClass);
+    _ttl = htonl(ttl);
+    _rdata = rdata;
 }
 
 ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
         const string& rrClass, const string& ttl, const string& rdata)
 {
-//    uint32_t int32;
-    unsigned type = atoi(rrType.data());
-    unsigned klass;
+    uint16_t type;
+    uint16_t klass;
     unsigned int_ttl;
 
     // type
     if (rrType.at(0) == 'F') {
         throw runtime_error("NOT IMPLEMENTED");
         //fuzzer.addAddress(&this->rrType, 2);
-        this->rrType = 1;
         type = 1;
     } else {
-        this->rrType = htons(type);
+        type = stringToQtype(rrType);
     }
 
     // class
@@ -75,7 +72,7 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
         //fuzzer.addAddress(&this->rrClass, 2);
         klass = 1;
     } else {
-        klass = htons(atoi(rrClass.data()));
+        klass = stringToQclass(rrClass);
     }
 
     // ttl
@@ -84,7 +81,7 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
         //fuzzer.addAddress(&this->ttl, 4);
         int_ttl = 1;
     } else {
-        int_ttl = htonl(atoi(ttl.data()));
+        int_ttl = atoi(ttl.data());
     }
 
     *this = ResourceRecord(rrDomain, type, klass, int_ttl, rdata);
@@ -95,26 +92,26 @@ ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
     _rrDomain_str = rr._rrDomain_str;
     _rrDomain_enc = rr._rrDomain_enc;
 
-    rrType = rr.rrType;
+    _rrType = rr._rrType;
     //TODO
 //    if (fuzzer.hasAddress(&rr.rrType)) {
 //        fuzzer.delAddress(&rr.rrType);
 //        fuzzer.addAddress(&rrType, 2);
 //    }
 
-    rrClass = rr.rrClass;
+    _rrClass = rr._rrClass;
 //    if (fuzzer.hasAddress(&rr.rrClass)) {
 //        fuzzer.delAddress(&rr.rrClass);
 //        fuzzer.addAddress(&rrClass, 2);
 //    }
 
-    ttl = rr.ttl;
+    _ttl = rr._ttl;
 //    if (fuzzer.hasAddress(&rr.ttl)) {
 //        fuzzer.delAddress(&rr.ttl);
 //        fuzzer.addAddress(&ttl, 4);
 //    }
 
-    rdata = rr.rdata;
+    _rdata = rr._rdata;
 
     return *this;
 }
@@ -126,18 +123,43 @@ string ResourceRecord::data() const
     uint16_t size;
 
     out += _rrDomain_enc;
-    out += string((char*)&rrType, 2);
-    out += string((char*)&rrClass, 2);
-    out += string((char*)&ttl, 4);
+    out += string((char*)&_rrType, 2);
+    out += string((char*)&_rrClass, 2);
+    out += string((char*)&_ttl, 4);
 
-    size = htons(rdata.size());
+    size = htons(_rdata.size());
     out += string((char*)&size, 2);
 
-    out += string(rdata.c_str(), rdata.size());
+    out += _rdata;
     return out;
 }
 
 string ResourceRecord::rrDomain() const
 {
     return _rrDomain_str;
+}
+
+uint16_t ResourceRecord::rrType() const
+{
+    return ntohs(_rrType);
+}
+
+uint16_t ResourceRecord::rrClass() const
+{
+    return ntohs(_rrClass);
+}
+
+uint32_t ResourceRecord::ttl() const
+{
+    return ntohl(_ttl);
+}
+
+unsigned ResourceRecord::rdatalen() const
+{
+    return _rdata.size();
+}
+
+string ResourceRecord::rdata() const
+{
+    return _rdata;
 }

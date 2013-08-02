@@ -16,11 +16,9 @@
 
 class DnsPacket {
     int _socket;
-    struct sockaddr_in _sin;
-    struct sockaddr_in _din;
 
     //! Creates the socket
-    void socketCreate();
+    void _socketCreate();
 
     //! The fuzzer
     Fuzzer fuzzer;

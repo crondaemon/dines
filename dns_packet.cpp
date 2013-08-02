@@ -4,6 +4,7 @@
 #include <in_cksum.hpp>
 #include <debug.hpp>
 
+#include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -18,31 +19,8 @@
 
 using namespace std;
 
-extern ostream* theLog;
-
-void DnsPacket::socketCreate()
+DnsPacket::DnsPacket()
 {
-    int on = 1;
-
-    _socket = socket(PF_INET, SOCK_RAW, IPPROTO_UDP);
-
-    if (_socket == -1) {
-        stringstream ss;
-        ss << __func__;
-        ss << ": socket creation error: ";
-        ss << strerror(errno);
-        throw runtime_error(ss.str());
-    }
-
-    if (setsockopt(_socket, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
-        throw runtime_error(string(__func__) + ": unable to set option _ipHdrINCL");
-
-     memset(&_sin, 0x0, sizeof(_sin));
-    _sin.sin_family = AF_INET;
-
-    memset(&_din, 0x0, sizeof(_din));
-    _din.sin_family = AF_INET;
-
     _ipHdr.ihl = 5;
     _ipHdr.version = 4;
     _ipHdr.tos = 16;
@@ -61,9 +39,22 @@ void DnsPacket::socketCreate()
     _udpHdr.check = 0;
 }
 
-DnsPacket::DnsPacket()
+void DnsPacket::_socketCreate()
 {
+    int on = 1;
 
+    _socket = socket(PF_INET, SOCK_RAW, IPPROTO_UDP);
+
+    if (_socket == -1) {
+        stringstream ss;
+        ss << __func__;
+        ss << ": socket creation error: ";
+        ss << strerror(errno);
+        throw runtime_error(ss.str());
+    }
+
+    if (setsockopt(_socket, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
+        throw runtime_error(string(__func__) + ": unable to set option _ipHdrINCL");
 }
 
 string DnsPacket::data() const
@@ -127,35 +118,12 @@ void DnsPacket::doUdpCksum()
 
 void DnsPacket::sendNet()
 {
-    this->socketCreate();
+    _socketCreate();
 
     // Sanity checks
 
     if (_ipHdr.daddr == 0)
         throw runtime_error("You must specify destination ip (--dst-ip)");
-
-    // Set L3/L4
-    _sin.sin_port = _udpHdr.source;
-    _sin.sin_addr.s_addr = _ipHdr.saddr;
-
-    _din.sin_port = _udpHdr.dest;
-    _din.sin_addr.s_addr = _ipHdr.daddr;
-
-    if (connect(_socket, (struct sockaddr*)&_din, sizeof(_din)) < 0) {
-        stringstream ss;
-        ss << __func__;
-        ss << ": connect error: ";
-        ss << strerror(errno);
-        throw runtime_error(ss.str());
-    }
-
-    if (_ipHdr.saddr == 0) {
-        struct sockaddr_in sa;
-        unsigned sa_len = sizeof(sa);
-        getsockname(_socket, (struct sockaddr*)&sa, &sa_len);
-        //printf("LOCAL IS %s\n", inet_ntop(AF_INET, &sa.sin_addr.s_addr, (char*)malloc(100), 100));
-        this->_ipHdr.saddr = sa.sin_addr.s_addr;
-    }
 
     if (_udpHdr.source == 0)
         _udpHdr.source = rand() % 0xFFFF;
@@ -166,6 +134,30 @@ void DnsPacket::sendNet()
         _dnsHdr.txid = rand() % 0xFFFF;
     if (_question.qdomain().size() == 1)
         throw runtime_error("You must specify DNS question (--question)");
+
+    // Set L3/L4
+    struct sockaddr_in sin;
+    memset(&sin, 0x0, sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_port = _udpHdr.dest;
+    sin.sin_addr.s_addr = _ipHdr.daddr;
+
+    if (connect(_socket, (struct sockaddr*)&sin, sizeof(sin)) < 0) {
+        stringstream ss;
+        ss << __func__;
+        ss << "::connect() (";
+        ss << strerror(errno);
+        ss << ")";
+        throw runtime_error(ss.str());
+    }
+
+    if (_ipHdr.saddr == 0) {
+        struct sockaddr_in sa;
+        unsigned sa_len = sizeof(sa);
+        getsockname(_socket, (struct sockaddr*)&sa, &sa_len);
+        //printf("LOCAL IS %s\n", inet_ntop(AF_INET, &sa.sin_addr.s_addr, (char*)malloc(100), 100));
+        this->_ipHdr.saddr = sa.sin_addr.s_addr;
+    }
 
     // Create output to send
     string output;
@@ -198,7 +190,7 @@ string DnsPacket::ipFrom() const
 {
     char buf[INET_ADDRSTRLEN];
 
-    if (!inet_ntop(AF_INET, &this->_sin.sin_addr.s_addr, buf, INET_ADDRSTRLEN))
+    if (!inet_ntop(AF_INET, &_ipHdr.saddr, buf, INET_ADDRSTRLEN))
         throw runtime_error("Error converting address");
 
     return string(buf);
@@ -208,7 +200,7 @@ string DnsPacket::ipTo() const
 {
     char buf[INET_ADDRSTRLEN];
 
-    if (!inet_ntop(AF_INET, &this->_din.sin_addr.s_addr, buf, INET_ADDRSTRLEN))
+    if (!inet_ntop(AF_INET, &_ipHdr.daddr, buf, INET_ADDRSTRLEN))
         throw runtime_error("Error converting address");
 
     return string(buf);
@@ -361,5 +353,5 @@ void DnsPacket::nrecord(DnsPacket::RecordSection section, uint32_t value)
 
 void DnsPacket::isQuestion(bool isQuestion)
 {
-    _dnsHdr.flags.qr = (isQuestion == true);
+    _dnsHdr.isQuestion(isQuestion);
 }

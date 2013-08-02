@@ -32,11 +32,10 @@ typedef struct {
 } DnsHeaderFlags;
 
 class DnsHeader {
+    DnsHeaderFlags _flags;
 public:
 
     uint16_t txid;
-
-    DnsHeaderFlags flags;
 
     uint32_t nrecord[4];
 
@@ -47,7 +46,10 @@ public:
     std::string data() const;
 
     bool isQuestion() const;
+    void isQuestion(bool isQuestion);
+
     bool isRecursive() const;
+    void isRecursive(bool isRecursive);
 };
 
 #endif 

@@ -12,8 +12,8 @@ using namespace std;
 DnsHeader::DnsHeader()
 {
     txid = 0;
-    memset(&flags, 0x0, sizeof(DnsHeaderFlags));
-    flags.rd = 1;
+    memset(&_flags, 0x0, sizeof(DnsHeaderFlags));
+    _flags.rd = 1;
     memset(nrecord, 0x0, sizeof(uint32_t) * 4);
 }
 
@@ -21,8 +21,8 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
         const uint32_t nadd, const uint32_t nauth)
 {
     this->txid = txid;
-    flags.rd = 1;
-    memset(&flags, 0x0, sizeof(DnsHeaderFlags));
+    _flags.rd = 1;
+    memset(&_flags, 0x0, sizeof(DnsHeaderFlags));
     nrecord[DnsPacket::R_QUESTION] = nquest;
     nrecord[DnsPacket::R_ANSWER] = nans;
     nrecord[DnsPacket::R_ADDITIONAL] = nadd;
@@ -38,7 +38,7 @@ string DnsHeader::data() const
 
     out += string((char*)&id, 2);
     //temp = *(uint16_t*)&flags;
-    memcpy(&temp, &flags, 2);
+    memcpy(&temp, &_flags, 2);
     out += string((char*)&temp, 2);
 
     for (int i = 0; i < 4; i++) {
@@ -51,10 +51,20 @@ string DnsHeader::data() const
 
 bool DnsHeader::isQuestion() const
 {
-    return flags.qr == 0;
+    return _flags.qr == 0;
 }
 
 bool DnsHeader::isRecursive() const
 {
-    return flags.rd == 1;
+    return _flags.rd == 1;
+}
+
+void DnsHeader::isQuestion(bool isQuestion)
+{
+    _flags.qr = (isQuestion != true);
+}
+
+void DnsHeader::isRecursive(bool isRecursive)
+{
+    _flags.rd = (isRecursive == true);
 }

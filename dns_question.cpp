@@ -1,8 +1,6 @@
 
 #include <dns_question.hpp>
 
-#include <dns_packet.hpp>
-#include <fuzzer.hpp>
 #include <convert.hpp>
 
 #include <iostream>
@@ -11,8 +9,6 @@
 #include <stdio.h>
 
 using namespace std;
-
-extern ostream* theLog;
 
 DnsQuestion::DnsQuestion(DnsQuestion& q)
 {

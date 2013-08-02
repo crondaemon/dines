@@ -8,19 +8,20 @@
 class ResourceRecord {
     std::string _rrDomain_str;
     std::string _rrDomain_enc;
+
+    uint16_t _rrType;
+    uint16_t _rrClass;
+    uint32_t _ttl;
+    std::string _rdata;
 public:
-    uint16_t rrType;
-    uint16_t rrClass;
-    uint32_t ttl;
-    std::string rdata;
 
     ResourceRecord();
     ResourceRecord(const std::string& rrDomain, const std::string& rrType,
         const std::string& rrClass, const std::string& ttl, const std::string& rdata);
-    ResourceRecord(const std::string& rrDomain, unsigned rrType,
-        unsigned rrClass, unsigned ttl, const std::string& rdata);
-    ResourceRecord(const std::string& rrDomain, unsigned rrType,
-        unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen);
+    ResourceRecord(const std::string& rrDomain, uint16_t rrType,
+        uint16_t rrClass, uint32_t ttl, const std::string& rdata);
+    ResourceRecord(const std::string& rrDomain, uint16_t rrType,
+        uint16_t rrClass, uint32_t ttl, const char* rdata, unsigned rdatalen);
 
     ResourceRecord(const ResourceRecord& rr);
 
@@ -29,6 +30,12 @@ public:
     std::string data() const;
 
     ResourceRecord& operator=(const ResourceRecord& rr);
+
+    uint16_t rrType() const;
+    uint16_t rrClass() const;
+    uint32_t ttl() const;
+    unsigned rdatalen() const;
+    std::string rdata() const;
 };
 
 #endif
