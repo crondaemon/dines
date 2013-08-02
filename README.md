@@ -37,7 +37,7 @@ This is the help from dines.
     --answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<data>: a DNS answer
 
     --num-auth <n>: number of authoritative records (A)
-    --auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<data(F)>: a DNS authoritative record
+    --auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<data>: a DNS authoritative record
 
     --num-add <n>: number of additional records (A)
     --additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<data>: a DNS additional record
