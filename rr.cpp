@@ -20,7 +20,7 @@ ResourceRecord::ResourceRecord()
     _rrType = 0;
     _rrClass = 0;
     _ttl = 0;
-    _rdata = "";
+    _rData = "";
 }
 
 ResourceRecord::ResourceRecord(const ResourceRecord& rr)
@@ -45,7 +45,7 @@ ResourceRecord::ResourceRecord(const string& rrDomain, uint16_t rrType,
     _rrType = htons(rrType);
     _rrClass = htons(rrClass);
     _ttl = htonl(ttl);
-    _rdata = rdata;
+    _rData = rdata;
 }
 
 ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
@@ -109,7 +109,7 @@ ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
 //        fuzzer.addAddress(&ttl, 4);
 //    }
 
-    _rdata = rr._rdata;
+    _rData = rr._rData;
 
     return *this;
 }
@@ -125,10 +125,10 @@ string ResourceRecord::data() const
     out += string((char*)&_rrClass, 2);
     out += string((char*)&_ttl, 4);
 
-    size = htons(_rdata.size());
+    size = htons(_rData.size());
     out += string((char*)&size, 2);
 
-    out += _rdata;
+    out += _rData;
     return out;
 }
 
@@ -152,12 +152,12 @@ uint32_t ResourceRecord::ttl() const
     return ntohl(_ttl);
 }
 
-unsigned ResourceRecord::rdatalen() const
+string ResourceRecord::rData() const
 {
-    return _rdata.size();
+    return _rData;
 }
 
-string ResourceRecord::rdata() const
+unsigned ResourceRecord::rDataLen() const
 {
-    return _rdata;
+    return _rData.size();
 }

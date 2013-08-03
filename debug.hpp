@@ -2,6 +2,8 @@
 #ifndef __DEBUG_HPP__
 #define __DEBUG_HPP__
 
+#include <stdio.h>
+
 #define PRINT_HEX(buf, len, separator) \
 { \
     unsigned i; \

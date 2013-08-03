@@ -12,7 +12,7 @@ class ResourceRecord {
     uint16_t _rrType;
     uint16_t _rrClass;
     uint32_t _ttl;
-    std::string _rdata;
+    std::string _rData;
 public:
 
     ResourceRecord();
@@ -34,8 +34,8 @@ public:
     uint16_t rrType() const;
     uint16_t rrClass() const;
     uint32_t ttl() const;
-    unsigned rdatalen() const;
-    std::string rdata() const;
+    std::string rData() const;
+    unsigned rDataLen() const;
 };
 
 #endif
