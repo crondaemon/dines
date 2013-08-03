@@ -3,7 +3,7 @@
 #include <debug.hpp>
 #include <iostream>
 #include <string.h>
-#include <stdio.h>
+//#include <stdio.h>
 
 using namespace std;
 
@@ -61,13 +61,16 @@ int test_question()
 
 int test_rr()
 {
-    ResourceRecord rr("www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+    ResourceRecord rr1("www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
 
-    CHECK(rr.rrDomain() == "www.test.com");
-    CHECK(rr.rrType() == 1);
-    CHECK(rr.rrClass() == 1);
-    CHECK(rr.ttl() == 64);
-    CHECK(rr.rdatalen() == 4);
+    CHECK(rr1.rrDomain() == "www.test.com");
+    CHECK(rr1.rrType() == 1);
+    CHECK(rr1.rrClass() == 1);
+    CHECK(rr1.ttl() == 64);
+    CHECK(rr1.rDataLen() == 4);
+
+    ResourceRecord rr2("www.test.com", 1, 1, 64, "\x00\x00\x01\x00", 4);
+    CHECK(rr2.rDataLen() == 4);
 
     return 0;
 }
@@ -93,8 +96,9 @@ int test_answer()
 
     CHECK(p.nRecord(DnsPacket::R_ANSWER) == 1);
     CHECK(p.answers(0).rrDomain() == "www.test.com");
-    CHECK(*(unsigned*)p.answers(0).rdata().data() == 0x0101A8C0);
+    CHECK(*(unsigned*)p.answers(0).rData().data() == 0x0101A8C0);
     CHECK(p.answers(0).ttl() == 64);
+    CHECK(p.answers(0).rDataLen() == 4);
 
     addr = inet_addr("192.168.1.2");
     p.addRR(DnsPacket::R_ANSWER, "www.test.com", 1, 1, 64, (const char*)&addr, 4);
