@@ -8,7 +8,7 @@
 { \
     unsigned i; \
     for (i = 0; i < len; i++) { \
-        printf("%.2X%c", *((u_char*)&((char*)buf)[i]), separator); \
+        printf("%.2X%s", *((u_char*)&((char*)buf)[i]), separator); \
     } \
 }
 
