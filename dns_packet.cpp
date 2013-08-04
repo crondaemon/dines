@@ -352,7 +352,7 @@ void DnsPacket::txid(uint16_t txid)
     _dnsHdr.txid(txid);
 }
 
-void DnsPacket::nrecord(DnsPacket::RecordSection section, uint32_t value)
+void DnsPacket::nRecord(DnsPacket::RecordSection section, uint16_t value)
 {
     _dnsHdr.nRecord(section, value);
 }

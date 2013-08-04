@@ -97,7 +97,7 @@ public:
     //! Nrecord
     uint16_t nRecord(DnsPacket::RecordSection section) const;
 
-    void nrecord(DnsPacket::RecordSection section, uint32_t value);
+    void nRecord(DnsPacket::RecordSection section, uint16_t value);
 
     //! TODO
     bool isRecursive() const;

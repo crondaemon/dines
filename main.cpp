@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <dns_packet.hpp>
 #include <tokenizer.hpp>
@@ -83,6 +84,9 @@ int main(int argc, char* argv[])
     unsigned num = 0;
     unsigned delay = 1000000;
     bool verbose = false;
+    uint16_t forged_nrecords[4];
+
+    memset(&forged_nrecords, 0x0, sizeof(forged_nrecords));
 
     theLog = new ostream(NULL);
 
@@ -148,7 +152,7 @@ int main(int argc, char* argv[])
                 break;
 
             case 5:
-                p.nrecord(DnsPacket::R_QUESTION, atoi(optarg));
+                forged_nrecords[DnsPacket::R_QUESTION] = atoi(optarg);
                 break;
 
             case 6:
@@ -164,7 +168,7 @@ int main(int argc, char* argv[])
                 break;
 
             case 7:
-                p.nrecord(DnsPacket::R_ANSWER, atoi(optarg));
+                forged_nrecords[DnsPacket::R_ANSWER] = atoi(optarg);
                 break;
 
             case 8:
@@ -177,7 +181,7 @@ int main(int argc, char* argv[])
                 break;
 
             case 9:
-                p.nrecord(DnsPacket::R_AUTHORITIES, atoi(optarg));
+                forged_nrecords[DnsPacket::R_AUTHORITIES] = atoi(optarg);
                 break;
 
             case 10:
@@ -190,7 +194,7 @@ int main(int argc, char* argv[])
                 break;
 
             case 11:
-                p.nrecord(DnsPacket::R_ADDITIONAL, atoi(optarg));
+                forged_nrecords[DnsPacket::R_ADDITIONAL] = atoi(optarg);
                 break;
 
             case 12:
@@ -223,6 +227,12 @@ int main(int argc, char* argv[])
             default:
                 cout << "Unknown option.\n";
                 return 1;
+        }
+    }
+
+    for (unsigned i = 0; i < 4; i++) {
+        if (forged_nrecords[i] != 0) {
+            p.nRecord(DnsPacket::RecordSection(i), forged_nrecords[i]);
         }
     }
 
