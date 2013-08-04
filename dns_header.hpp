@@ -37,10 +37,8 @@ class DnsHeader {
     uint16_t _txid;
     void _checkSection(unsigned section) const;
 public:
-
-    DnsHeader();
-    DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t nans,
-        const uint32_t nadd, const uint32_t nauth);
+    DnsHeader(const uint16_t txid = 0, const uint32_t nquest = 0, const uint32_t nans = 0,
+        const uint32_t nadd = 0, const uint32_t nauth = 0);
 
     void nRecord(unsigned section, uint32_t value);
 

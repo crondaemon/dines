@@ -5,26 +5,18 @@
 
 #include <cstring>
 #include <stdexcept>
+#include <iostream>
 #include <sstream>
 #include <arpa/inet.h>
 
 using namespace std;
 
-DnsHeader::DnsHeader()
-{
-    _txid = 0;
-    memset(&_flags, 0x0, sizeof(DnsHeaderFlags));
-    memset(_nRecord, 0x0, sizeof(uint32_t) * 4);
-
-    _flags.rd = 1;
-}
-
 DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t nans,
         const uint32_t nadd, const uint32_t nauth)
 {
-    _txid = txid;
-    _flags.rd = 1;
+    _txid = htons(txid);
     memset(&_flags, 0x0, sizeof(DnsHeaderFlags));
+    _flags.rd = 1;
     _nRecord[DnsPacket::R_QUESTION] = nquest;
     _nRecord[DnsPacket::R_ANSWER] = nans;
     _nRecord[DnsPacket::R_ADDITIONAL] = nadd;
@@ -39,9 +31,7 @@ string DnsHeader::data() const
     uint16_t temp;
 
     out += string((char*)&id, 2);
-    //temp = *(uint16_t*)&flags;
-    memcpy(&temp, &_flags, 2);
-    out += string((char*)&temp, 2);
+    out += string((char*)&_flags, 2);
 
     for (int i = 0; i < 4; i++) {
         temp = htons(_nRecord[i]);

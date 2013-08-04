@@ -19,16 +19,49 @@ using namespace std;
 
 int test_header()
 {
-    DnsHeader h(10, 1, 2, 3, 4);
+    DnsHeader h1;
 
-    CHECK(h.nRecord(DnsPacket::R_QUESTION) == 1);
-    CHECK(h.nRecord(DnsPacket::R_ANSWER) == 2);
-    CHECK(h.nRecord(DnsPacket::R_ADDITIONAL) == 3);
-    CHECK(h.nRecord(DnsPacket::R_AUTHORITIES) == 4);
+    CHECK(h1.txid() == 0);
+    CHECK(h1.nRecord(DnsPacket::R_QUESTION) == 0);
+    CHECK(h1.nRecord(DnsPacket::R_ANSWER) == 0);
+    CHECK(h1.nRecord(DnsPacket::R_ADDITIONAL) == 0);
+    CHECK(h1.nRecord(DnsPacket::R_AUTHORITIES) == 0);
 
-    h.isQuestion(true);
+    DnsHeader h2(10, 1, 2, 3, 4);
 
-    CHECK(h.isQuestion() == true);
+    CHECK(h2.nRecord(DnsPacket::R_QUESTION) == 1);
+    CHECK(h2.nRecord(DnsPacket::R_ANSWER) == 2);
+    CHECK(h2.nRecord(DnsPacket::R_ADDITIONAL) == 3);
+    CHECK(h2.nRecord(DnsPacket::R_AUTHORITIES) == 4);
+    CHECK(h2.txid() == 10);
+
+    // qr flag
+    CHECK(h2.isQuestion() == true);
+    h2.isQuestion(true);
+    CHECK(h2.isQuestion() == true);
+    h2.isQuestion(false);
+    CHECK(h2.isQuestion() == false);
+
+    // rd flags
+    CHECK(h2.isRecursive() == true);
+    h2.isRecursive(true);
+    CHECK(h2.isRecursive() == true);
+    h2.isRecursive(false);
+    CHECK(h2.isRecursive() == false);
+
+    h2.txid(0x1234);
+    CHECK(h2.txid() == 0x1234);
+
+    CHECK(h2.data() == string("\x34\x12\x80\x00\x00\x01\x00\x02\x00\x03\x00\x04", 12));
+
+    DnsHeader h3;
+    h3 = h2;
+
+    CHECK(h3.nRecord(DnsPacket::R_QUESTION) == 1);
+    CHECK(h3.nRecord(DnsPacket::R_ANSWER) == 2);
+    CHECK(h3.nRecord(DnsPacket::R_ADDITIONAL) == 3);
+    CHECK(h3.nRecord(DnsPacket::R_AUTHORITIES) == 4);
+    CHECK(h3.txid() == 0x1234);
 
     return 0;
 }
@@ -119,7 +152,7 @@ int test_raw_packet()
         0x74, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01,
         0x00, 0x01 };
 
-    CHECK(memcmp(p1.data().c_str(), &pkt1, 30) == 0);
+    CHECK(p1.data() == string(pkt1, 30));
 
     DnsPacket p2;
     p2.addQuestion("www.test.com", "A", "IN");
@@ -141,7 +174,7 @@ int test_raw_packet()
         0x00, 0x00, 0x00, 0x40, 0x00, 0x04, 0x02, 0x03,
         0x04, 0x05 };
 
-    CHECK(memcmp(p2.data().c_str(), &pkt2, 86) == 0);
+    CHECK(p2.data() == string(pkt2, 86));
     return 0;
 }
 
