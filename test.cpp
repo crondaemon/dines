@@ -89,6 +89,8 @@ int test_question()
     CHECK(q4.qtype() == 0x10);
     CHECK(q4.qclass() == 3);
 
+    CHECK(q4.data() == string("\x03\x77\x77\x77\x04\x74\x65\x73\x74\x03\x63\x6F\x6D\x00\x00\x10\x00\x03", 18));
+
     return 0;
 }
 
