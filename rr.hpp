@@ -14,12 +14,10 @@ class ResourceRecord {
     uint32_t _ttl;
     std::string _rData;
 public:
-
-    ResourceRecord();
     ResourceRecord(const std::string& rrDomain, const std::string& rrType,
         const std::string& rrClass, const std::string& ttl, const std::string& rdata);
-    ResourceRecord(const std::string& rrDomain, uint16_t rrType,
-        uint16_t rrClass, uint32_t ttl, const std::string& rdata);
+    ResourceRecord(const std::string& rrDomain = "", uint16_t rrType = 0,
+        uint16_t rrClass = 0, uint32_t ttl = 0, const std::string& rdata = "");
     ResourceRecord(const std::string& rrDomain, uint16_t rrType,
         uint16_t rrClass, uint32_t ttl, const char* rdata, unsigned rdatalen);
 

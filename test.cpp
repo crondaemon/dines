@@ -17,6 +17,16 @@ using namespace std;
     cout << "." << flush; \
 }
 
+int test_ip()
+{
+    DnsPacket p;
+    p.ipFrom("1.2.3.4");
+    p.ipTo("2.3.4.5");
+    CHECK(p.ipFrom() == "1.2.3.4");
+    CHECK(p.ipTo() == "2.3.4.5");
+    return 0;
+}
+
 int test_header()
 {
     DnsHeader h1;
@@ -118,6 +128,7 @@ int test_query()
     CHECK(p.question().qdomain() == "www.test.com");
     CHECK(p.question().qclass() == 3);
     CHECK(p.question().qtype() == 1);
+    CHECK(p.isRecursive() == true);
     return 0;
 }
 
@@ -138,6 +149,8 @@ int test_answer()
     addr = inet_addr("192.168.1.2");
     p.addRR(DnsPacket::R_ANSWER, "www.test.com", 1, 1, 64, (const char*)&addr, 4);
     CHECK(p.nRecord(DnsPacket::R_ANSWER) == 2);
+    p.nRecord(DnsPacket::R_ANSWER, 3);
+    CHECK(p.nRecord(DnsPacket::R_ANSWER) == 3);
     return 0;
 }
 
@@ -180,9 +193,10 @@ int test_raw_packet()
     return 0;
 }
 
-int main()
+int main(int argc, char* argv[])
 {
     cout << "Tests running";
+    TEST(test_ip());
     TEST(test_header());
     TEST(test_question());
     TEST(test_rr());

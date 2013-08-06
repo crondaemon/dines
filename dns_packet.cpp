@@ -92,19 +92,13 @@ void DnsPacket::doUdpCksum()
         uint16_t len;
     } phdr;
 
-    phdr.saddr = this->_ipHdr.saddr;
-    phdr.daddr = this->_ipHdr.daddr;
+    phdr.saddr = _ipHdr.saddr;
+    phdr.daddr = _ipHdr.daddr;
     phdr.zero = 0;
-    phdr.proto = this->_ipHdr.protocol;
-    phdr.len = this->_udpHdr.len;
+    phdr.proto = _ipHdr.protocol;
+    phdr.len = _udpHdr.len;
 
-    this->_udpHdr.check = 0;
-
-//    printf("\n\n");
-//    PRINT_HEX(&phdr, sizeof(struct pseudo), '\0');
-//    PRINT_HEX(&this->_udpHdr, sizeof(struct udphdr), '\0');
-//    PRINT_HEX(dns.c_str(), dns.length(), '\0');
-//    printf("\n\n");
+    _udpHdr.check = 0;
 
     char* temp = new char[sizeof(struct pseudo) + sizeof(struct udphdr) + dns.length()];
 

@@ -13,16 +13,6 @@
 
 using namespace std;
 
-ResourceRecord::ResourceRecord()
-{
-    _rrDomain_str = "";
-    _rrDomain_enc = "";
-    _rrType = 0;
-    _rrClass = 0;
-    _ttl = 0;
-    _rData = "";
-}
-
 ResourceRecord::ResourceRecord(const ResourceRecord& rr)
 {
     *this = rr;
