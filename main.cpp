@@ -21,7 +21,7 @@ struct option opts[] = {
     {"dst-ip", 1, NULL, 1},
     {"sport", 1, NULL, 2},
     {"dport", 1, NULL, 3},
-    {"trid", 1, NULL, 4},
+    {"txid", 1, NULL, 4},
     {"num-questions", 1, NULL, 5},
     {"question", 1, NULL, 6},
     {"num-ans", 1, NULL, 7},
@@ -42,33 +42,33 @@ ostream* theLog;
 
 void usage(string s)
 {
-    cout << "Fields with (F) can be fuzzed. (Example --trid F)\n";
+    cout << "Fields with (F) can be fuzzed. (Example --txid F)\n";
     cout << "Fields with (R) are repeatable. (Example --answer)\n";
     cout << "Fields with (A) are calculated automatically.\n";
     cout << "\n";
     cout << "Usage: " << s << " <params>\n\n";
     cout << "Params:\n";
     cout << "\n[IP]\n";
-    cout << "--src-ip <ip>: Source IP (default: local address)\n";
+    cout << "--src-ip <ip>: Source IP (default: local address), (F)\n";
     cout << "--dst-ip <ip>: Destination IP\n";
     cout << "\n[UDP]\n";
-    cout << "--sport <port>: source port\n";
+    cout << "--sport <port>: source port (A)\n";
     cout << "--dport <port>: destination port (default: 53)\n";
     cout << "\n[DNS]\n";
-    cout << "--trid <id>: transaction id (F)\n";
-    cout << "--num-questions <n>: number of questions (A)\n";
-    cout << "--question <domain>,<type(F)>,<class>: question domain\n";
+    cout << "--txid <id>: transaction id (F)\n";
+    cout << "--num-questions <n>: number of questions (AF)\n";
+    cout << "--question <domain>,<type(F)>,<class(F)>: question domain\n";
     cout << "\n";
-    cout << "--num-ans <n>: number of answers (A)\n";
+    cout << "--num-ans <n>: number of answers (AF)\n";
     cout << "--answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<data>: a DNS answer\n";
     cout << "\n";
-    cout << "--num-auth <n>: number of authoritative records (A)\n";
+    cout << "--num-auth <n>: number of authoritative records (AF)\n";
     cout << "--auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<data>: a DNS authoritative record\n";
     cout << "\n";
-    cout << "--num-add <n>: number of additional records (A)\n";
+    cout << "--num-add <n>: number of additional records (AF)\n";
     cout << "--additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<data>: a DNS additional record\n";
     cout << "\n[MISC]\n";
-    cout << "--num <n>: number of packets (0 means infinite)\n";
+    cout << "--num <n>: number of packets (0 = infinite)\n";
     cout << "--delay <usec>: delay between packets\n";
     cout << "--debug: activate debug\n";
     cout << "--verbose: be verbose\n";
@@ -117,7 +117,6 @@ int main(int argc, char* argv[])
     // Create a packet
     DnsPacket p;
     vector<string> tokens;
-    ResourceRecord rr;
 
     while((c = getopt_long(argc, argv, "", opts, NULL)) != -1) {
         switch(c) {
@@ -144,15 +143,20 @@ int main(int argc, char* argv[])
 
             case 4:
                 if (optarg[0] == 'F') {
-                    throw runtime_error("Fuzzer unsupported");
-                    //p.fuzzer.addAddress(&p.dnsHdr.txid, 2);
+                    DnsHeader& h = p.dnsHdr();
+                    h.fuzzTxid();
                 } else {
                     p.txid(optarg);
                 }
                 break;
 
             case 5:
-                forged_nrecords[DnsPacket::R_QUESTION] = atoi(optarg);
+                if (optarg[0] == 'F') {
+                    DnsHeader& h = p.dnsHdr();
+                    h.fuzzNRecord(DnsPacket::R_QUESTION);
+                } else {
+                    forged_nrecords[DnsPacket::R_QUESTION] = atoi(optarg);
+                }
                 break;
 
             case 6:
@@ -163,12 +167,24 @@ int main(int argc, char* argv[])
                     cout << "Syntax: --question <domain>,<type>,<class>\n";
                     return 1;
                 }
-
                 p.addQuestion(tokens.at(0), tokens.at(1), tokens.at(2));
+                if (tokens.at(1).at(0) == 'F') {
+                    DnsQuestion& q = p.question();
+                    q.fuzzQtype();
+                }
+                if (tokens.at(2).at(0) == 'F') {
+                    DnsQuestion& q = p.question();
+                    q.fuzzQclass();
+                }
                 break;
 
             case 7:
-                forged_nrecords[DnsPacket::R_ANSWER] = atoi(optarg);
+                if (optarg[0] == 'F') {
+                    DnsHeader& h = p.dnsHdr();
+                    h.fuzzNRecord(DnsPacket::R_ANSWER);
+                } else {
+                    forged_nrecords[DnsPacket::R_ANSWER] = atoi(optarg);
+                }
                 break;
 
             case 8:
@@ -176,12 +192,29 @@ int main(int argc, char* argv[])
                 tokens = tokenize(optarg, ",");
 
                 p.isQuestion(false);
-                p.addRR(DnsPacket::R_ANSWER, tokens.at(0), tokens.at(1), tokens.at(2),
-                        tokens.at(3), tokens.at(4));
+
+                {
+                    ResourceRecord& rr = p.addRR(DnsPacket::R_ANSWER, tokens.at(0),
+                        tokens.at(1), tokens.at(2), tokens.at(3), tokens.at(4));
+                    if (tokens.at(1).at(0) == 'F') {
+                        rr.fuzzRRtype();
+                    }
+                    if (tokens.at(2).at(0) == 'F') {
+                        rr.fuzzRRclass();
+                    }
+                    if (tokens.at(3).at(0) == 'F') {
+                        rr.fuzzRRttl();
+                    }
+                }
                 break;
 
             case 9:
-                forged_nrecords[DnsPacket::R_AUTHORITIES] = atoi(optarg);
+                if (optarg[0] == 'F') {
+                    DnsHeader& h = p.dnsHdr();
+                    h.fuzzNRecord(DnsPacket::R_ADDITIONAL);
+                } else {
+                    forged_nrecords[DnsPacket::R_ADDITIONAL] = atoi(optarg);
+                }
                 break;
 
             case 10:
@@ -194,7 +227,12 @@ int main(int argc, char* argv[])
                 break;
 
             case 11:
-                forged_nrecords[DnsPacket::R_ADDITIONAL] = atoi(optarg);
+                if (optarg[0] == 'F') {
+                    DnsHeader& h = p.dnsHdr();
+                    h.fuzzNRecord(DnsPacket::R_AUTHORITIES);
+                } else {
+                    forged_nrecords[DnsPacket::R_AUTHORITIES] = atoi(optarg);
+                }
                 break;
 
             case 12:
@@ -242,7 +280,7 @@ int main(int argc, char* argv[])
     cout << "Sending " << num << " datagrams" << endl;
     // Send datagram
     while (num-- > 0) {
-        //p.fuzzer.goFuzz();
+        p.fuzz();
         try {
             p.sendNet();
         } catch(exception& e) {

@@ -13,11 +13,6 @@
 
 using namespace std;
 
-ResourceRecord::ResourceRecord(const ResourceRecord& rr)
-{
-    *this = rr;
-}
-
 ResourceRecord::ResourceRecord(const std::string& rrDomain, uint16_t rrType,
         uint16_t rrClass, uint32_t ttl, const char* rdata, unsigned rdatalen)
 {
@@ -36,6 +31,10 @@ ResourceRecord::ResourceRecord(const string& rrDomain, uint16_t rrType,
     _rrClass = htons(rrClass);
     _ttl = htonl(ttl);
     _rData = rdata;
+
+    _fuzzRRtype = false;
+    _fuzzRRclass = false;
+    _fuzzTTL = false;
 }
 
 ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
@@ -150,4 +149,31 @@ string ResourceRecord::rData() const
 unsigned ResourceRecord::rDataLen() const
 {
     return _rData.size();
+}
+
+void ResourceRecord::fuzz()
+{
+    if (_fuzzRRtype)
+        _rrType = rand() % 65535;
+
+    if (_fuzzRRclass)
+        _rrClass = rand() % 65535;
+
+    if (_fuzzTTL)
+        _ttl = rand();
+}
+
+void ResourceRecord::fuzzRRtype()
+{
+    _fuzzRRtype = true;
+}
+
+void ResourceRecord::fuzzRRclass()
+{
+    _fuzzRRclass = true;
+}
+
+void ResourceRecord::fuzzRRttl()
+{
+    _fuzzTTL = true;
 }

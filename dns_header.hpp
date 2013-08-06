@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <fuzzer.hpp>
 
 #pragma pack(1)
 typedef struct {
@@ -33,16 +34,20 @@ typedef struct {
 
 class DnsHeader {
     DnsHeaderFlags _flags;
-    uint32_t _nRecord[4];
+    uint16_t _nRecord[4];
     uint16_t _txid;
     void _checkSection(unsigned section) const;
+
+    bool _fuzzFlags;
+    bool _fuzzTxid;
+    bool _fuzzNRecord[4];
 public:
     DnsHeader(const uint16_t txid = 0, const uint32_t nquest = 0, const uint32_t nans = 0,
         const uint32_t nadd = 0, const uint32_t nauth = 0);
 
-    void nRecord(unsigned section, uint32_t value);
+    void nRecord(unsigned section, uint16_t value);
 
-    uint32_t nRecord(unsigned section) const;
+    uint16_t nRecord(unsigned section) const;
 
     void nRecordAdd(unsigned section, unsigned n);
 
@@ -57,6 +62,12 @@ public:
 
     bool isRecursive() const;
     void isRecursive(bool isRecursive);
+
+    void fuzz();
+
+    void fuzzFlags();
+    void fuzzTxid();
+    void fuzzNRecord(unsigned section);
 };
 
 #endif 

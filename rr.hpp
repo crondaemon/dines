@@ -13,6 +13,10 @@ class ResourceRecord {
     uint16_t _rrClass;
     uint32_t _ttl;
     std::string _rData;
+
+    bool _fuzzRRtype;
+    bool _fuzzRRclass;
+    bool _fuzzTTL;
 public:
     ResourceRecord(const std::string& rrDomain, const std::string& rrType,
         const std::string& rrClass, const std::string& ttl, const std::string& rdata);
@@ -20,8 +24,6 @@ public:
         uint16_t rrClass = 0, uint32_t ttl = 0, const std::string& rdata = "");
     ResourceRecord(const std::string& rrDomain, uint16_t rrType,
         uint16_t rrClass, uint32_t ttl, const char* rdata, unsigned rdatalen);
-
-    ResourceRecord(const ResourceRecord& rr);
 
     std::string rrDomain() const;
 
@@ -34,6 +36,12 @@ public:
     uint32_t ttl() const;
     std::string rData() const;
     unsigned rDataLen() const;
+
+    void fuzz();
+
+    void fuzzRRtype();
+    void fuzzRRclass();
+    void fuzzRRttl();
 };
 
 #endif

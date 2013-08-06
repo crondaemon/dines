@@ -51,15 +51,13 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_dines_OBJECTS = dns_header.$(OBJEXT) dns_packet.$(OBJEXT) \
-	dns_question.$(OBJEXT) fuzzer.$(OBJEXT) in_cksum.$(OBJEXT) \
-	main.$(OBJEXT) rr.$(OBJEXT) tokenizer.$(OBJEXT) \
-	convert.$(OBJEXT)
+	dns_question.$(OBJEXT) in_cksum.$(OBJEXT) main.$(OBJEXT) \
+	rr.$(OBJEXT) tokenizer.$(OBJEXT) convert.$(OBJEXT)
 dines_OBJECTS = $(am_dines_OBJECTS)
 dines_LDADD = $(LDADD)
 am_test_dines_OBJECTS = dns_header.$(OBJEXT) dns_packet.$(OBJEXT) \
-	dns_question.$(OBJEXT) fuzzer.$(OBJEXT) in_cksum.$(OBJEXT) \
-	test.$(OBJEXT) rr.$(OBJEXT) tokenizer.$(OBJEXT) \
-	convert.$(OBJEXT)
+	dns_question.$(OBJEXT) in_cksum.$(OBJEXT) test.$(OBJEXT) \
+	rr.$(OBJEXT) tokenizer.$(OBJEXT) convert.$(OBJEXT)
 test_dines_OBJECTS = $(am_test_dines_OBJECTS)
 test_dines_LDADD = $(LDADD)
 DEFAULT_INCLUDES = -I.
@@ -177,8 +175,8 @@ target_alias =
 top_build_prefix = 
 top_builddir = .
 top_srcdir = .
-dines_SOURCES = debug.hpp dns_header.hpp dns_packet.hpp dns_question.hpp fuzzer.hpp in_cksum.hpp rr.hpp tokenizer.hpp version.hpp dns_header.cpp dns_packet.cpp dns_question.cpp fuzzer.cpp in_cksum.cpp main.cpp rr.cpp tokenizer.cpp convert.cpp
-test_dines_SOURCES = debug.hpp dns_header.hpp dns_packet.hpp dns_question.hpp fuzzer.hpp in_cksum.hpp rr.hpp tokenizer.hpp version.hpp dns_header.cpp dns_packet.cpp dns_question.cpp fuzzer.cpp in_cksum.cpp test.cpp rr.cpp tokenizer.cpp convert.cpp convert.hpp
+dines_SOURCES = debug.hpp dns_header.hpp dns_packet.hpp dns_question.hpp in_cksum.hpp rr.hpp tokenizer.hpp version.hpp dns_header.cpp dns_packet.cpp dns_question.cpp in_cksum.cpp main.cpp rr.cpp tokenizer.cpp convert.cpp
+test_dines_SOURCES = debug.hpp dns_header.hpp dns_packet.hpp dns_question.hpp in_cksum.hpp rr.hpp tokenizer.hpp version.hpp dns_header.cpp dns_packet.cpp dns_question.cpp in_cksum.cpp test.cpp rr.cpp tokenizer.cpp convert.cpp convert.hpp
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -287,7 +285,6 @@ include ./$(DEPDIR)/convert.Po
 include ./$(DEPDIR)/dns_header.Po
 include ./$(DEPDIR)/dns_packet.Po
 include ./$(DEPDIR)/dns_question.Po
-include ./$(DEPDIR)/fuzzer.Po
 include ./$(DEPDIR)/in_cksum.Po
 include ./$(DEPDIR)/main.Po
 include ./$(DEPDIR)/rr.Po

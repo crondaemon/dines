@@ -41,6 +41,9 @@ uint16_t stringToQtype(const std::string& s)
     if (s == "AXFR") return 252;
     if (s == "ANY") return 255;
 
+    // this is used by fuzzer
+    if (s == "F") return 1;
+
     unsigned n = atoi(s.c_str());
 
     if (n > 0xFFFF || n == 0) {
@@ -58,6 +61,8 @@ uint16_t stringToQclass(const std::string& s)
     if (s == "HESIOD" || s == "4") return 0x0004;
     if (s == "NONE" || s == "254") return 0x00fe;
     if (s == "ALL" || s == "ANY" || s == "255") return 0x00ff;
+
+    if (s == "F") return 1;
 
     // Invalid class
     throw runtime_error("Invalid qclass");

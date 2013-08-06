@@ -7,13 +7,9 @@
 #include <arpa/inet.h>
 #include <stdexcept>
 #include <stdio.h>
+#include <stdlib.h>
 
 using namespace std;
-
-DnsQuestion::DnsQuestion(DnsQuestion& q)
-{
-    *this = q;
-}
 
 DnsQuestion& DnsQuestion::operator=(const DnsQuestion& q)
 {
@@ -21,17 +17,6 @@ DnsQuestion& DnsQuestion::operator=(const DnsQuestion& q)
     _qdomain_enc = q._qdomain_enc;
     _qtype = q._qtype;
     _qclass = q._qclass;
-
-    // TODO
-//    if (fuzzer.hasAddress((void*)&q.qtype)) {
-//        fuzzer.delAddress((void*)&q.qtype);
-//        fuzzer.addAddress((void*)&qtype, 2);
-//    }
-
-//    if (fuzzer.hasAddress((void*)&q.qclass)) {
-//        fuzzer.delAddress((void*)&q.qclass);
-//        fuzzer.addAddress((void*)&qclass, 2);
-//    }
 
     return *this;
 }
@@ -41,21 +26,8 @@ DnsQuestion::DnsQuestion(const string qdomain, const string qtype, const string 
     unsigned myqtype;
     unsigned myqclass;
 
-    if (qtype.at(0) == 'F') {
-        throw runtime_error("NOT IMPLEMENTED");
-        //fuzzer.addAddress(&this->qtype, 2);
-        myqtype = 1;
-    } else {
-        myqtype = stringToQtype(qtype);
-    }
-
-    if (qclass.at(0) == 'F') {
-        throw runtime_error("NOT IMPLEMENTED");
-        //fuzzer.addAddress(&this->qclass, 2);
-        myqclass = 1;
-    } else {
-        myqclass = stringToQclass(qclass);
-    }
+    myqtype = stringToQtype(qtype);
+    myqclass = stringToQclass(qclass);
 
     *this = DnsQuestion(qdomain, myqtype, myqclass);
 }
@@ -67,10 +39,13 @@ DnsQuestion::DnsQuestion(const string qdomain, unsigned qtype, unsigned qclass)
     _qdomain_enc = domainEncode(qdomain);
 
     // qtype
-    this->_qtype = qtype;
+    _qtype = qtype;
 
     // qclass
-    this->_qclass = qclass;
+    _qclass = qclass;
+
+    _fuzzQtype = false;
+    _fuzzQclass = false;
 }
 
 string DnsQuestion::data() const
@@ -102,4 +77,25 @@ uint16_t DnsQuestion::qclass() const
 uint16_t DnsQuestion::qtype() const
 {
     return _qtype;
+}
+
+void DnsQuestion::fuzz()
+{
+    if (_fuzzQtype == true) {
+        _qtype = rand() % 65535;
+    }
+
+    if (_fuzzQclass == true) {
+        _qclass = rand() % 65535;
+    }
+}
+
+void DnsQuestion::fuzzQtype()
+{
+    _fuzzQtype = true;
+}
+
+void DnsQuestion::fuzzQclass()
+{
+    _fuzzQclass = true;
 }

@@ -12,16 +12,12 @@
 #include <dns_question.hpp>
 #include <rr.hpp>
 #include <tokenizer.hpp>
-#include <fuzzer.hpp>
 
 class DnsPacket {
     int _socket;
 
     //! Creates the socket
     void _socketCreate();
-
-    //! The fuzzer
-    Fuzzer fuzzer;
 
     //! IP layer
     struct iphdr _ipHdr;
@@ -56,7 +52,9 @@ public:
     //! Constructor
     DnsPacket();
 
-    //! DNS SECTION
+    DnsHeader& dnsHdr();
+    DnsQuestion& question();
+    ResourceRecord& rr(DnsPacket::RecordSection section, unsigned n);
 
     //! Compute the UDP checksum
     void doUdpCksum();
@@ -107,24 +105,23 @@ public:
     //! TODO
     bool isQuestion() const;
 
-    //! TODO
-    const DnsQuestion& question() const;
-
     const ResourceRecord& answers(unsigned n) const;
     const ResourceRecord& additionals(unsigned n) const;
     const ResourceRecord& authorities(unsigned n) const;
 
     //! Adds a question
-    void addQuestion(const std::string qdomain, const std::string& qtype, const std::string& qclass);
-    void addQuestion(const std::string qdomain, unsigned qtype, unsigned qclass);
+    DnsQuestion& addQuestion(const std::string qdomain, const std::string& qtype, const std::string& qclass);
+    DnsQuestion& addQuestion(const std::string qdomain, unsigned qtype, unsigned qclass);
 
     //! Adds a RR
-    void addRR(DnsPacket::RecordSection section, const std::string rrDomain, const std::string& rrType,
+    ResourceRecord& addRR(DnsPacket::RecordSection section, const std::string rrDomain, const std::string& rrType,
         const std::string& rrClass, const std::string& ttl, const std::string& rdata);
-    void addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
+    ResourceRecord& addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
         unsigned rrClass, unsigned ttl, const std::string& rdata);
-    void addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
+    ResourceRecord& addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
         unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen);
+
+    void fuzz();
 };
 
 

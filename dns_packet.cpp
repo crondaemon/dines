@@ -212,36 +212,39 @@ string DnsPacket::to_string() const
     return s;
 }
 
-void DnsPacket::addQuestion(const std::string qdomain, const std::string& qtype, const std::string& qclass)
+DnsQuestion& DnsPacket::addQuestion(const std::string qdomain, const std::string& qtype,
+        const std::string& qclass)
 {
     _dnsHdr.nRecordAdd(DnsPacket::R_QUESTION, 1);
     _question = DnsQuestion(qdomain, qtype, qclass);
+    return _question;
 }
 
-void DnsPacket::addQuestion(const std::string qdomain, unsigned qtype, unsigned qclass)
+DnsQuestion& DnsPacket::addQuestion(const std::string qdomain, unsigned qtype, unsigned qclass)
 {
     _dnsHdr.nRecordAdd(DnsPacket::R_QUESTION, 1);
     _question = DnsQuestion(qdomain, qtype, qclass);
+    return _question;
 }
 
-void DnsPacket::addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
+ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
         unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen)
 {
     string rd(rdata, rdatalen);
-    addRR(section, rrDomain, rrType, rrClass, ttl, rd);
+    return addRR(section, rrDomain, rrType, rrClass, ttl, rd);
 }
 
-void DnsPacket::addRR(DnsPacket::RecordSection section, const std::string rrDomain,
+ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const std::string rrDomain,
         const std::string& rrType, const std::string& rrClass, const std::string& ttl, const std::string& rdata)
 {
     unsigned type = stringToQtype(rrType);
     unsigned klass = stringToQclass(rrClass);
     unsigned int_ttl = atoi(ttl.data());
 
-    addRR(section, rrDomain, type, klass, int_ttl, rdata);
+    return addRR(section, rrDomain, type, klass, int_ttl, rdata);
 }
 
-void DnsPacket::addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
+ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
         unsigned rrClass, unsigned ttl, const std::string& rdata)
 {
     std::vector<ResourceRecord> *rrPtr;
@@ -264,6 +267,7 @@ void DnsPacket::addRR(DnsPacket::RecordSection section, const std::string& rrDom
     _dnsHdr.nRecordAdd(section, 1);
     rrPtr->push_back(rr);
     isQuestion(false);
+    return rrPtr->front();
 }
 
 bool DnsPacket::isRecursive() const
@@ -281,7 +285,7 @@ uint16_t DnsPacket::nRecord(DnsPacket::RecordSection section) const
     return _dnsHdr.nRecord(section);
 }
 
-const DnsQuestion& DnsPacket::question() const
+DnsQuestion& DnsPacket::question()
 {
     return _question;
 }
@@ -354,4 +358,27 @@ void DnsPacket::nRecord(DnsPacket::RecordSection section, uint16_t value)
 void DnsPacket::isQuestion(bool isQuestion)
 {
     _dnsHdr.isQuestion(isQuestion);
+}
+
+void DnsPacket::fuzz()
+{
+    _dnsHdr.fuzz();
+    _question.fuzz();
+    for (vector<ResourceRecord>::iterator itr = _answers.begin(); itr != _answers.end();
+            ++itr) {
+        itr->fuzz();
+    }
+    for (vector<ResourceRecord>::iterator itr = _additionals.begin(); itr != _additionals.end();
+            ++itr) {
+        itr->fuzz();
+    }
+    for (vector<ResourceRecord>::iterator itr = _authorities.begin(); itr != _authorities.end();
+            ++itr) {
+        itr->fuzz();
+    }
+}
+
+DnsHeader& DnsPacket::dnsHdr()
+{
+    return _dnsHdr;
 }
