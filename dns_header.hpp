@@ -3,7 +3,6 @@
 
 #include <stdint.h>
 #include <string>
-#include <fuzzer.hpp>
 
 #pragma pack(1)
 typedef struct {

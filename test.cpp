@@ -193,6 +193,17 @@ int test_raw_packet()
     return 0;
 }
 
+int test_fuzzer()
+{
+    DnsPacket p;
+    p.addQuestion("www.test.com", "F", "1");
+    uint16_t txid1 = p.txid();
+    p.fuzz();
+    uint16_t txid2 = p.txid();
+    CHECK(txid1 != txid2);
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     cout << "Tests running";

@@ -29,8 +29,6 @@ public:
 
     std::string data() const;
 
-    ResourceRecord& operator=(const ResourceRecord& rr);
-
     uint16_t rrType() const;
     uint16_t rrClass() const;
     uint32_t ttl() const;
