@@ -29,6 +29,8 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
     _fuzzNRecord[1] = false;
     _fuzzNRecord[2] = false;
     _fuzzNRecord[3] = false;
+
+    srand(time(NULL));
 }
 
 string DnsHeader::data() const

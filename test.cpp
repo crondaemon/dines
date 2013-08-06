@@ -196,7 +196,9 @@ int test_raw_packet()
 int test_fuzzer()
 {
     DnsPacket p;
-    p.addQuestion("www.test.com", "F", "1");
+    p.addQuestion("www.test.com", "1", "1");
+    DnsHeader& h = p.dnsHdr();
+    h.fuzzTxid();
     uint16_t txid1 = p.txid();
     p.fuzz();
     uint16_t txid2 = p.txid();
@@ -214,5 +216,6 @@ int main(int argc, char* argv[])
     TEST(test_query());
     TEST(test_answer());
     TEST(test_raw_packet());
+    TEST(test_fuzzer());
     cout << "done" << endl;
 }

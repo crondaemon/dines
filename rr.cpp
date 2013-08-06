@@ -34,6 +34,7 @@ ResourceRecord::ResourceRecord(const string& rrDomain, uint16_t rrType,
     _fuzzRRtype = false;
     _fuzzRRclass = false;
     _fuzzTTL = false;
+    srand(time(NULL));
 }
 
 ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
@@ -43,32 +44,9 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
     uint16_t klass;
     unsigned int_ttl;
 
-    // type
-    if (rrType.at(0) == 'F') {
-        throw runtime_error("NOT IMPLEMENTED");
-        //fuzzer.addAddress(&this->rrType, 2);
-        type = 1;
-    } else {
-        type = stringToQtype(rrType);
-    }
-
-    // class
-    if (rrClass.at(0) == 'F') {
-        throw runtime_error("NOT IMPLEMENTED");
-        //fuzzer.addAddress(&this->rrClass, 2);
-        klass = 1;
-    } else {
-        klass = stringToQclass(rrClass);
-    }
-
-    // ttl
-    if (ttl.at(0) == 'F') {
-        throw runtime_error("NOT IMPLEMENTED");
-        //fuzzer.addAddress(&this->ttl, 4);
-        int_ttl = 1;
-    } else {
-        int_ttl = atoi(ttl.data());
-    }
+    type = stringToQtype(rrType);
+    klass = stringToQclass(rrClass);
+    int_ttl = atoi(ttl.data());
 
     *this = ResourceRecord(rrDomain, type, klass, int_ttl, rdata);
 }

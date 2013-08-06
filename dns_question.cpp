@@ -11,16 +11,6 @@
 
 using namespace std;
 
-DnsQuestion& DnsQuestion::operator=(const DnsQuestion& q)
-{
-    _qdomain_str = q._qdomain_str;
-    _qdomain_enc = q._qdomain_enc;
-    _qtype = q._qtype;
-    _qclass = q._qclass;
-
-    return *this;
-}
-
 DnsQuestion::DnsQuestion(const string qdomain, const string qtype, const string qclass)
 {
     unsigned myqtype;
@@ -46,6 +36,7 @@ DnsQuestion::DnsQuestion(const string qdomain, unsigned qtype, unsigned qclass)
 
     _fuzzQtype = false;
     _fuzzQclass = false;
+    srand(time(NULL));
 }
 
 string DnsQuestion::data() const
