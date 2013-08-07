@@ -125,3 +125,23 @@ void ResourceRecord::fuzzRRttl()
 {
     _fuzzTTL = true;
 }
+
+void ResourceRecord::rrType(string rrType)
+{
+    this->rrType(stringToQtype(rrType));
+}
+
+void ResourceRecord::rrType(unsigned rrType)
+{
+    _rrType = htons(rrType);
+}
+
+void ResourceRecord::rrClass(string rrClass)
+{
+    this->rrClass(stringToQclass(rrClass));
+}
+
+void ResourceRecord::rrClass(unsigned rrClass)
+{
+    _rrClass = rrClass;
+}

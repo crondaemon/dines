@@ -3,6 +3,7 @@
 #include <debug.hpp>
 #include <iostream>
 #include <string.h>
+#include <convert.hpp>
 //#include <stdio.h>
 
 using namespace std;
@@ -154,6 +155,26 @@ int test_answer()
     return 0;
 }
 
+int test_many_rr()
+{
+    DnsPacket p;
+    p.addQuestion("www.test.com", "A", "IN");
+    ResourceRecord rr("www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+    p.addRR(DnsPacket::R_ANSWER, rr);
+    rr.rrType("NS");
+    p.addRR(DnsPacket::R_ADDITIONAL, rr);
+    rr.rrType("MX");
+    p.addRR(DnsPacket::R_AUTHORITIES, rr);
+
+    CHECK(p.nRecord(DnsPacket::R_ADDITIONAL) == 1);
+    CHECK(p.addRR(DnsPacket::R_ADDITIONAL, rr).rrType() == stringToQtype("NS"));
+
+    CHECK(p.nRecord(DnsPacket::R_AUTHORITIES) == 1);
+    CHECK(p.addRR(DnsPacket::R_AUTHORITIES, rr).rrType() == stringToQtype("MX"));
+
+    return 0;
+}
+
 int test_raw_packet()
 {
     DnsPacket p1;
@@ -215,6 +236,7 @@ int main(int argc, char* argv[])
     TEST(test_rr());
     TEST(test_query());
     TEST(test_answer());
+    TEST(test_many_rr());
     TEST(test_raw_packet());
     TEST(test_fuzzer());
     cout << "done" << endl;

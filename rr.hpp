@@ -20,8 +20,10 @@ class ResourceRecord {
 public:
     ResourceRecord(const std::string& rrDomain, const std::string& rrType,
         const std::string& rrClass, const std::string& ttl, const std::string& rdata);
+
     ResourceRecord(const std::string& rrDomain = "", uint16_t rrType = 0,
         uint16_t rrClass = 0, uint32_t ttl = 0, const std::string& rdata = "");
+
     ResourceRecord(const std::string& rrDomain, uint16_t rrType,
         uint16_t rrClass, uint32_t ttl, const char* rdata, unsigned rdatalen);
 
@@ -30,8 +32,17 @@ public:
     std::string data() const;
 
     uint16_t rrType() const;
+    void rrType(std::string rrType);
+    void rrType(unsigned rrType);
+
     uint16_t rrClass() const;
+    void rrClass(std::string rrClass);
+    void rrClass(unsigned rrClass);
+
     uint32_t ttl() const;
+    void ttl(std::string ttl);
+    void ttl(unsigned ttl);
+
     std::string rData() const;
     unsigned rDataLen() const;
 

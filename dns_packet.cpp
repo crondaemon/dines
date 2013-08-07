@@ -247,27 +247,8 @@ ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const std::st
 ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
         unsigned rrClass, unsigned ttl, const std::string& rdata)
 {
-    std::vector<ResourceRecord> *rrPtr;
-
-    switch (section) {
-        case DnsPacket::R_ANSWER:
-            rrPtr = &_answers;
-            break;
-        case DnsPacket::R_AUTHORITIES:
-            rrPtr = &_authorities;
-            break;
-        case DnsPacket::R_ADDITIONAL:
-            rrPtr = &_additionals;
-            break;
-        default:
-            throw runtime_error("Unexpected section");
-    }
-
     ResourceRecord rr(rrDomain, rrType, rrClass, ttl, rdata);
-    _dnsHdr.nRecordAdd(section, 1);
-    rrPtr->push_back(rr);
-    isQuestion(false);
-    return rrPtr->front();
+    return addRR(section, rr);
 }
 
 bool DnsPacket::isRecursive() const
@@ -381,4 +362,28 @@ void DnsPacket::fuzz()
 DnsHeader& DnsPacket::dnsHdr()
 {
     return _dnsHdr;
+}
+
+ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const ResourceRecord& rr)
+{
+    std::vector<ResourceRecord> *rrPtr;
+
+    switch (section) {
+        case DnsPacket::R_ANSWER:
+            rrPtr = &_answers;
+            break;
+        case DnsPacket::R_AUTHORITIES:
+            rrPtr = &_authorities;
+            break;
+        case DnsPacket::R_ADDITIONAL:
+            rrPtr = &_additionals;
+            break;
+        default:
+            throw runtime_error("Unexpected section");
+    }
+
+    _dnsHdr.nRecordAdd(section, 1);
+    rrPtr->push_back(rr);
+    isQuestion(false);
+    return rrPtr->front();
 }

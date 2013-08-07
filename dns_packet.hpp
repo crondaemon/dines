@@ -116,10 +116,14 @@ public:
     //! Adds a RR
     ResourceRecord& addRR(DnsPacket::RecordSection section, const std::string rrDomain, const std::string& rrType,
         const std::string& rrClass, const std::string& ttl, const std::string& rdata);
+
     ResourceRecord& addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
         unsigned rrClass, unsigned ttl, const std::string& rdata);
+
     ResourceRecord& addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
         unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen);
+
+    ResourceRecord& addRR(DnsPacket::RecordSection section, const ResourceRecord& rr);
 
     void fuzz();
 };
