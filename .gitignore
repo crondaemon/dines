@@ -26,6 +26,9 @@ config.status
 *.d
 .deps
 
+# cc suite
+*.cs*
+
 # exe
 dines
 test_dines
