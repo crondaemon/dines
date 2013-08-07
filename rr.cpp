@@ -143,5 +143,5 @@ void ResourceRecord::rrClass(string rrClass)
 
 void ResourceRecord::rrClass(unsigned rrClass)
 {
-    _rrClass = rrClass;
+    _rrClass = htons(rrClass);
 }

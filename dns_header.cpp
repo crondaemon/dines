@@ -151,3 +151,28 @@ void DnsHeader::fuzzNRecord(unsigned section)
     _checkSection(section);
     _fuzzNRecord[section] = true;
 }
+
+DnsHeaderFlags DnsHeader::flags() const
+{
+    return _flags;
+}
+
+bool operator==(const DnsHeaderFlags& f1, const DnsHeaderFlags& f2)
+{
+    return
+        (f1.qr == f2.qr) &&
+        (f1.opcode == f2.opcode) &&
+        (f1.aa == f2.aa) &&
+        (f1.tc == f2.tc) &&
+        (f1.rd == f2.rd) &&
+        (f1.ra == f2.ra) &&
+        (f1.z == f2.z) &&
+        (f1.auth == f2.auth) &&
+        (f1.cd == f2.cd) &&
+        (f1.rcode == f2.rcode);
+}
+
+bool operator!=(const DnsHeaderFlags& f1, const DnsHeaderFlags& f2)
+{
+    return !(f1 == f2);
+}

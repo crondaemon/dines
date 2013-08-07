@@ -25,6 +25,7 @@ using namespace std;
     } catch(exception& e) { \
         invalid = true; \
     } \
+    cout << "." << flush; \
 }
 
 int test_ip()
@@ -123,6 +124,12 @@ int test_rr()
     CHECK(rr1.rrClass() == 1);
     CHECK(rr1.ttl() == 64);
     CHECK(rr1.rDataLen() == 4);
+
+    rr1.rrType("A");
+    CHECK(rr1.rrType() == 1);
+
+    rr1.rrClass("CHAOS");
+    CHECK(rr1.rrClass() == 3);
 
     ResourceRecord rr2("www.test.com", 1, 1, 64, "\x00\x00\x01\x00", 4);
     CHECK(rr2.rDataLen() == 4);
@@ -225,7 +232,88 @@ int test_raw_packet()
     return 0;
 }
 
-int test_fuzzer()
+int test_fuzz_header()
+{
+    DnsHeader h;
+
+    h.txid(1);
+    h.fuzz();
+    CHECK(h.txid() == 1);
+
+    h.fuzzFlags();
+
+    DnsHeaderFlags flags = h.flags();
+    h.fuzz();
+    CHECK(flags != h.flags());
+
+    uint16_t nrecord;
+
+    h.fuzzNRecord(0);
+    h.fuzzNRecord(1);
+    h.fuzzNRecord(2);
+    h.fuzzNRecord(3);
+
+    nrecord = h.nRecord(0);
+    h.fuzz();
+    CHECK(nrecord != h.nRecord(0));
+    nrecord = h.nRecord(1);
+    h.fuzz();
+    CHECK(nrecord != h.nRecord(1));
+    nrecord = h.nRecord(2);
+    h.fuzz();
+    CHECK(nrecord != h.nRecord(2));
+
+    return 0;
+}
+
+int test_fuzz_question()
+{
+    DnsQuestion q("www.test.com", "A", "IN");
+    q.fuzzQtype();
+    q.fuzzQclass();
+
+    uint16_t x;
+
+    x = q.qtype();
+    q.fuzz();
+    CHECK(x != q.qtype());
+
+    x = q.qclass();
+    q.fuzz();
+    CHECK(x != q.qclass());
+
+    return 0;
+}
+
+int test_fuzz_rr()
+{
+    ResourceRecord rr("www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+
+    rr.fuzz();
+    CHECK(rr.rrType() == stringToQtype("A"));
+
+    rr.fuzzRRtype();
+    rr.fuzzRRclass();
+    rr.fuzzRRttl();
+
+    uint16_t x;
+
+    x = rr.rrType();
+    rr.fuzz();
+    CHECK(x != rr.rrType());
+
+    x = rr.rrClass();
+    rr.fuzz();
+    CHECK(x != rr.rrClass());
+
+    x = rr.ttl();
+    rr.fuzz();
+    CHECK(x != rr.ttl());
+
+    return 0;
+}
+
+int test_fuzz_packet()
 {
     DnsPacket p;
     p.addQuestion("www.test.com", "1", "1");
@@ -267,15 +355,22 @@ int test_conversion()
     CHECK(stringToQtype("F") == 1);
     CHECK(stringToQtype("20") == 20);
     CATCH_EXCEPTION(stringToQtype("TEST"));
+    CATCH_EXCEPTION(stringToQtype("70000"));
 
     CHECK(stringToQclass("IN") == 1);
     CHECK(stringToQclass("CSNET") == 2);
+    CHECK(stringToQclass("2") == 2);
     CHECK(stringToQclass("CHAOS") == 3);
+    CHECK(stringToQclass("3") == 3);
     CHECK(stringToQclass("HESIOD") == 4);
+    CHECK(stringToQclass("4") == 4);
     CHECK(stringToQclass("NONE") == 254);
+    CHECK(stringToQclass("254") == 254);
     CHECK(stringToQclass("ALL") == 255);
     CHECK(stringToQclass("ANY") == 255);
+    CHECK(stringToQclass("255") == 255);
     CHECK(stringToQclass("4") == 4);
+    CHECK(stringToQclass("F") == 1);
     CATCH_EXCEPTION(stringToQclass("50"));
 
     return 0;
@@ -292,7 +387,10 @@ int main(int argc, char* argv[])
     TEST(test_answer());
     TEST(test_many_rr());
     TEST(test_raw_packet());
-    TEST(test_fuzzer());
+    TEST(test_fuzz_header());
+    TEST(test_fuzz_question());
+    TEST(test_fuzz_rr());
+    TEST(test_fuzz_packet());
     TEST(test_invalid_section());
     TEST(test_conversion());
     cout << "done" << endl;

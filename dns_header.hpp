@@ -31,6 +31,9 @@ typedef struct {
 #endif
 } DnsHeaderFlags;
 
+bool operator==(const DnsHeaderFlags& f1, const DnsHeaderFlags& f2);
+bool operator!=(const DnsHeaderFlags& f1, const DnsHeaderFlags& f2);
+
 class DnsHeader {
     DnsHeaderFlags _flags;
     uint16_t _nRecord[4];
@@ -53,6 +56,8 @@ public:
     uint16_t txid() const;
 
     void txid(uint16_t txid);
+
+    DnsHeaderFlags flags() const;
 
     std::string data() const;
 
