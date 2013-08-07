@@ -18,6 +18,15 @@ using namespace std;
     cout << "." << flush; \
 }
 
+#define CATCH_EXCEPTION(statement) { \
+    invalid = false; \
+    try { \
+        statement; \
+    } catch(exception& e) { \
+        invalid = true; \
+    } \
+}
+
 int test_ip()
 {
     DnsPacket p;
@@ -168,9 +177,11 @@ int test_many_rr()
 
     CHECK(p.nRecord(DnsPacket::R_ADDITIONAL) == 1);
     CHECK(p.addRR(DnsPacket::R_ADDITIONAL, rr).rrType() == stringToQtype("NS"));
+    CHECK(p.additionals(0).rrType() == stringToQtype("NS"));
 
     CHECK(p.nRecord(DnsPacket::R_AUTHORITIES) == 1);
     CHECK(p.addRR(DnsPacket::R_AUTHORITIES, rr).rrType() == stringToQtype("MX"));
+    CHECK(p.authorities(0).rrType() == stringToQtype("MX"));
 
     return 0;
 }
@@ -227,6 +238,49 @@ int test_fuzzer()
     return 0;
 }
 
+int test_invalid_section()
+{
+    DnsHeader h;
+    DnsPacket p;
+    bool invalid;
+
+    CATCH_EXCEPTION(h.nRecord(7, 1));
+//    CATCH_EXCEPTION(p.addRR(1, ResourceRecord("www.test.com", "A", "IN", "64", "abcd")));
+
+    CHECK(invalid == true);
+    return 0;
+}
+
+int test_conversion()
+{
+    bool invalid;
+
+    CHECK(stringToQtype("A") == 1);
+    CHECK(stringToQtype("NS") == 2);
+    CHECK(stringToQtype("CNAME") == 5);
+    CHECK(stringToQtype("PTR") == 12);
+    CHECK(stringToQtype("HINFO") == 13);
+    CHECK(stringToQtype("MX") == 15);
+    CHECK(stringToQtype("TXT") == 16);
+    CHECK(stringToQtype("AXFR") == 252);
+    CHECK(stringToQtype("ANY") == 255);
+    CHECK(stringToQtype("F") == 1);
+    CHECK(stringToQtype("20") == 20);
+    CATCH_EXCEPTION(stringToQtype("TEST"));
+
+    CHECK(stringToQclass("IN") == 1);
+    CHECK(stringToQclass("CSNET") == 2);
+    CHECK(stringToQclass("CHAOS") == 3);
+    CHECK(stringToQclass("HESIOD") == 4);
+    CHECK(stringToQclass("NONE") == 254);
+    CHECK(stringToQclass("ALL") == 255);
+    CHECK(stringToQclass("ANY") == 255);
+    CHECK(stringToQclass("4") == 4);
+    CATCH_EXCEPTION(stringToQclass("50"));
+
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     cout << "Tests running";
@@ -239,5 +293,7 @@ int main(int argc, char* argv[])
     TEST(test_many_rr());
     TEST(test_raw_packet());
     TEST(test_fuzzer());
+    TEST(test_invalid_section());
+    TEST(test_conversion());
     cout << "done" << endl;
 }
