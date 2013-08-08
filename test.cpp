@@ -376,8 +376,18 @@ int test_conversion()
     return 0;
 }
 
+void mylogfunc(string s)
+{
+    cout << s << endl;
+//    printf("pippo\n");
+}
+
+void (*DnsHeader::logFunc)(string s) = mylogfunc;
+
 int main(int argc, char* argv[])
 {
+//    DnsHeader::logFunc = mylogfunc;
+//    DnsHeader::logFunc("ciao");
     cout << "Tests running";
     TEST(test_ip());
     TEST(test_header());
