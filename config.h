@@ -8,7 +8,7 @@
 #define PACKAGE_NAME "Dines"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "Dines 0.3"
+#define PACKAGE_STRING "Dines 0.4"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "dines"
@@ -17,4 +17,4 @@
 #define PACKAGE_URL "http://github.com/crondaemon/dines"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "0.3"
+#define PACKAGE_VERSION "0.4"
