@@ -37,11 +37,19 @@ DnsPacket::DnsPacket()
     _udpHdr.dest = 0;
     _udpHdr.len = sizeof(_udpHdr);
     _udpHdr.check = 0;
+
+    _socket = -1;
+    _recvSocket = -1;
 }
 
 void DnsPacket::_socketCreate()
 {
     int on = 1;
+    struct sockaddr_in servaddr;
+
+    if (_socket > 0 && _recvSocket > 0) {
+        return;
+    }
 
     _socket = socket(PF_INET, SOCK_RAW, IPPROTO_UDP);
 
@@ -50,6 +58,19 @@ void DnsPacket::_socketCreate()
 
     if (setsockopt(_socket, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
         throw runtime_error(string(__func__) + ": unable to set option _IPHDRINCL");
+
+    _recvSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (_recvSocket == -1)
+        throw runtime_error("Can't create listening socket");
+
+
+    memset(&servaddr, 0, sizeof(servaddr));
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    servaddr.sin_port = _udpHdr.source;
+
+    if (bind(_recvSocket, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0 )
+        throw runtime_error("Can't bind() listening socket");
 }
 
 string DnsPacket::data() const
@@ -158,13 +179,16 @@ void DnsPacket::sendNet(bool doCksum)
     output += dns_dgram;
 
     if (send(_socket, output.data(), output.length(), 0) < 0) {
+//    if (sendto(_socket, output.data(), output.length(), 0, (struct sockaddr*)&sin,
+//            sizeof(sin)) < 0) {
         if (errno == 22) {
             cout << "Invalid parameter (probably fuzzer is shaking it).\n";
         } else {
-            throw runtime_error("sendto() error: " + string(strerror(errno)));
+            throw runtime_error("send() error: " + string(strerror(errno)));
         }
     }
 }
+
 
 string DnsPacket::ipFrom() const
 {

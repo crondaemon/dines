@@ -15,6 +15,7 @@
 
 class DnsPacket {
     int _socket;
+    int _recvSocket;
 
     //! Creates the socket
     void _socketCreate();
