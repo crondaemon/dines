@@ -50,16 +50,25 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_dines_OBJECTS = dns_header.$(OBJEXT) dns_packet.$(OBJEXT) \
-	dns_question.$(OBJEXT) in_cksum.$(OBJEXT) main.$(OBJEXT) \
-	rr.$(OBJEXT) tokenizer.$(OBJEXT) convert.$(OBJEXT)
+am_dines_OBJECTS = dines-dns_header.$(OBJEXT) \
+	dines-dns_packet.$(OBJEXT) dines-dns_question.$(OBJEXT) \
+	dines-in_cksum.$(OBJEXT) dines-main.$(OBJEXT) \
+	dines-rr.$(OBJEXT) dines-tokenizer.$(OBJEXT) \
+	dines-convert.$(OBJEXT)
 dines_OBJECTS = $(am_dines_OBJECTS)
 dines_LDADD = $(LDADD)
-am_test_dines_OBJECTS = dns_header.$(OBJEXT) dns_packet.$(OBJEXT) \
-	dns_question.$(OBJEXT) in_cksum.$(OBJEXT) test.$(OBJEXT) \
-	rr.$(OBJEXT) tokenizer.$(OBJEXT) convert.$(OBJEXT)
+dines_LINK = $(CXXLD) $(dines_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
+am_test_dines_OBJECTS = test_dines-dns_header.$(OBJEXT) \
+	test_dines-dns_packet.$(OBJEXT) \
+	test_dines-dns_question.$(OBJEXT) \
+	test_dines-in_cksum.$(OBJEXT) test_dines-test.$(OBJEXT) \
+	test_dines-rr.$(OBJEXT) test_dines-tokenizer.$(OBJEXT) \
+	test_dines-convert.$(OBJEXT)
 test_dines_OBJECTS = $(am_test_dines_OBJECTS)
 test_dines_LDADD = $(LDADD)
+test_dines_LINK = $(CXXLD) $(test_dines_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -176,7 +185,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 dines_SOURCES = debug.hpp dns_header.hpp dns_packet.hpp dns_question.hpp in_cksum.hpp rr.hpp tokenizer.hpp version.hpp dns_header.cpp dns_packet.cpp dns_question.cpp in_cksum.cpp main.cpp rr.cpp tokenizer.cpp convert.cpp
+dines_CXXFLAGS = -Wall
 test_dines_SOURCES = debug.hpp dns_header.hpp dns_packet.hpp dns_question.hpp in_cksum.hpp rr.hpp tokenizer.hpp version.hpp dns_header.cpp dns_packet.cpp dns_question.cpp in_cksum.cpp test.cpp rr.cpp tokenizer.cpp convert.cpp convert.hpp
+test_dines_CXXFLAGS = -Wall
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -270,10 +281,10 @@ clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 dines$(EXEEXT): $(dines_OBJECTS) $(dines_DEPENDENCIES) $(EXTRA_dines_DEPENDENCIES) 
 	@rm -f dines$(EXEEXT)
-	$(CXXLINK) $(dines_OBJECTS) $(dines_LDADD) $(LIBS)
+	$(dines_LINK) $(dines_OBJECTS) $(dines_LDADD) $(LIBS)
 test_dines$(EXEEXT): $(test_dines_OBJECTS) $(test_dines_DEPENDENCIES) $(EXTRA_test_dines_DEPENDENCIES) 
 	@rm -f test_dines$(EXEEXT)
-	$(CXXLINK) $(test_dines_OBJECTS) $(test_dines_LDADD) $(LIBS)
+	$(test_dines_LINK) $(test_dines_OBJECTS) $(test_dines_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -281,15 +292,22 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/convert.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dns_header.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dns_packet.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dns_question.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/in_cksum.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rr.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tokenizer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dines-convert.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dines-dns_header.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dines-dns_packet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dines-dns_question.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dines-in_cksum.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dines-main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dines-rr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dines-tokenizer.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dines-convert.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dines-dns_header.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dines-dns_packet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dines-dns_question.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dines-in_cksum.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dines-rr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dines-test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_dines-tokenizer.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -304,6 +322,230 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+dines-dns_header.o: dns_header.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-dns_header.o -MD -MP -MF $(DEPDIR)/dines-dns_header.Tpo -c -o dines-dns_header.o `test -f 'dns_header.cpp' || echo '$(srcdir)/'`dns_header.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-dns_header.Tpo $(DEPDIR)/dines-dns_header.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dns_header.cpp' object='dines-dns_header.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-dns_header.o `test -f 'dns_header.cpp' || echo '$(srcdir)/'`dns_header.cpp
+
+dines-dns_header.obj: dns_header.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-dns_header.obj -MD -MP -MF $(DEPDIR)/dines-dns_header.Tpo -c -o dines-dns_header.obj `if test -f 'dns_header.cpp'; then $(CYGPATH_W) 'dns_header.cpp'; else $(CYGPATH_W) '$(srcdir)/dns_header.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-dns_header.Tpo $(DEPDIR)/dines-dns_header.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dns_header.cpp' object='dines-dns_header.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-dns_header.obj `if test -f 'dns_header.cpp'; then $(CYGPATH_W) 'dns_header.cpp'; else $(CYGPATH_W) '$(srcdir)/dns_header.cpp'; fi`
+
+dines-dns_packet.o: dns_packet.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-dns_packet.o -MD -MP -MF $(DEPDIR)/dines-dns_packet.Tpo -c -o dines-dns_packet.o `test -f 'dns_packet.cpp' || echo '$(srcdir)/'`dns_packet.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-dns_packet.Tpo $(DEPDIR)/dines-dns_packet.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dns_packet.cpp' object='dines-dns_packet.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-dns_packet.o `test -f 'dns_packet.cpp' || echo '$(srcdir)/'`dns_packet.cpp
+
+dines-dns_packet.obj: dns_packet.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-dns_packet.obj -MD -MP -MF $(DEPDIR)/dines-dns_packet.Tpo -c -o dines-dns_packet.obj `if test -f 'dns_packet.cpp'; then $(CYGPATH_W) 'dns_packet.cpp'; else $(CYGPATH_W) '$(srcdir)/dns_packet.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-dns_packet.Tpo $(DEPDIR)/dines-dns_packet.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dns_packet.cpp' object='dines-dns_packet.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-dns_packet.obj `if test -f 'dns_packet.cpp'; then $(CYGPATH_W) 'dns_packet.cpp'; else $(CYGPATH_W) '$(srcdir)/dns_packet.cpp'; fi`
+
+dines-dns_question.o: dns_question.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-dns_question.o -MD -MP -MF $(DEPDIR)/dines-dns_question.Tpo -c -o dines-dns_question.o `test -f 'dns_question.cpp' || echo '$(srcdir)/'`dns_question.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-dns_question.Tpo $(DEPDIR)/dines-dns_question.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dns_question.cpp' object='dines-dns_question.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-dns_question.o `test -f 'dns_question.cpp' || echo '$(srcdir)/'`dns_question.cpp
+
+dines-dns_question.obj: dns_question.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-dns_question.obj -MD -MP -MF $(DEPDIR)/dines-dns_question.Tpo -c -o dines-dns_question.obj `if test -f 'dns_question.cpp'; then $(CYGPATH_W) 'dns_question.cpp'; else $(CYGPATH_W) '$(srcdir)/dns_question.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-dns_question.Tpo $(DEPDIR)/dines-dns_question.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dns_question.cpp' object='dines-dns_question.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-dns_question.obj `if test -f 'dns_question.cpp'; then $(CYGPATH_W) 'dns_question.cpp'; else $(CYGPATH_W) '$(srcdir)/dns_question.cpp'; fi`
+
+dines-in_cksum.o: in_cksum.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-in_cksum.o -MD -MP -MF $(DEPDIR)/dines-in_cksum.Tpo -c -o dines-in_cksum.o `test -f 'in_cksum.cpp' || echo '$(srcdir)/'`in_cksum.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-in_cksum.Tpo $(DEPDIR)/dines-in_cksum.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='in_cksum.cpp' object='dines-in_cksum.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-in_cksum.o `test -f 'in_cksum.cpp' || echo '$(srcdir)/'`in_cksum.cpp
+
+dines-in_cksum.obj: in_cksum.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-in_cksum.obj -MD -MP -MF $(DEPDIR)/dines-in_cksum.Tpo -c -o dines-in_cksum.obj `if test -f 'in_cksum.cpp'; then $(CYGPATH_W) 'in_cksum.cpp'; else $(CYGPATH_W) '$(srcdir)/in_cksum.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-in_cksum.Tpo $(DEPDIR)/dines-in_cksum.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='in_cksum.cpp' object='dines-in_cksum.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-in_cksum.obj `if test -f 'in_cksum.cpp'; then $(CYGPATH_W) 'in_cksum.cpp'; else $(CYGPATH_W) '$(srcdir)/in_cksum.cpp'; fi`
+
+dines-main.o: main.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-main.o -MD -MP -MF $(DEPDIR)/dines-main.Tpo -c -o dines-main.o `test -f 'main.cpp' || echo '$(srcdir)/'`main.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-main.Tpo $(DEPDIR)/dines-main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main.cpp' object='dines-main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-main.o `test -f 'main.cpp' || echo '$(srcdir)/'`main.cpp
+
+dines-main.obj: main.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-main.obj -MD -MP -MF $(DEPDIR)/dines-main.Tpo -c -o dines-main.obj `if test -f 'main.cpp'; then $(CYGPATH_W) 'main.cpp'; else $(CYGPATH_W) '$(srcdir)/main.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-main.Tpo $(DEPDIR)/dines-main.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main.cpp' object='dines-main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-main.obj `if test -f 'main.cpp'; then $(CYGPATH_W) 'main.cpp'; else $(CYGPATH_W) '$(srcdir)/main.cpp'; fi`
+
+dines-rr.o: rr.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-rr.o -MD -MP -MF $(DEPDIR)/dines-rr.Tpo -c -o dines-rr.o `test -f 'rr.cpp' || echo '$(srcdir)/'`rr.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-rr.Tpo $(DEPDIR)/dines-rr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='rr.cpp' object='dines-rr.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-rr.o `test -f 'rr.cpp' || echo '$(srcdir)/'`rr.cpp
+
+dines-rr.obj: rr.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-rr.obj -MD -MP -MF $(DEPDIR)/dines-rr.Tpo -c -o dines-rr.obj `if test -f 'rr.cpp'; then $(CYGPATH_W) 'rr.cpp'; else $(CYGPATH_W) '$(srcdir)/rr.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-rr.Tpo $(DEPDIR)/dines-rr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='rr.cpp' object='dines-rr.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-rr.obj `if test -f 'rr.cpp'; then $(CYGPATH_W) 'rr.cpp'; else $(CYGPATH_W) '$(srcdir)/rr.cpp'; fi`
+
+dines-tokenizer.o: tokenizer.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-tokenizer.o -MD -MP -MF $(DEPDIR)/dines-tokenizer.Tpo -c -o dines-tokenizer.o `test -f 'tokenizer.cpp' || echo '$(srcdir)/'`tokenizer.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-tokenizer.Tpo $(DEPDIR)/dines-tokenizer.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tokenizer.cpp' object='dines-tokenizer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-tokenizer.o `test -f 'tokenizer.cpp' || echo '$(srcdir)/'`tokenizer.cpp
+
+dines-tokenizer.obj: tokenizer.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-tokenizer.obj -MD -MP -MF $(DEPDIR)/dines-tokenizer.Tpo -c -o dines-tokenizer.obj `if test -f 'tokenizer.cpp'; then $(CYGPATH_W) 'tokenizer.cpp'; else $(CYGPATH_W) '$(srcdir)/tokenizer.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-tokenizer.Tpo $(DEPDIR)/dines-tokenizer.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tokenizer.cpp' object='dines-tokenizer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-tokenizer.obj `if test -f 'tokenizer.cpp'; then $(CYGPATH_W) 'tokenizer.cpp'; else $(CYGPATH_W) '$(srcdir)/tokenizer.cpp'; fi`
+
+dines-convert.o: convert.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-convert.o -MD -MP -MF $(DEPDIR)/dines-convert.Tpo -c -o dines-convert.o `test -f 'convert.cpp' || echo '$(srcdir)/'`convert.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-convert.Tpo $(DEPDIR)/dines-convert.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='convert.cpp' object='dines-convert.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-convert.o `test -f 'convert.cpp' || echo '$(srcdir)/'`convert.cpp
+
+dines-convert.obj: convert.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -MT dines-convert.obj -MD -MP -MF $(DEPDIR)/dines-convert.Tpo -c -o dines-convert.obj `if test -f 'convert.cpp'; then $(CYGPATH_W) 'convert.cpp'; else $(CYGPATH_W) '$(srcdir)/convert.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/dines-convert.Tpo $(DEPDIR)/dines-convert.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='convert.cpp' object='dines-convert.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(dines_CXXFLAGS) $(CXXFLAGS) -c -o dines-convert.obj `if test -f 'convert.cpp'; then $(CYGPATH_W) 'convert.cpp'; else $(CYGPATH_W) '$(srcdir)/convert.cpp'; fi`
+
+test_dines-dns_header.o: dns_header.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-dns_header.o -MD -MP -MF $(DEPDIR)/test_dines-dns_header.Tpo -c -o test_dines-dns_header.o `test -f 'dns_header.cpp' || echo '$(srcdir)/'`dns_header.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-dns_header.Tpo $(DEPDIR)/test_dines-dns_header.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dns_header.cpp' object='test_dines-dns_header.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-dns_header.o `test -f 'dns_header.cpp' || echo '$(srcdir)/'`dns_header.cpp
+
+test_dines-dns_header.obj: dns_header.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-dns_header.obj -MD -MP -MF $(DEPDIR)/test_dines-dns_header.Tpo -c -o test_dines-dns_header.obj `if test -f 'dns_header.cpp'; then $(CYGPATH_W) 'dns_header.cpp'; else $(CYGPATH_W) '$(srcdir)/dns_header.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-dns_header.Tpo $(DEPDIR)/test_dines-dns_header.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dns_header.cpp' object='test_dines-dns_header.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-dns_header.obj `if test -f 'dns_header.cpp'; then $(CYGPATH_W) 'dns_header.cpp'; else $(CYGPATH_W) '$(srcdir)/dns_header.cpp'; fi`
+
+test_dines-dns_packet.o: dns_packet.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-dns_packet.o -MD -MP -MF $(DEPDIR)/test_dines-dns_packet.Tpo -c -o test_dines-dns_packet.o `test -f 'dns_packet.cpp' || echo '$(srcdir)/'`dns_packet.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-dns_packet.Tpo $(DEPDIR)/test_dines-dns_packet.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dns_packet.cpp' object='test_dines-dns_packet.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-dns_packet.o `test -f 'dns_packet.cpp' || echo '$(srcdir)/'`dns_packet.cpp
+
+test_dines-dns_packet.obj: dns_packet.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-dns_packet.obj -MD -MP -MF $(DEPDIR)/test_dines-dns_packet.Tpo -c -o test_dines-dns_packet.obj `if test -f 'dns_packet.cpp'; then $(CYGPATH_W) 'dns_packet.cpp'; else $(CYGPATH_W) '$(srcdir)/dns_packet.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-dns_packet.Tpo $(DEPDIR)/test_dines-dns_packet.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dns_packet.cpp' object='test_dines-dns_packet.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-dns_packet.obj `if test -f 'dns_packet.cpp'; then $(CYGPATH_W) 'dns_packet.cpp'; else $(CYGPATH_W) '$(srcdir)/dns_packet.cpp'; fi`
+
+test_dines-dns_question.o: dns_question.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-dns_question.o -MD -MP -MF $(DEPDIR)/test_dines-dns_question.Tpo -c -o test_dines-dns_question.o `test -f 'dns_question.cpp' || echo '$(srcdir)/'`dns_question.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-dns_question.Tpo $(DEPDIR)/test_dines-dns_question.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dns_question.cpp' object='test_dines-dns_question.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-dns_question.o `test -f 'dns_question.cpp' || echo '$(srcdir)/'`dns_question.cpp
+
+test_dines-dns_question.obj: dns_question.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-dns_question.obj -MD -MP -MF $(DEPDIR)/test_dines-dns_question.Tpo -c -o test_dines-dns_question.obj `if test -f 'dns_question.cpp'; then $(CYGPATH_W) 'dns_question.cpp'; else $(CYGPATH_W) '$(srcdir)/dns_question.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-dns_question.Tpo $(DEPDIR)/test_dines-dns_question.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='dns_question.cpp' object='test_dines-dns_question.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-dns_question.obj `if test -f 'dns_question.cpp'; then $(CYGPATH_W) 'dns_question.cpp'; else $(CYGPATH_W) '$(srcdir)/dns_question.cpp'; fi`
+
+test_dines-in_cksum.o: in_cksum.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-in_cksum.o -MD -MP -MF $(DEPDIR)/test_dines-in_cksum.Tpo -c -o test_dines-in_cksum.o `test -f 'in_cksum.cpp' || echo '$(srcdir)/'`in_cksum.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-in_cksum.Tpo $(DEPDIR)/test_dines-in_cksum.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='in_cksum.cpp' object='test_dines-in_cksum.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-in_cksum.o `test -f 'in_cksum.cpp' || echo '$(srcdir)/'`in_cksum.cpp
+
+test_dines-in_cksum.obj: in_cksum.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-in_cksum.obj -MD -MP -MF $(DEPDIR)/test_dines-in_cksum.Tpo -c -o test_dines-in_cksum.obj `if test -f 'in_cksum.cpp'; then $(CYGPATH_W) 'in_cksum.cpp'; else $(CYGPATH_W) '$(srcdir)/in_cksum.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-in_cksum.Tpo $(DEPDIR)/test_dines-in_cksum.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='in_cksum.cpp' object='test_dines-in_cksum.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-in_cksum.obj `if test -f 'in_cksum.cpp'; then $(CYGPATH_W) 'in_cksum.cpp'; else $(CYGPATH_W) '$(srcdir)/in_cksum.cpp'; fi`
+
+test_dines-test.o: test.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-test.o -MD -MP -MF $(DEPDIR)/test_dines-test.Tpo -c -o test_dines-test.o `test -f 'test.cpp' || echo '$(srcdir)/'`test.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-test.Tpo $(DEPDIR)/test_dines-test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test.cpp' object='test_dines-test.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-test.o `test -f 'test.cpp' || echo '$(srcdir)/'`test.cpp
+
+test_dines-test.obj: test.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-test.obj -MD -MP -MF $(DEPDIR)/test_dines-test.Tpo -c -o test_dines-test.obj `if test -f 'test.cpp'; then $(CYGPATH_W) 'test.cpp'; else $(CYGPATH_W) '$(srcdir)/test.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-test.Tpo $(DEPDIR)/test_dines-test.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='test.cpp' object='test_dines-test.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-test.obj `if test -f 'test.cpp'; then $(CYGPATH_W) 'test.cpp'; else $(CYGPATH_W) '$(srcdir)/test.cpp'; fi`
+
+test_dines-rr.o: rr.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-rr.o -MD -MP -MF $(DEPDIR)/test_dines-rr.Tpo -c -o test_dines-rr.o `test -f 'rr.cpp' || echo '$(srcdir)/'`rr.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-rr.Tpo $(DEPDIR)/test_dines-rr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='rr.cpp' object='test_dines-rr.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-rr.o `test -f 'rr.cpp' || echo '$(srcdir)/'`rr.cpp
+
+test_dines-rr.obj: rr.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-rr.obj -MD -MP -MF $(DEPDIR)/test_dines-rr.Tpo -c -o test_dines-rr.obj `if test -f 'rr.cpp'; then $(CYGPATH_W) 'rr.cpp'; else $(CYGPATH_W) '$(srcdir)/rr.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-rr.Tpo $(DEPDIR)/test_dines-rr.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='rr.cpp' object='test_dines-rr.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-rr.obj `if test -f 'rr.cpp'; then $(CYGPATH_W) 'rr.cpp'; else $(CYGPATH_W) '$(srcdir)/rr.cpp'; fi`
+
+test_dines-tokenizer.o: tokenizer.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-tokenizer.o -MD -MP -MF $(DEPDIR)/test_dines-tokenizer.Tpo -c -o test_dines-tokenizer.o `test -f 'tokenizer.cpp' || echo '$(srcdir)/'`tokenizer.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-tokenizer.Tpo $(DEPDIR)/test_dines-tokenizer.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tokenizer.cpp' object='test_dines-tokenizer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-tokenizer.o `test -f 'tokenizer.cpp' || echo '$(srcdir)/'`tokenizer.cpp
+
+test_dines-tokenizer.obj: tokenizer.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-tokenizer.obj -MD -MP -MF $(DEPDIR)/test_dines-tokenizer.Tpo -c -o test_dines-tokenizer.obj `if test -f 'tokenizer.cpp'; then $(CYGPATH_W) 'tokenizer.cpp'; else $(CYGPATH_W) '$(srcdir)/tokenizer.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-tokenizer.Tpo $(DEPDIR)/test_dines-tokenizer.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='tokenizer.cpp' object='test_dines-tokenizer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-tokenizer.obj `if test -f 'tokenizer.cpp'; then $(CYGPATH_W) 'tokenizer.cpp'; else $(CYGPATH_W) '$(srcdir)/tokenizer.cpp'; fi`
+
+test_dines-convert.o: convert.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-convert.o -MD -MP -MF $(DEPDIR)/test_dines-convert.Tpo -c -o test_dines-convert.o `test -f 'convert.cpp' || echo '$(srcdir)/'`convert.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-convert.Tpo $(DEPDIR)/test_dines-convert.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='convert.cpp' object='test_dines-convert.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-convert.o `test -f 'convert.cpp' || echo '$(srcdir)/'`convert.cpp
+
+test_dines-convert.obj: convert.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -MT test_dines-convert.obj -MD -MP -MF $(DEPDIR)/test_dines-convert.Tpo -c -o test_dines-convert.obj `if test -f 'convert.cpp'; then $(CYGPATH_W) 'convert.cpp'; else $(CYGPATH_W) '$(srcdir)/convert.cpp'; fi`
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/test_dines-convert.Tpo $(DEPDIR)/test_dines-convert.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='convert.cpp' object='test_dines-convert.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(test_dines_CXXFLAGS) $(CXXFLAGS) -c -o test_dines-convert.obj `if test -f 'convert.cpp'; then $(CYGPATH_W) 'convert.cpp'; else $(CYGPATH_W) '$(srcdir)/convert.cpp'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
