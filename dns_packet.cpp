@@ -14,7 +14,6 @@
 #include <errno.h>
 #include <cstring>
 #include <stdexcept>
-#include <sstream>
 #include <iostream>
 #include <stdlib.h>
 
@@ -46,16 +45,11 @@ void DnsPacket::_socketCreate()
 
     _socket = socket(PF_INET, SOCK_RAW, IPPROTO_UDP);
 
-    if (_socket == -1) {
-        stringstream ss;
-        ss << __func__;
-        ss << ": socket creation error: ";
-        ss << strerror(errno);
-        throw runtime_error(ss.str());
-    }
+    if (_socket == -1)
+        throw runtime_error(string(__func__) + ": socket creation error: " + string(strerror(errno)));
 
     if (setsockopt(_socket, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
-        throw runtime_error(string(__func__) + ": unable to set option _ipHdrINCL");
+        throw runtime_error(string(__func__) + ": unable to set option _IPHDRINCL");
 }
 
 string DnsPacket::data() const
@@ -111,7 +105,7 @@ void DnsPacket::doUdpCksum()
     delete temp;
 }
 
-void DnsPacket::sendNet()
+void DnsPacket::sendNet(bool doCksum)
 {
     _socketCreate();
 
@@ -137,21 +131,14 @@ void DnsPacket::sendNet()
     sin.sin_port = _udpHdr.dest;
     sin.sin_addr.s_addr = _ipHdr.daddr;
 
-    if (connect(_socket, (struct sockaddr*)&sin, sizeof(sin)) < 0) {
-        stringstream ss;
-        ss << __func__;
-        ss << "::connect() (";
-        ss << strerror(errno);
-        ss << ")";
-        throw runtime_error(ss.str());
-    }
+    if (connect(_socket, (struct sockaddr*)&sin, sizeof(sin)) < 0)
+        throw runtime_error(string(__func__) + "::connect() (" + string(strerror(errno)) + ")");
 
     if (_ipHdr.saddr == 0) {
         struct sockaddr_in sa;
         unsigned sa_len = sizeof(sa);
         getsockname(_socket, (struct sockaddr*)&sa, &sa_len);
-        //printf("LOCAL IS %s\n", inet_ntop(AF_INET, &sa.sin_addr.s_addr, (char*)malloc(100), 100));
-        this->_ipHdr.saddr = sa.sin_addr.s_addr;
+        _ipHdr.saddr = sa.sin_addr.s_addr;
     }
 
     // Create output to send
@@ -163,7 +150,8 @@ void DnsPacket::sendNet()
     _ipHdr.tot_len = htons(sizeof(_ipHdr) + sizeof(_udpHdr) + dns_dgram.length());
 
     // Calculate udp checksum
-    doUdpCksum();
+    if (doCksum)
+        doUdpCksum();
 
     output += string((char*)&_ipHdr, sizeof(_ipHdr));
     output += string((char*)&_udpHdr, sizeof(_udpHdr));
@@ -173,10 +161,7 @@ void DnsPacket::sendNet()
         if (errno == 22) {
             cout << "Invalid parameter (probably fuzzer is shaking it).\n";
         } else {
-            stringstream ss;
-            ss << "sendto() error: ";
-            ss << strerror(errno);
-            throw runtime_error(ss.str());
+            throw runtime_error("sendto() error: " + string(strerror(errno)));
         }
     }
 }

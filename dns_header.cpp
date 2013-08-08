@@ -6,9 +6,9 @@
 #include <cstring>
 #include <stdexcept>
 #include <iostream>
-#include <sstream>
 #include <arpa/inet.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -102,9 +102,9 @@ void DnsHeader::nRecordAdd(unsigned section, unsigned n)
 void DnsHeader::_checkSection(unsigned section) const
 {
     if (section > 3) {
-        stringstream ss;
-        ss << "Invalid section: " << section;
-        throw logic_error(ss.str());
+        char s[10];
+        snprintf(s, 10, "%d", section);
+        throw logic_error("Invalid section: " + string(s));
     }
 }
 

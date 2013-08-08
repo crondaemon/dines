@@ -63,7 +63,7 @@ public:
     std::string data() const;
 
     //! Sends the packet into the network
-    void sendNet();
+    void sendNet(bool doCksum = true);
 
     //! to_string
     std::string to_string() const;
