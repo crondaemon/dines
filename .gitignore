@@ -9,9 +9,10 @@
 # logs
 *.log
 
-# status
+# autotools
 config.status
 *cache
+configure
 
 # Compiled Dynamic libraries
 *.so
