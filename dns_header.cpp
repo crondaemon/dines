@@ -31,8 +31,6 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
     _fuzzNRecord[3] = false;
 
     srand(time(NULL));
-
-    DnsHeader::logFunc("io sono il log");
 }
 
 string DnsHeader::data() const

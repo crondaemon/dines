@@ -72,8 +72,6 @@ public:
     void fuzzFlags();
     void fuzzTxid();
     void fuzzNRecord(unsigned section);
-
-    static void (*logFunc)(std::string msg);
 };
 
 #endif 

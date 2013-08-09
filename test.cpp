@@ -19,14 +19,16 @@ using namespace std;
 }
 
 #define CATCH_EXCEPTION(statement) { \
-    invalid = false; \
+    bool invalid = false; \
     try { \
         statement; \
     } catch(exception& e) { \
         invalid = true; \
     } \
-    if (invalid == true) \
+    if (invalid == false) { \
+        cerr << "[ERROR] " << __FILE__ << ":" << __LINE__ << " (" << __func__ << ")" << endl; \
         return 1; \
+    } \
     cout << "." << flush; \
 }
 
@@ -332,19 +334,15 @@ int test_invalid_section()
 {
     DnsHeader h;
     DnsPacket p;
-    bool invalid;
 
     CATCH_EXCEPTION(h.nRecord(7, 1));
 //    CATCH_EXCEPTION(p.addRR(1, ResourceRecord("www.test.com", "A", "IN", "64", "abcd")));
 
-    CHECK(invalid == true);
     return 0;
 }
 
 int test_conversion()
 {
-    bool invalid;
-
     CHECK(stringToQtype("A") == 1);
     CHECK(stringToQtype("NS") == 2);
     CHECK(stringToQtype("CNAME") == 5);
@@ -378,18 +376,8 @@ int test_conversion()
     return 0;
 }
 
-void mylogfunc(string s)
-{
-    cout << s << endl;
-//    printf("pippo\n");
-}
-
-void (*DnsHeader::logFunc)(string s) = mylogfunc;
-
 int main(int argc, char* argv[])
 {
-//    DnsHeader::logFunc = mylogfunc;
-//    DnsHeader::logFunc("ciao");
     cout << "Tests running";
     TEST(test_ip());
     TEST(test_header());
