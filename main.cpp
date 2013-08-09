@@ -275,9 +275,14 @@ int main(int argc, char* argv[])
     }
 
     if (num == 0)
-        num = 0xFFFFFF;
+        num = 0xFFFFFFFF;
 
-    cout << "Sending " << num << " datagrams" << endl;
+    cout << "Sending ";
+    if (num < 0xFFFFFFFF)
+        cout << num;
+    else
+        cout << "infinite";
+    cout << " datagrams" << endl;
     // Send datagram
     while (num-- > 0) {
         p.fuzz();
