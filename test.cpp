@@ -25,6 +25,8 @@ using namespace std;
     } catch(exception& e) { \
         invalid = true; \
     } \
+    if (invalid == true) \
+        return 1; \
     cout << "." << flush; \
 }
 
