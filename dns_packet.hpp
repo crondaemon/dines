@@ -12,6 +12,7 @@
 #include <dns_question.hpp>
 #include <rr.hpp>
 #include <tokenizer.hpp>
+#include <dinestypes.hpp>
 
 class DnsPacket {
     int _socket;
@@ -42,21 +43,15 @@ class DnsPacket {
     std::vector<ResourceRecord> _additionals;
 
     bool _fuzzSrcIp;
+
+    Dines::LogFunc _log;
 public:
-
-    typedef enum {
-        R_QUESTION = 0,
-        R_ANSWER = 1,
-        R_ADDITIONAL = 2,
-        R_AUTHORITIES = 3
-    } RecordSection;
-
     //! Constructor
-    DnsPacket();
+    DnsPacket(Dines::LogFunc l = NULL);
 
     DnsHeader& dnsHdr();
     DnsQuestion& question();
-    ResourceRecord& rr(DnsPacket::RecordSection section, unsigned n);
+    ResourceRecord& rr(Dines::RecordSection section, unsigned n);
 
     //! Compute the UDP checksum
     void doUdpCksum();
@@ -95,9 +90,9 @@ public:
     void txid(uint16_t txid);
 
     //! Nrecord
-    uint16_t nRecord(DnsPacket::RecordSection section) const;
+    uint16_t nRecord(Dines::RecordSection section) const;
 
-    void nRecord(DnsPacket::RecordSection section, uint16_t value);
+    void nRecord(Dines::RecordSection section, uint16_t value);
 
     //! TODO
     bool isRecursive() const;
@@ -112,24 +107,29 @@ public:
     const ResourceRecord& authorities(unsigned n) const;
 
     //! Adds a question
-    DnsQuestion& addQuestion(const std::string qdomain, const std::string& qtype, const std::string& qclass);
+    DnsQuestion& addQuestion(const std::string qdomain, const std::string& qtype,
+        const std::string& qclass);
     DnsQuestion& addQuestion(const std::string qdomain, unsigned qtype, unsigned qclass);
 
     //! Adds a RR
-    ResourceRecord& addRR(DnsPacket::RecordSection section, const std::string rrDomain, const std::string& rrType,
-        const std::string& rrClass, const std::string& ttl, const std::string& rdata);
+    ResourceRecord& addRR(Dines::RecordSection section, const std::string rrDomain,
+        const std::string& rrType, const std::string& rrClass, const std::string& ttl,
+        const std::string& rdata);
 
-    ResourceRecord& addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
-        unsigned rrClass, unsigned ttl, const std::string& rdata);
+    ResourceRecord& addRR(Dines::RecordSection section, const std::string& rrDomain,
+        unsigned rrType, unsigned rrClass, unsigned ttl, const std::string& rdata);
 
-    ResourceRecord& addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
-        unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen);
+    ResourceRecord& addRR(Dines::RecordSection section, const std::string& rrDomain,
+        unsigned rrType, unsigned rrClass, unsigned ttl, const char* rdata,
+        unsigned rdatalen);
 
-    ResourceRecord& addRR(DnsPacket::RecordSection section, const ResourceRecord& rr);
+    ResourceRecord& addRR(Dines::RecordSection section, const ResourceRecord& rr);
 
     void fuzz();
 
     void fuzzSrcIp();
+
+    void setLogger(Dines::LogFunc l);
 };
 
 

@@ -47,17 +47,17 @@ int test_header()
     DnsHeader h1;
 
     CHECK(h1.txid() == 0);
-    CHECK(h1.nRecord(DnsPacket::R_QUESTION) == 0);
-    CHECK(h1.nRecord(DnsPacket::R_ANSWER) == 0);
-    CHECK(h1.nRecord(DnsPacket::R_ADDITIONAL) == 0);
-    CHECK(h1.nRecord(DnsPacket::R_AUTHORITIES) == 0);
+    CHECK(h1.nRecord(Dines::R_QUESTION) == 0);
+    CHECK(h1.nRecord(Dines::R_ANSWER) == 0);
+    CHECK(h1.nRecord(Dines::R_ADDITIONAL) == 0);
+    CHECK(h1.nRecord(Dines::R_AUTHORITIES) == 0);
 
     DnsHeader h2(10, 1, 2, 3, 4);
 
-    CHECK(h2.nRecord(DnsPacket::R_QUESTION) == 1);
-    CHECK(h2.nRecord(DnsPacket::R_ANSWER) == 2);
-    CHECK(h2.nRecord(DnsPacket::R_ADDITIONAL) == 3);
-    CHECK(h2.nRecord(DnsPacket::R_AUTHORITIES) == 4);
+    CHECK(h2.nRecord(Dines::R_QUESTION) == 1);
+    CHECK(h2.nRecord(Dines::R_ANSWER) == 2);
+    CHECK(h2.nRecord(Dines::R_ADDITIONAL) == 3);
+    CHECK(h2.nRecord(Dines::R_AUTHORITIES) == 4);
     CHECK(h2.txid() == 10);
 
     // qr flag
@@ -77,15 +77,15 @@ int test_header()
     h2.txid(0x1234);
     CHECK(h2.txid() == 0x1234);
 
-    CHECK(h2.data() == string("\x34\x12\x80\x00\x00\x01\x00\x02\x00\x03\x00\x04", 12));
+    CHECK(h2.data() == string("\x12\x34\x80\x00\x00\x01\x00\x02\x00\x03\x00\x04", 12));
 
     DnsHeader h3;
     h3 = h2;
 
-    CHECK(h3.nRecord(DnsPacket::R_QUESTION) == 1);
-    CHECK(h3.nRecord(DnsPacket::R_ANSWER) == 2);
-    CHECK(h3.nRecord(DnsPacket::R_ADDITIONAL) == 3);
-    CHECK(h3.nRecord(DnsPacket::R_AUTHORITIES) == 4);
+    CHECK(h3.nRecord(Dines::R_QUESTION) == 1);
+    CHECK(h3.nRecord(Dines::R_ANSWER) == 2);
+    CHECK(h3.nRecord(Dines::R_ADDITIONAL) == 3);
+    CHECK(h3.nRecord(Dines::R_AUTHORITIES) == 4);
     CHECK(h3.txid() == 0x1234);
 
     return 0;
@@ -159,19 +159,19 @@ int test_answer()
 
     p.addQuestion("www.test.com", 1, 1);
     uint32_t addr = inet_addr("192.168.1.1");
-    p.addRR(DnsPacket::R_ANSWER, "www.test.com", 1, 1, 64, (const char*)&addr, 4);
+    p.addRR(Dines::R_ANSWER, "www.test.com", 1, 1, 64, (const char*)&addr, 4);
 
-    CHECK(p.nRecord(DnsPacket::R_ANSWER) == 1);
+    CHECK(p.nRecord(Dines::R_ANSWER) == 1);
     CHECK(p.answers(0).rrDomain() == "www.test.com");
     CHECK(*(unsigned*)p.answers(0).rData().data() == 0x0101A8C0);
     CHECK(p.answers(0).ttl() == 64);
     CHECK(p.answers(0).rDataLen() == 4);
 
     addr = inet_addr("192.168.1.2");
-    p.addRR(DnsPacket::R_ANSWER, "www.test.com", 1, 1, 64, (const char*)&addr, 4);
-    CHECK(p.nRecord(DnsPacket::R_ANSWER) == 2);
-    p.nRecord(DnsPacket::R_ANSWER, 3);
-    CHECK(p.nRecord(DnsPacket::R_ANSWER) == 3);
+    p.addRR(Dines::R_ANSWER, "www.test.com", 1, 1, 64, (const char*)&addr, 4);
+    CHECK(p.nRecord(Dines::R_ANSWER) == 2);
+    p.nRecord(Dines::R_ANSWER, 3);
+    CHECK(p.nRecord(Dines::R_ANSWER) == 3);
     return 0;
 }
 
@@ -180,18 +180,18 @@ int test_many_rr()
     DnsPacket p;
     p.addQuestion("www.test.com", "A", "IN");
     ResourceRecord rr("www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
-    p.addRR(DnsPacket::R_ANSWER, rr);
+    p.addRR(Dines::R_ANSWER, rr);
     rr.rrType("NS");
-    p.addRR(DnsPacket::R_ADDITIONAL, rr);
+    p.addRR(Dines::R_ADDITIONAL, rr);
     rr.rrType("MX");
-    p.addRR(DnsPacket::R_AUTHORITIES, rr);
+    p.addRR(Dines::R_AUTHORITIES, rr);
 
-    CHECK(p.nRecord(DnsPacket::R_ADDITIONAL) == 1);
-    CHECK(p.addRR(DnsPacket::R_ADDITIONAL, rr).rrType() == stringToQtype("NS"));
+    CHECK(p.nRecord(Dines::R_ADDITIONAL) == 1);
+    CHECK(p.addRR(Dines::R_ADDITIONAL, rr).rrType() == stringToQtype("NS"));
     CHECK(p.additionals(0).rrType() == stringToQtype("NS"));
 
-    CHECK(p.nRecord(DnsPacket::R_AUTHORITIES) == 1);
-    CHECK(p.addRR(DnsPacket::R_AUTHORITIES, rr).rrType() == stringToQtype("MX"));
+    CHECK(p.nRecord(Dines::R_AUTHORITIES) == 1);
+    CHECK(p.addRR(Dines::R_AUTHORITIES, rr).rrType() == stringToQtype("MX"));
     CHECK(p.authorities(0).rrType() == stringToQtype("MX"));
 
     return 0;
@@ -204,7 +204,7 @@ int test_raw_packet()
     p1.txid(0xd6e2);
 
     char pkt1[] = {
-        0xe2, 0xd6, 0x01, 0x00,
+        0xd6, 0xe2, 0x01, 0x00,
         0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x03, 0x77, 0x77, 0x77, 0x04, 0x74, 0x65, 0x73,
         0x74, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01,
@@ -215,11 +215,11 @@ int test_raw_packet()
     DnsPacket p2;
     p2.addQuestion("www.test.com", "A", "IN");
     p2.txid(0xdfc1);
-    p2.addRR(DnsPacket::R_ANSWER, "www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
-    p2.addRR(DnsPacket::R_ANSWER, "www.test.com", "A", "IN", "64", "\x02\x03\x04\x05");
+    p2.addRR(Dines::R_ANSWER, "www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+    p2.addRR(Dines::R_ANSWER, "www.test.com", "A", "IN", "64", "\x02\x03\x04\x05");
 
     char pkt2[] = {
-        0xc1, 0xdf, 0x81, 0x00,
+        0xdf, 0xc1, 0x81, 0x00,
         0x00, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,
         0x03, 0x77, 0x77, 0x77, 0x04, 0x74, 0x65, 0x73,
         0x74, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01,
