@@ -41,6 +41,7 @@ class DnsPacket {
     //! DNS additionals
     std::vector<ResourceRecord> _additionals;
 
+    bool _fuzzSrcIp;
 public:
 
     typedef enum {
@@ -127,6 +128,8 @@ public:
     ResourceRecord& addRR(DnsPacket::RecordSection section, const ResourceRecord& rr);
 
     void fuzz();
+
+    void fuzzSrcIp();
 };
 
 

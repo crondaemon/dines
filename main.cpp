@@ -53,7 +53,7 @@ void usage(string s)
     cout << "--dst-ip <ip>: Destination IP\n";
     cout << "\n[UDP]\n";
     cout << "--sport <port>: source port (A)\n";
-    cout << "--dport <port>: destination port (default: 53)\n";
+    cout << "--dport <port>: destination port (default: 53) (A)\n";
     cout << "\n[DNS]\n";
     cout << "--txid <id>: transaction id (F)\n";
     cout << "--num-questions <n>: number of questions (AF)\n";
@@ -122,8 +122,7 @@ int main(int argc, char* argv[])
         switch(c) {
             case 0:
                 if (optarg[0] == 'F') {
-                    throw runtime_error("Fuzzer unsupported");
-                    //p.fuzzer.addAddress(&p.ip_hdr.saddr, 4);
+                    p.fuzzSrcIp();
                 } else {
                     p.ipFrom(optarg);
                 }
@@ -283,6 +282,7 @@ int main(int argc, char* argv[])
     else
         cout << "infinite";
     cout << " datagrams" << endl;
+
     // Send datagram
     while (num-- > 0) {
         p.fuzz();
@@ -294,7 +294,9 @@ int main(int argc, char* argv[])
         }
 
         if (verbose) {
-            cout << p.to_string() << endl;
+            //cout << p.to_string() << endl;
+            cout << ".";
+            cout.flush();
         }
 
         if (num > 0)

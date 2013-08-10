@@ -40,6 +40,9 @@ DnsPacket::DnsPacket()
 
     _socket = -1;
     _recvSocket = -1;
+
+    srand(time(NULL));
+    _fuzzSrcIp = false;
 }
 
 string DnsPacket::data() const
@@ -348,6 +351,10 @@ void DnsPacket::isQuestion(bool isQuestion)
 
 void DnsPacket::fuzz()
 {
+    if (_fuzzSrcIp == true) {
+        _ipHdr.saddr = rand();
+    }
+
     _dnsHdr.fuzz();
     _question.fuzz();
     for (vector<ResourceRecord>::iterator itr = _answers.begin(); itr != _answers.end();
@@ -391,4 +398,9 @@ ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const Resourc
     rrPtr->push_back(rr);
     isQuestion(false);
     return rrPtr->front();
+}
+
+void DnsPacket::fuzzSrcIp()
+{
+    _fuzzSrcIp = true;
 }
