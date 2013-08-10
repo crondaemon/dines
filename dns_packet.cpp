@@ -40,37 +40,9 @@ DnsPacket::DnsPacket()
 
     _socket = -1;
     _recvSocket = -1;
-}
 
-void DnsPacket::_socketCreate()
-{
-    int on = 1;
-    struct sockaddr_in servaddr;
-
-    if (_socket > 0 && _recvSocket > 0) {
-        return;
-    }
-
-    _socket = socket(PF_INET, SOCK_RAW, IPPROTO_UDP);
-
-    if (_socket == -1)
-        throw runtime_error(string(__func__) + ": socket creation error: " + string(strerror(errno)));
-
-    if (setsockopt(_socket, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
-        throw runtime_error(string(__func__) + ": unable to set option _IPHDRINCL");
-
-    _recvSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if (_recvSocket == -1)
-        throw runtime_error("Can't create listening socket");
-
-
-    memset(&servaddr, 0, sizeof(servaddr));
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servaddr.sin_port = _udpHdr.source;
-
-    if (bind(_recvSocket, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0 )
-        throw runtime_error("Can't bind() listening socket");
+    srand(time(NULL));
+    _fuzzSrcIp = false;
 }
 
 string DnsPacket::data() const
@@ -126,9 +98,14 @@ void DnsPacket::doUdpCksum()
     delete temp;
 }
 
-void DnsPacket::sendNet(bool doCksum)
+void DnsPacket::_socketCreate()
 {
-    _socketCreate();
+    if (_socket > 0) {
+        return;
+    }
+
+    int on = 1;
+    struct sockaddr_in servaddr;
 
     // Sanity checks
 
@@ -142,8 +119,35 @@ void DnsPacket::sendNet(bool doCksum)
 
     if (_dnsHdr.txid() == 0)
         _dnsHdr.txid(rand() % 0xFFFF);
-    if (_question.qdomain().size() == 1)
-        throw runtime_error("You must specify DNS question (--question)");
+
+    _socket = socket(PF_INET, SOCK_RAW, IPPROTO_UDP);
+
+    if (_socket == -1)
+        throw runtime_error(string(__func__) + ": socket creation error: " + string(strerror(errno)));
+
+    if (setsockopt(_socket, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
+        throw runtime_error(string(__func__) + ": unable to set option _IPHDRINCL");
+
+    if (_ipHdr.saddr != 0) {
+        // We are spoofing. Don't create a listening socket
+        _recvSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        if (_recvSocket == -1)
+            throw runtime_error("Can't create listening socket");
+
+        memset(&servaddr, 0, sizeof(servaddr));
+        servaddr.sin_family = AF_INET;
+        servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+        servaddr.sin_port = _udpHdr.source;
+
+        if (bind(_recvSocket, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0 )
+            throw runtime_error("Can't bind() listening socket");
+    } else {
+        // we are not spoofing. Set the source address from localhost
+        struct sockaddr_in sa;
+        unsigned sa_len = sizeof(sa);
+        getsockname(_socket, (struct sockaddr*)&sa, &sa_len);
+        _ipHdr.saddr = sa.sin_addr.s_addr;
+    }
 
     // Set L3/L4
     struct sockaddr_in sin;
@@ -154,13 +158,11 @@ void DnsPacket::sendNet(bool doCksum)
 
     if (connect(_socket, (struct sockaddr*)&sin, sizeof(sin)) < 0)
         throw runtime_error(string(__func__) + "::connect() (" + string(strerror(errno)) + ")");
+}
 
-    if (_ipHdr.saddr == 0) {
-        struct sockaddr_in sa;
-        unsigned sa_len = sizeof(sa);
-        getsockname(_socket, (struct sockaddr*)&sa, &sa_len);
-        _ipHdr.saddr = sa.sin_addr.s_addr;
-    }
+void DnsPacket::sendNet(bool doCksum)
+{
+    _socketCreate();
 
     // Create output to send
     string output;
@@ -179,8 +181,6 @@ void DnsPacket::sendNet(bool doCksum)
     output += dns_dgram;
 
     if (send(_socket, output.data(), output.length(), 0) < 0) {
-//    if (sendto(_socket, output.data(), output.length(), 0, (struct sockaddr*)&sin,
-//            sizeof(sin)) < 0) {
         if (errno == 22) {
             cout << "Invalid parameter (probably fuzzer is shaking it).\n";
         } else {
@@ -188,7 +188,6 @@ void DnsPacket::sendNet(bool doCksum)
         }
     }
 }
-
 
 string DnsPacket::ipFrom() const
 {
@@ -352,6 +351,10 @@ void DnsPacket::isQuestion(bool isQuestion)
 
 void DnsPacket::fuzz()
 {
+    if (_fuzzSrcIp == true) {
+        _ipHdr.saddr = rand();
+    }
+
     _dnsHdr.fuzz();
     _question.fuzz();
     for (vector<ResourceRecord>::iterator itr = _answers.begin(); itr != _answers.end();
@@ -395,4 +398,9 @@ ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const Resourc
     rrPtr->push_back(rr);
     isQuestion(false);
     return rrPtr->front();
+}
+
+void DnsPacket::fuzzSrcIp()
+{
+    _fuzzSrcIp = true;
 }
