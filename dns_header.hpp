@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <dinestypes.hpp>
 
 #pragma pack(1)
 typedef struct {
