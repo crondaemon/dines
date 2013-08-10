@@ -19,7 +19,7 @@
 
 using namespace std;
 
-DnsPacket::DnsPacket()
+DnsPacket::DnsPacket(Dines::LogFunc l)
 {
     _ipHdr.ihl = 5;
     _ipHdr.version = 4;
@@ -43,6 +43,11 @@ DnsPacket::DnsPacket()
 
     srand(time(NULL));
     _fuzzSrcIp = false;
+
+    _log = l;
+
+    if (_log != NULL)
+        _log("DnsPacket created");
 }
 
 string DnsPacket::data() const
@@ -128,27 +133,6 @@ void DnsPacket::_socketCreate()
     if (setsockopt(_socket, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
         throw runtime_error(string(__func__) + ": unable to set option _IPHDRINCL");
 
-    if (_ipHdr.saddr != 0) {
-        // We are spoofing. Don't create a listening socket
-        _recvSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-        if (_recvSocket == -1)
-            throw runtime_error("Can't create listening socket");
-
-        memset(&servaddr, 0, sizeof(servaddr));
-        servaddr.sin_family = AF_INET;
-        servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-        servaddr.sin_port = _udpHdr.source;
-
-        if (bind(_recvSocket, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0 )
-            throw runtime_error("Can't bind() listening socket");
-    } else {
-        // we are not spoofing. Set the source address from localhost
-        struct sockaddr_in sa;
-        unsigned sa_len = sizeof(sa);
-        getsockname(_socket, (struct sockaddr*)&sa, &sa_len);
-        _ipHdr.saddr = sa.sin_addr.s_addr;
-    }
-
     // Set L3/L4
     struct sockaddr_in sin;
     memset(&sin, 0x0, sizeof(sin));
@@ -158,6 +142,32 @@ void DnsPacket::_socketCreate()
 
     if (connect(_socket, (struct sockaddr*)&sin, sizeof(sin)) < 0)
         throw runtime_error(string(__func__) + "::connect() (" + string(strerror(errno)) + ")");
+
+    if (_ipHdr.saddr == 0) {
+        // we are not spoofing. Set the source address from localhost
+        struct sockaddr_in sa;
+        unsigned sa_len = sizeof(sa);
+        getsockname(_socket, (struct sockaddr*)&sa, &sa_len);
+        _ipHdr.saddr = sa.sin_addr.s_addr;
+
+        _recvSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        if (_recvSocket == -1)
+            throw runtime_error("Can't create listening socket");
+
+        memset(&servaddr, 0, sizeof(servaddr));
+        servaddr.sin_family = AF_INET;
+        servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+        servaddr.sin_port = _udpHdr.source;
+
+        if (_log) {
+            char buf[10];
+            snprintf(buf, 10, "%u", htons(_udpHdr.source));
+            _log("Creating listening socket on port " + string(buf));
+        }
+
+        if (bind(_recvSocket, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0 )
+            throw runtime_error("Can't bind() listening socket");
+    }
 }
 
 void DnsPacket::sendNet(bool doCksum)
@@ -179,6 +189,9 @@ void DnsPacket::sendNet(bool doCksum)
     output += string((char*)&_ipHdr, sizeof(_ipHdr));
     output += string((char*)&_udpHdr, sizeof(_udpHdr));
     output += dns_dgram;
+
+    if (_log)
+        _log(this->to_string());
 
     if (send(_socket, output.data(), output.length(), 0) < 0) {
         if (errno == 22) {
@@ -212,10 +225,14 @@ string DnsPacket::ipTo() const
 string DnsPacket::to_string() const
 {
     string s;
+    char buf[10];
 
-    s += "[" + this->ipFrom();
+    s += this->ipFrom();
     s += " -> ";
-    s += this->ipTo() + "]";
+    s += this->ipTo();
+    s += ", txid: ";
+    snprintf(buf, 10, "0x%.2X", _dnsHdr.txid());
+    s += string(buf);
 
     return s;
 }
@@ -223,26 +240,26 @@ string DnsPacket::to_string() const
 DnsQuestion& DnsPacket::addQuestion(const std::string qdomain, const std::string& qtype,
         const std::string& qclass)
 {
-    _dnsHdr.nRecordAdd(DnsPacket::R_QUESTION, 1);
+    _dnsHdr.nRecordAdd(Dines::R_QUESTION, 1);
     _question = DnsQuestion(qdomain, qtype, qclass);
     return _question;
 }
 
 DnsQuestion& DnsPacket::addQuestion(const std::string qdomain, unsigned qtype, unsigned qclass)
 {
-    _dnsHdr.nRecordAdd(DnsPacket::R_QUESTION, 1);
+    _dnsHdr.nRecordAdd(Dines::R_QUESTION, 1);
     _question = DnsQuestion(qdomain, qtype, qclass);
     return _question;
 }
 
-ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
+ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string& rrDomain, unsigned rrType,
         unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen)
 {
     string rd(rdata, rdatalen);
     return addRR(section, rrDomain, rrType, rrClass, ttl, rd);
 }
 
-ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const std::string rrDomain,
+ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string rrDomain,
         const std::string& rrType, const std::string& rrClass, const std::string& ttl, const std::string& rdata)
 {
     unsigned type = stringToQtype(rrType);
@@ -252,7 +269,7 @@ ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const std::st
     return addRR(section, rrDomain, type, klass, int_ttl, rdata);
 }
 
-ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const std::string& rrDomain, unsigned rrType,
+ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string& rrDomain, unsigned rrType,
         unsigned rrClass, unsigned ttl, const std::string& rdata)
 {
     ResourceRecord rr(rrDomain, rrType, rrClass, ttl, rdata);
@@ -269,7 +286,7 @@ bool DnsPacket::isQuestion() const
     return _dnsHdr.isQuestion();
 }
 
-uint16_t DnsPacket::nRecord(DnsPacket::RecordSection section) const
+uint16_t DnsPacket::nRecord(Dines::RecordSection section) const
 {
     return _dnsHdr.nRecord(section);
 }
@@ -339,7 +356,7 @@ void DnsPacket::txid(uint16_t txid)
     _dnsHdr.txid(txid);
 }
 
-void DnsPacket::nRecord(DnsPacket::RecordSection section, uint16_t value)
+void DnsPacket::nRecord(Dines::RecordSection section, uint16_t value)
 {
     _dnsHdr.nRecord(section, value);
 }
@@ -376,18 +393,18 @@ DnsHeader& DnsPacket::dnsHdr()
     return _dnsHdr;
 }
 
-ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const ResourceRecord& rr)
+ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const ResourceRecord& rr)
 {
     std::vector<ResourceRecord> *rrPtr;
 
     switch (section) {
-        case DnsPacket::R_ANSWER:
+        case Dines::R_ANSWER:
             rrPtr = &_answers;
             break;
-        case DnsPacket::R_AUTHORITIES:
+        case Dines::R_AUTHORITIES:
             rrPtr = &_authorities;
             break;
-        case DnsPacket::R_ADDITIONAL:
+        case Dines::R_ADDITIONAL:
             rrPtr = &_additionals;
             break;
         default:
@@ -403,4 +420,9 @@ ResourceRecord& DnsPacket::addRR(DnsPacket::RecordSection section, const Resourc
 void DnsPacket::fuzzSrcIp()
 {
     _fuzzSrcIp = true;
+}
+
+void DnsPacket::setLogger(Dines::LogFunc l)
+{
+    _log = l;
 }
