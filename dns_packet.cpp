@@ -42,7 +42,9 @@ DnsPacket::DnsPacket(Dines::LogFunc l)
     _recvSocket = -1;
 
     srand(time(NULL));
+
     _fuzzSrcIp = false;
+    _fuzzSport = false;
 
     _log = l;
 
@@ -225,14 +227,47 @@ string DnsPacket::ipTo() const
 string DnsPacket::to_string() const
 {
     string s;
-    char buf[10];
 
-    s += this->ipFrom();
+    s += this->ipFrom() + ":" + this->sportStr();
     s += " -> ";
-    s += this->ipTo();
-    s += ", txid: ";
-    snprintf(buf, 10, "0x%.2X", _dnsHdr.txid());
-    s += string(buf);
+    s += this->ipTo() + ":" + this->dportStr();
+    s += " txid: " + _dnsHdr.txidStr();
+
+    if (isQuestion())
+        s += " Q";
+    else
+        s += " R";
+
+    if (_question != DnsQuestion()) {
+        s += " [Question:" + _question.to_string() + "]";
+    }
+
+    if (_answers.size() > 0) {
+        s += "[Answers:";
+        for (vector<ResourceRecord>::const_iterator itr = _answers.begin();
+                itr != _answers.end(); ++itr) {
+            s += itr->to_string();
+        }
+        s += "]";
+    }
+
+    if (_authorities.size() > 0) {
+        s += "[Authorities:";
+        for (vector<ResourceRecord>::const_iterator itr = _authorities.begin();
+                itr != _authorities.end(); ++itr) {
+            s += itr->to_string();
+        }
+        s += "]";
+    }
+
+    if (_additionals.size() > 0) {
+        s += "[Additionals:";
+        for (vector<ResourceRecord>::const_iterator itr = _additionals.begin();
+                itr != _additionals.end(); ++itr) {
+            s += itr->to_string();
+        }
+        s += "]";
+    }
 
     return s;
 }
@@ -326,9 +361,23 @@ uint16_t DnsPacket::sport() const
     return ntohs(_udpHdr.source);
 }
 
+string DnsPacket::sportStr() const
+{
+    char buf[6];
+    snprintf(buf, 6, "%u", ntohs(_udpHdr.source));
+    return string(buf);
+}
+
 uint16_t DnsPacket::dport() const
 {
     return ntohs(_udpHdr.dest);
+}
+
+string DnsPacket::dportStr() const
+{
+    char buf[6];
+    snprintf(buf, 6, "%u", ntohs(_udpHdr.dest));
+    return string(buf);
 }
 
 void DnsPacket::sport(string sport)
@@ -368,8 +417,12 @@ void DnsPacket::isQuestion(bool isQuestion)
 
 void DnsPacket::fuzz()
 {
-    if (_fuzzSrcIp == true) {
+    if (_fuzzSrcIp) {
         _ipHdr.saddr = rand();
+    }
+
+    if (_fuzzSport) {
+        _udpHdr.source = rand() % 65535;
     }
 
     _dnsHdr.fuzz();
@@ -420,6 +473,11 @@ ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const ResourceRec
 void DnsPacket::fuzzSrcIp()
 {
     _fuzzSrcIp = true;
+}
+
+void DnsPacket::fuzzSport()
+{
+    _fuzzSport = true;
 }
 
 void DnsPacket::setLogger(Dines::LogFunc l)

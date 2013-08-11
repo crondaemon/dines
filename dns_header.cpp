@@ -87,6 +87,13 @@ uint16_t DnsHeader::txid() const
     return ntohs(_txid);
 }
 
+string DnsHeader::txidStr() const
+{
+    char buf[7];
+    snprintf(buf, 7, "0x%.2X", ntohs(_txid));
+    return string(buf);
+}
+
 void DnsHeader::txid(uint16_t txid)
 {
     _txid = htons(txid);

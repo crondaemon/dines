@@ -56,6 +56,8 @@ public:
 
     uint16_t txid() const;
 
+    std::string txidStr() const;
+
     void txid(uint16_t txid);
 
     DnsHeaderFlags flags() const;

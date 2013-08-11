@@ -9,6 +9,7 @@
 #include <cstring>
 #include <stdexcept>
 #include <stdlib.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -79,14 +80,31 @@ uint16_t ResourceRecord::rrType() const
     return ntohs(_rrType);
 }
 
+string ResourceRecord::rrTypeStr() const
+{
+    return qtypeToString(ntohs(_rrType));
+}
+
 uint16_t ResourceRecord::rrClass() const
 {
     return ntohs(_rrClass);
 }
 
+string ResourceRecord::rrClassStr() const
+{
+    return qclassToString(ntohs(_rrClass));
+}
+
 uint32_t ResourceRecord::ttl() const
 {
     return ntohl(_ttl);
+}
+
+string ResourceRecord::ttlStr() const
+{
+    char buf[11];
+    snprintf(buf, 11, "%u", ntohl(_ttl));
+    return string(buf);
 }
 
 string ResourceRecord::rData() const
@@ -144,4 +162,10 @@ void ResourceRecord::rrClass(string rrClass)
 void ResourceRecord::rrClass(unsigned rrClass)
 {
     _rrClass = htons(rrClass);
+}
+
+string ResourceRecord::to_string() const
+{
+    return _rrDomain_str + "/" + rrTypeStr() + "/" + rrClassStr() + "/" +
+        ttlStr();
 }

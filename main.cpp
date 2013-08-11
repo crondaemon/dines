@@ -139,7 +139,11 @@ int main(int argc, char* argv[])
                 break;
 
             case 2:
-                p.sport(optarg);
+                if (optarg[0] == 'F') {
+                    p.fuzzSport();
+                } else {
+                    p.sport(optarg);
+                }
                 break;
 
             case 3:
