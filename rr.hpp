@@ -32,14 +32,17 @@ public:
     std::string data() const;
 
     uint16_t rrType() const;
+    std::string rrTypeStr() const;
     void rrType(std::string rrType);
     void rrType(unsigned rrType);
 
     uint16_t rrClass() const;
+    std::string rrClassStr() const;
     void rrClass(std::string rrClass);
     void rrClass(unsigned rrClass);
 
     uint32_t ttl() const;
+    std::string ttlStr() const;
     void ttl(std::string ttl);
     void ttl(unsigned ttl);
 
@@ -51,6 +54,8 @@ public:
     void fuzzRRtype();
     void fuzzRRclass();
     void fuzzRRttl();
+
+    std::string to_string() const;
 };
 
 #endif

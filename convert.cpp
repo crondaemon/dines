@@ -47,10 +47,36 @@ uint16_t stringToQtype(const std::string& s)
     unsigned n = atoi(s.c_str());
 
     if (n > 0xFFFF || n == 0) {
-        throw runtime_error("Invalid qtype");
+        throw runtime_error(string(__func__) + "Invalid qtype");
     }
 
     return n;
+}
+
+string qtypeToString(uint16_t qtype)
+{
+    switch (qtype) {
+        case 1:
+            return "A";
+        case 2:
+            return "NS";
+        case 5:
+            return "CNAME";
+        case 12:
+            return "PTR";
+        case 13:
+            return "HINFO";
+        case 15:
+            return "MX";
+        case 16:
+            return "TXT";
+        case 252:
+            return "AXFR";
+        case 255:
+            return "ANY";
+        default:
+            throw logic_error(string(__func__) + "Invalid qtype");
+    }
 }
 
 uint16_t stringToQclass(const std::string& s)
@@ -65,5 +91,25 @@ uint16_t stringToQclass(const std::string& s)
     if (s == "F") return 1;
 
     // Invalid class
-    throw runtime_error("Invalid qclass");
+    throw runtime_error(string(__func__) + "Invalid qclass");
+}
+
+string qclassToString(uint16_t qclass)
+{
+    switch (qclass) {
+        case 1:
+            return "IN";
+        case 2:
+            return "CSNET";
+        case 3:
+            return "CHAOS";
+        case 4:
+            return "HESIOD";
+        case 254:
+            return "NONE";
+        case 255:
+            return "ANY";
+        default:
+            throw logic_error(string(__func__) + "Invalid qclass");
+    }
 }

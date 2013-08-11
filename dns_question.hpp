@@ -17,20 +17,28 @@ class DnsQuestion {
     bool _fuzzQtype;
     bool _fuzzQclass;
 public:
-    DnsQuestion() {}
-    DnsQuestion(const std::string qdomain, unsigned qtype, unsigned qclass);
+    DnsQuestion(const std::string qdomain = "", unsigned qtype = 0, unsigned qclass = 0);
     DnsQuestion(const std::string qdomain, const std::string qtype, const std::string qclass);
+
+    bool operator==(const DnsQuestion& q) const;
+    bool operator!=(const DnsQuestion& q) const;
 
     std::string data() const;
 
     std::string qdomain() const;
+
     uint16_t qtype() const;
+    std::string qtypeStr() const;
+
     uint16_t qclass() const;
+    std::string qclassStr() const;
 
     void fuzz();
 
     void fuzzQtype();
     void fuzzQclass();
+
+    std::string to_string() const;
 };
 
 #endif
