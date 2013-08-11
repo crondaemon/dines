@@ -116,7 +116,8 @@ void DnsHeader::fuzz()
 
     if (_fuzzFlags == true) {
         uint16_t v = rand() % 65535;
-        _flags = *(DnsHeaderFlags*)(&v);
+        DnsHeaderFlags* f = (DnsHeaderFlags*)(u_char*)(&v);
+        _flags = *f;
     }
 
     if (_fuzzNRecord[DnsPacket::R_QUESTION] == true) {

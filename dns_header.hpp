@@ -7,6 +7,7 @@
 #pragma pack(1)
 typedef struct {
 #if BYTE_ORDER == BIG_ENDIAN
+    union {
     uint8_t qr: 1,
             opcode: 4,
             aa: 1,
