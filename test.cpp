@@ -376,6 +376,12 @@ int test_conversion()
     return 0;
 }
 
+int test_ip_conversion()
+{
+    // XXX
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     cout << "Tests running";
@@ -393,5 +399,6 @@ int main(int argc, char* argv[])
     TEST(test_fuzz_packet());
     TEST(test_invalid_section());
     TEST(test_conversion());
+    TEST(test_ip_conversion());
     cout << "done" << endl;
 }

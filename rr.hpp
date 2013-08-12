@@ -46,6 +46,7 @@ public:
     void ttl(std::string ttl);
     void ttl(unsigned ttl);
 
+    void rData(std::string rdata);
     std::string rData() const;
     unsigned rDataLen() const;
 

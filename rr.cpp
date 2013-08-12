@@ -169,3 +169,8 @@ string ResourceRecord::to_string() const
     return _rrDomain_str + "/" + rrTypeStr() + "/" + rrClassStr() + "/" +
         ttlStr();
 }
+
+void ResourceRecord::rData(string rdata)
+{
+    _rData = rdata;
+}
