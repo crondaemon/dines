@@ -42,6 +42,10 @@ class DnsPacket {
     //! DNS additionals
     std::vector<ResourceRecord> _additionals;
 
+    uint32_t _convertIP(std::string rdata);
+
+    bool _rDataIp;
+
     bool _fuzzSrcIp;
 
     bool _fuzzSport;
@@ -130,6 +134,10 @@ public:
         unsigned rdatalen);
 
     ResourceRecord& addRR(Dines::RecordSection section, const ResourceRecord& rr);
+
+    // Converts existing resource record rdata into IP addresses. Sets also a flag
+    // for future conversions
+    void rDataIp();
 
     void fuzz();
 

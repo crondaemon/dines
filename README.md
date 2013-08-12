@@ -22,7 +22,7 @@ Usage
 
 This is the help from dines.
 
-    Dines 0.3 - The definitive DNS packet forger.
+    Dines 0.4 - The definitive DNS packet forger.
 
     Fields with (F) can be fuzzed. (Example --txid F)
     Fields with (R) are repeatable. (Example --answer)
@@ -69,6 +69,10 @@ To generate a question, issue the follogin command:
 that asks for domain www.test.com, sending 1 packet only. To generate an answer, one can use the following
 command
 
-    sudo ./dines --src-ip 192.168.1.1 --dst-ip 192.168.1.2 --question www.google.com,1,1 --num 1 --answer www.google.com,1,1,256,$'\xc0\xa8\01\01' --answer www.google.com,1,1,256,$'\xc0\xa8\01\02'
+    sudo ./dines --src-ip 192.168.1.1 --dst-ip 192.168.1.2 --question www.test.com,1,1 --num 1 --rdata-ip --answer www.test.com,1,1,256,192.168.1.1 --answer www.test.com,1,1,256,192.168.1.2
 
-The switches related to resource records can be repeated multiple times.
+The switches related to resource records can be repeated multiple times. In order to specify IP addresses on
+the command line, the user must use the --rdata-ip switch. Otherwise, data will we used as is. This allows
+to inject binary data directly, as in the following example
+
+    sudo ./dines --src-ip 192.168.1.1 --dst-ip 192.168.1.2 --question www.test.com,NULL,IN --num 1 --answer www.test.com,NULL,IN,0,$'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a'

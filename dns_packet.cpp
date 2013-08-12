@@ -46,6 +46,8 @@ DnsPacket::DnsPacket(Dines::LogFunc l)
     _fuzzSrcIp = false;
     _fuzzSport = false;
 
+    _rDataIp = false;
+
     _log = l;
 
     if (_log != NULL)
@@ -290,25 +292,35 @@ DnsQuestion& DnsPacket::addQuestion(const std::string qdomain, unsigned qtype, u
     return _question;
 }
 
-ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string& rrDomain, unsigned rrType,
-        unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen)
+ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string& rrDomain,
+        unsigned rrType, unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen)
 {
     string rd(rdata, rdatalen);
     return addRR(section, rrDomain, rrType, rrClass, ttl, rd);
 }
 
 ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string rrDomain,
-        const std::string& rrType, const std::string& rrClass, const std::string& ttl, const std::string& rdata)
+        const std::string& rrType, const std::string& rrClass, const std::string& ttl,
+        const std::string& rdata)
 {
     unsigned type = stringToQtype(rrType);
     unsigned klass = stringToQclass(rrClass);
     unsigned int_ttl = atoi(ttl.data());
 
-    return addRR(section, rrDomain, type, klass, int_ttl, rdata);
+    string localrdata = rdata;
+
+    if (_rDataIp) {
+        if (_log)
+            _log("Converting " + rdata + " to IP address");
+        uint32_t addr = _convertIP(rdata);
+        localrdata = string((char*)&addr, 4);
+    }
+
+    return addRR(section, rrDomain, type, klass, int_ttl, localrdata);
 }
 
-ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string& rrDomain, unsigned rrType,
-        unsigned rrClass, unsigned ttl, const std::string& rdata)
+ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string& rrDomain,
+        unsigned rrType, unsigned rrClass, unsigned ttl, const std::string& rdata)
 {
     ResourceRecord rr(rrDomain, rrType, rrClass, ttl, rdata);
     return addRR(section, rr);
@@ -410,6 +422,13 @@ void DnsPacket::txid(uint16_t txid)
 
 void DnsPacket::nRecord(Dines::RecordSection section, uint16_t value)
 {
+    char sect[10];
+    char val[11];
+    snprintf(sect, 10, "%u", section);
+    snprintf(val, 11, "%u", value);
+    if (_log)
+        _log("Setting record section " + string(sect) + " to " + string(val));
+
     _dnsHdr.nRecord(section, value);
 }
 
@@ -486,4 +505,37 @@ void DnsPacket::fuzzSport()
 void DnsPacket::setLogger(Dines::LogFunc l)
 {
     _log = l;
+}
+
+uint32_t DnsPacket::_convertIP(string rdata)
+{
+    uint32_t addr;
+    if (inet_pton(AF_INET, rdata.data(), &addr) != 1)
+        throw runtime_error("Can't convert IP address: " + rdata);
+    return addr;
+}
+
+void DnsPacket::rDataIp()
+{
+    if (_log)
+        _log("Activating IP conversion");
+
+    _rDataIp = true;
+
+    uint32_t addr;
+    for (vector<ResourceRecord>::iterator itr = _answers.begin(); itr != _answers.end();
+            ++itr) {
+        addr = _convertIP(itr->rData());
+        itr->rData(string((char*)&addr, 4));
+    }
+    for (vector<ResourceRecord>::iterator itr = _authorities.begin(); itr != _authorities.end();
+            ++itr) {
+        addr = _convertIP(itr->rData());
+        itr->rData(string((char*)&addr, 4));
+    }
+    for (vector<ResourceRecord>::iterator itr = _additionals.begin(); itr != _additionals.end();
+            ++itr) {
+        addr = _convertIP(itr->rData());
+        itr->rData(string((char*)&addr, 4));
+    }
 }
