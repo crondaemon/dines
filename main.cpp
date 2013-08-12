@@ -49,13 +49,13 @@ void usage(string s)
     cout << "Usage: " << s << " <params>\n\n";
     cout << "Params:\n";
     cout << "\n[IP]\n";
-    cout << "--src-ip <ip>: Source IP (default: local address), (F)\n";
+    cout << "--src-ip <ip>: Source IP (AF)\n";
     cout << "--dst-ip <ip>: Destination IP\n";
     cout << "\n[UDP]\n";
     cout << "--sport <port>: source port (A)\n";
-    cout << "--dport <port>: destination port (default: 53) (A)\n";
+    cout << "--dport <port>: destination port (A)\n";
     cout << "\n[DNS]\n";
-    cout << "--txid <id>: transaction id (F)\n";
+    cout << "--txid <id>: transaction id (AF)\n";
     cout << "--num-questions <n>: number of questions (AF)\n";
     cout << "--question <domain>,<type(F)>,<class(F)>: question domain\n";
     cout << "\n";
