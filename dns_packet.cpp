@@ -168,6 +168,9 @@ void DnsPacket::sendNet(bool doCksum)
     string output;
     string dns_dgram = this->data();
 
+    // ip id
+    _ipHdr.id = rand() % 0xFFFF;
+
     // Adjust lenghts
     _udpHdr.len = htons(sizeof(_udpHdr) + dns_dgram.length());
     _ipHdr.tot_len = htons(sizeof(_ipHdr) + sizeof(_udpHdr) + dns_dgram.length());
