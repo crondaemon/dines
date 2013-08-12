@@ -29,30 +29,33 @@ DnsQuestion::DnsQuestion(const string qdomain, unsigned qtype, unsigned qclass)
     _qdomain_enc = domainEncode(qdomain);
 
     // qtype
-    _qtype = qtype;
+    _qtype = htons(qtype);
 
     // qclass
-    _qclass = qclass;
+    _qclass = htons(qclass);
 
     _fuzzQtype = false;
     _fuzzQclass = false;
     srand(time(NULL));
 }
 
+bool DnsQuestion::operator==(const DnsQuestion& q) const
+{
+    return (
+        _qdomain_str == q._qdomain_str &&
+        _qdomain_enc == q._qdomain_enc &&
+        _qtype == q._qtype &&
+        _qclass == q._qclass);
+}
+
+bool DnsQuestion::operator!=(const DnsQuestion& q) const
+{
+    return !(*this == q);
+}
+
 string DnsQuestion::data() const
 {
-    string out = "";
-    uint16_t temp;
-
-    out += _qdomain_enc;
-
-    temp = htons(_qtype);
-    out += string((char*)&temp, 2);
-
-    temp = htons(_qclass);
-    out += string((char*)&temp, 2);
-
-    return out;
+    return _qdomain_enc + string((char*)&_qtype, 2) + string((char*)&_qclass, 2);
 }
 
 string DnsQuestion::qdomain() const
@@ -62,12 +65,22 @@ string DnsQuestion::qdomain() const
 
 uint16_t DnsQuestion::qclass() const
 {
-    return _qclass;
+    return ntohs(_qclass);
+}
+
+string DnsQuestion::qclassStr() const
+{
+    return qclassToString(ntohs(_qclass));
 }
 
 uint16_t DnsQuestion::qtype() const
 {
-    return _qtype;
+    return ntohs(_qtype);
+}
+
+string DnsQuestion::qtypeStr() const
+{
+    return qtypeToString(ntohs(_qtype));
 }
 
 void DnsQuestion::fuzz()
@@ -89,4 +102,9 @@ void DnsQuestion::fuzzQtype()
 void DnsQuestion::fuzzQclass()
 {
     _fuzzQclass = true;
+}
+
+string DnsQuestion::to_string() const
+{
+    return _qdomain_str + "/" + qtypeStr() + "/" + qclassStr();
 }

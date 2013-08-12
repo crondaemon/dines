@@ -18,10 +18,10 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
     _txid = htons(txid);
     memset(&_flags, 0x0, sizeof(DnsHeaderFlags));
     _flags.rd = 1;
-    _nRecord[DnsPacket::R_QUESTION] = nquest;
-    _nRecord[DnsPacket::R_ANSWER] = nans;
-    _nRecord[DnsPacket::R_ADDITIONAL] = nadd;
-    _nRecord[DnsPacket::R_AUTHORITIES] = nauth;
+    _nRecord[Dines::R_QUESTION] = nquest;
+    _nRecord[Dines::R_ANSWER] = nans;
+    _nRecord[Dines::R_ADDITIONAL] = nadd;
+    _nRecord[Dines::R_AUTHORITIES] = nauth;
 
     _fuzzFlags = false;
     _fuzzTxid = false;
@@ -37,10 +37,9 @@ string DnsHeader::data() const
 {
     string out = "";
 
-    uint16_t id = htons(_txid);
     uint16_t temp;
 
-    out += string((char*)&id, 2);
+    out += string((char*)&_txid, 2);
     out += string((char*)&_flags, 2);
 
     for (int i = 0; i < 4; i++) {
@@ -88,6 +87,13 @@ uint16_t DnsHeader::txid() const
     return ntohs(_txid);
 }
 
+string DnsHeader::txidStr() const
+{
+    char buf[7];
+    snprintf(buf, 7, "0x%.2X", ntohs(_txid));
+    return string(buf);
+}
+
 void DnsHeader::txid(uint16_t txid)
 {
     _txid = htons(txid);
@@ -120,20 +126,20 @@ void DnsHeader::fuzz()
         _flags = *f;
     }
 
-    if (_fuzzNRecord[DnsPacket::R_QUESTION] == true) {
-        _nRecord[DnsPacket::R_QUESTION] = rand() % 65535;
+    if (_fuzzNRecord[Dines::R_QUESTION] == true) {
+        _nRecord[Dines::R_QUESTION] = rand() % 65535;
     }
 
-    if (_fuzzNRecord[DnsPacket::R_ANSWER] == true) {
-        _nRecord[DnsPacket::R_ANSWER] = rand() % 65535;
+    if (_fuzzNRecord[Dines::R_ANSWER] == true) {
+        _nRecord[Dines::R_ANSWER] = rand() % 65535;
     }
 
-    if (_fuzzNRecord[DnsPacket::R_ADDITIONAL] == true) {
-        _nRecord[DnsPacket::R_ADDITIONAL] = rand() % 65535;
+    if (_fuzzNRecord[Dines::R_ADDITIONAL] == true) {
+        _nRecord[Dines::R_ADDITIONAL] = rand() % 65535;
     }
 
-    if (_fuzzNRecord[DnsPacket::R_AUTHORITIES] == true) {
-        _nRecord[DnsPacket::R_AUTHORITIES] = rand() % 65535;
+    if (_fuzzNRecord[Dines::R_AUTHORITIES] == true) {
+        _nRecord[Dines::R_AUTHORITIES] = rand() % 65535;
     }
 }
 

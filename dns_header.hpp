@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <dinestypes.hpp>
 
 #pragma pack(1)
 typedef struct {
@@ -55,6 +56,8 @@ public:
     void nRecordAdd(unsigned section, unsigned n);
 
     uint16_t txid() const;
+
+    std::string txidStr() const;
 
     void txid(uint16_t txid);
 

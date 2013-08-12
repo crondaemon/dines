@@ -12,6 +12,10 @@ std::string domainEncode(const std::string& s);
 //! and string numbers (as "1");
 uint16_t stringToQtype(const std::string& s);
 
+std::string qtypeToString(uint16_t qtype);
+
 uint16_t stringToQclass(const std::string& s);
+
+std::string qclassToString(uint16_t qclass);
 
 #endif

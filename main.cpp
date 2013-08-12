@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <dns_packet.hpp>
 #include <tokenizer.hpp>
@@ -33,12 +34,9 @@ struct option opts[] = {
     // some space here for new params
     {"num", 1, NULL, 30},
     {"delay", 1, NULL, 31},
-    {"debug", 0, NULL, 32},
-    {"verbose", 0, NULL, 33},
+    {"verbose", 0, NULL, 32},
     {NULL, 0, NULL, 0}
 };
-
-ostream* theLog;
 
 void usage(string s)
 {
@@ -76,6 +74,15 @@ void usage(string s)
     cout << "\n";
 }
 
+void logger(string s)
+{
+    const time_t t = time(NULL);
+    char buf[30];
+    ctime_r(&t, buf);
+    buf[strlen(buf)-1] = '\0';
+    cout << "[" << buf << "] " << s << endl;
+}
+
 int main(int argc, char* argv[])
 {
     int c = 0;
@@ -88,8 +95,6 @@ int main(int argc, char* argv[])
 
     memset(&forged_nrecords, 0x0, sizeof(forged_nrecords));
 
-    theLog = new ostream(NULL);
-
     cout << "\nDines " << PACKAGE_VERSION << " - The definitive DNS packet forger.\n\n";
 
     if (argc < 2) {
@@ -98,16 +103,16 @@ int main(int argc, char* argv[])
     }
 
     // Scan cmd line to dig for options and activate them immediately
-    for (int i = 0; i < argc; i++) {
-        if (string(argv[i]) == "--debug") {
-            cout << "Activating DEBUG\n";
-            theLog = new ostream(cout.rdbuf());
-        }
-        if (string(argv[i]) == "--help") {
-            usage(argv[0]);
-            return 1;
-        }
-    }
+//    for (int i = 0; i < argc; i++) {
+//        if (string(argv[i]) == "--debug") {
+//            cout << "Activating DEBUG\n";
+//            theLog = new ostream(cout.rdbuf());
+//        }
+//        if (string(argv[i]) == "--help") {
+//            usage(argv[0]);
+//            return 1;
+//        }
+//    }
 
     if (getuid() != 0) {
         cout << "You need to be root." << endl;
@@ -116,6 +121,7 @@ int main(int argc, char* argv[])
 
     // Create a packet
     DnsPacket p;
+
     vector<string> tokens;
 
     while((c = getopt_long(argc, argv, "", opts, NULL)) != -1) {
@@ -133,7 +139,11 @@ int main(int argc, char* argv[])
                 break;
 
             case 2:
-                p.sport(optarg);
+                if (optarg[0] == 'F') {
+                    p.fuzzSport();
+                } else {
+                    p.sport(optarg);
+                }
                 break;
 
             case 3:
@@ -152,9 +162,9 @@ int main(int argc, char* argv[])
             case 5:
                 if (optarg[0] == 'F') {
                     DnsHeader& h = p.dnsHdr();
-                    h.fuzzNRecord(DnsPacket::R_QUESTION);
+                    h.fuzzNRecord(Dines::R_QUESTION);
                 } else {
-                    forged_nrecords[DnsPacket::R_QUESTION] = atoi(optarg);
+                    forged_nrecords[Dines::R_QUESTION] = atoi(optarg);
                 }
                 break;
 
@@ -180,9 +190,9 @@ int main(int argc, char* argv[])
             case 7:
                 if (optarg[0] == 'F') {
                     DnsHeader& h = p.dnsHdr();
-                    h.fuzzNRecord(DnsPacket::R_ANSWER);
+                    h.fuzzNRecord(Dines::R_ANSWER);
                 } else {
-                    forged_nrecords[DnsPacket::R_ANSWER] = atoi(optarg);
+                    forged_nrecords[Dines::R_ANSWER] = atoi(optarg);
                 }
                 break;
 
@@ -193,7 +203,7 @@ int main(int argc, char* argv[])
                 p.isQuestion(false);
 
                 {
-                    ResourceRecord& rr = p.addRR(DnsPacket::R_ANSWER, tokens.at(0),
+                    ResourceRecord& rr = p.addRR(Dines::R_ANSWER, tokens.at(0),
                         tokens.at(1), tokens.at(2), tokens.at(3), tokens.at(4));
                     if (tokens.at(1).at(0) == 'F') {
                         rr.fuzzRRtype();
@@ -210,9 +220,9 @@ int main(int argc, char* argv[])
             case 9:
                 if (optarg[0] == 'F') {
                     DnsHeader& h = p.dnsHdr();
-                    h.fuzzNRecord(DnsPacket::R_ADDITIONAL);
+                    h.fuzzNRecord(Dines::R_ADDITIONAL);
                 } else {
-                    forged_nrecords[DnsPacket::R_ADDITIONAL] = atoi(optarg);
+                    forged_nrecords[Dines::R_ADDITIONAL] = atoi(optarg);
                 }
                 break;
 
@@ -221,16 +231,16 @@ int main(int argc, char* argv[])
                 tokens = tokenize(optarg, ",");
 
                 p.isQuestion(false);
-                p.addRR(DnsPacket::R_AUTHORITIES, tokens.at(0), tokens.at(1), tokens.at(2),
+                p.addRR(Dines::R_AUTHORITIES, tokens.at(0), tokens.at(1), tokens.at(2),
                     tokens.at(3), tokens.at(4));
                 break;
 
             case 11:
                 if (optarg[0] == 'F') {
                     DnsHeader& h = p.dnsHdr();
-                    h.fuzzNRecord(DnsPacket::R_AUTHORITIES);
+                    h.fuzzNRecord(Dines::R_AUTHORITIES);
                 } else {
-                    forged_nrecords[DnsPacket::R_AUTHORITIES] = atoi(optarg);
+                    forged_nrecords[Dines::R_AUTHORITIES] = atoi(optarg);
                 }
                 break;
 
@@ -238,27 +248,22 @@ int main(int argc, char* argv[])
                 tokens.clear();
                 tokens = tokenize(optarg, ",");
 
-                p.addRR(DnsPacket::R_ADDITIONAL, tokens.at(0), tokens.at(1), tokens.at(2),
+                p.addRR(Dines::R_ADDITIONAL, tokens.at(0), tokens.at(1), tokens.at(2),
                     tokens.at(3), tokens.at(4));
                 break;
 
             case 30:
                 num = atoi(optarg);
-                *theLog << "About to send " << num << " packets." << endl;
                 break;
 
             case 31:
                 delay = atoi(optarg);
-                *theLog << "Inter packet gap set to " << delay << endl;
+                logger("Inter packet gap set to "  + string(optarg));
                 break;
 
             case 32:
-                //cout << "Activating debug\n";
-                //theLog = new ostream(cout.rdbuf());
-                break;
-
-            case 33:
-                cout << "Verbose: ON" << endl;
+                logger("Verbose: ON");
+                p.setLogger(logger);
                 verbose = true;
                 break;
             default:
@@ -269,7 +274,7 @@ int main(int argc, char* argv[])
 
     for (unsigned i = 0; i < 4; i++) {
         if (forged_nrecords[i] != 0) {
-            p.nRecord(DnsPacket::RecordSection(i), forged_nrecords[i]);
+            p.nRecord(Dines::RecordSection(i), forged_nrecords[i]);
         }
     }
 
@@ -293,8 +298,7 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        if (verbose) {
-            //cout << p.to_string() << endl;
+        if (!verbose) {
             cout << ".";
             cout.flush();
         }
