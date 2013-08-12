@@ -13,6 +13,15 @@
 config.status
 *cache
 configure
+Makefile
+Makefile.in
+aclocal.m4
+config.h
+config.h.in
+depcomp
+install-sh
+missing
+stamp-h1
 
 # Compiled Dynamic libraries
 *.so
