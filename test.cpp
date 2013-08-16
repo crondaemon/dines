@@ -187,12 +187,12 @@ int test_many_rr()
     p.addRR(Dines::R_AUTHORITIES, rr);
 
     CHECK(p.nRecord(Dines::R_ADDITIONAL) == 1);
-    CHECK(p.addRR(Dines::R_ADDITIONAL, rr).rrType() == stringToQtype("NS"));
-    CHECK(p.additionals(0).rrType() == stringToQtype("NS"));
+    CHECK(p.addRR(Dines::R_ADDITIONAL, rr).rrType() == Dines::stringToQtype("NS"));
+    CHECK(p.additionals(0).rrType() == Dines::stringToQtype("NS"));
 
     CHECK(p.nRecord(Dines::R_AUTHORITIES) == 1);
-    CHECK(p.addRR(Dines::R_AUTHORITIES, rr).rrType() == stringToQtype("MX"));
-    CHECK(p.authorities(0).rrType() == stringToQtype("MX"));
+    CHECK(p.addRR(Dines::R_AUTHORITIES, rr).rrType() == Dines::stringToQtype("MX"));
+    CHECK(p.authorities(0).rrType() == Dines::stringToQtype("MX"));
 
     return 0;
 }
@@ -294,7 +294,7 @@ int test_fuzz_rr()
     ResourceRecord rr("www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
 
     rr.fuzz();
-    CHECK(rr.rrType() == stringToQtype("A"));
+    CHECK(rr.rrType() == Dines::stringToQtype("A"));
 
     rr.fuzzRRtype();
     rr.fuzzRRclass();
@@ -343,35 +343,35 @@ int test_invalid_section()
 
 int test_conversion()
 {
-    CHECK(stringToQtype("A") == 1);
-    CHECK(stringToQtype("NS") == 2);
-    CHECK(stringToQtype("CNAME") == 5);
-    CHECK(stringToQtype("PTR") == 12);
-    CHECK(stringToQtype("HINFO") == 13);
-    CHECK(stringToQtype("MX") == 15);
-    CHECK(stringToQtype("TXT") == 16);
-    CHECK(stringToQtype("AXFR") == 252);
-    CHECK(stringToQtype("ANY") == 255);
-    CHECK(stringToQtype("F") == 1);
-    CHECK(stringToQtype("20") == 20);
-    CATCH_EXCEPTION(stringToQtype("TEST"));
-    CATCH_EXCEPTION(stringToQtype("70000"));
+    CHECK(Dines::stringToQtype("A") == 1);
+    CHECK(Dines::stringToQtype("NS") == 2);
+    CHECK(Dines::stringToQtype("CNAME") == 5);
+    CHECK(Dines::stringToQtype("PTR") == 12);
+    CHECK(Dines::stringToQtype("HINFO") == 13);
+    CHECK(Dines::stringToQtype("MX") == 15);
+    CHECK(Dines::stringToQtype("TXT") == 16);
+    CHECK(Dines::stringToQtype("AXFR") == 252);
+    CHECK(Dines::stringToQtype("ANY") == 255);
+    CHECK(Dines::stringToQtype("F") == 1);
+    CHECK(Dines::stringToQtype("20") == 20);
+    CATCH_EXCEPTION(Dines::stringToQtype("TEST"));
+    CATCH_EXCEPTION(Dines::stringToQtype("70000"));
 
-    CHECK(stringToQclass("IN") == 1);
-    CHECK(stringToQclass("CSNET") == 2);
-    CHECK(stringToQclass("2") == 2);
-    CHECK(stringToQclass("CHAOS") == 3);
-    CHECK(stringToQclass("3") == 3);
-    CHECK(stringToQclass("HESIOD") == 4);
-    CHECK(stringToQclass("4") == 4);
-    CHECK(stringToQclass("NONE") == 254);
-    CHECK(stringToQclass("254") == 254);
-    CHECK(stringToQclass("ALL") == 255);
-    CHECK(stringToQclass("ANY") == 255);
-    CHECK(stringToQclass("255") == 255);
-    CHECK(stringToQclass("4") == 4);
-    CHECK(stringToQclass("F") == 1);
-    CATCH_EXCEPTION(stringToQclass("50"));
+    CHECK(Dines::stringToQclass("IN") == 1);
+    CHECK(Dines::stringToQclass("CSNET") == 2);
+    CHECK(Dines::stringToQclass("2") == 2);
+    CHECK(Dines::stringToQclass("CHAOS") == 3);
+    CHECK(Dines::stringToQclass("3") == 3);
+    CHECK(Dines::stringToQclass("HESIOD") == 4);
+    CHECK(Dines::stringToQclass("4") == 4);
+    CHECK(Dines::stringToQclass("NONE") == 254);
+    CHECK(Dines::stringToQclass("254") == 254);
+    CHECK(Dines::stringToQclass("ALL") == 255);
+    CHECK(Dines::stringToQclass("ANY") == 255);
+    CHECK(Dines::stringToQclass("255") == 255);
+    CHECK(Dines::stringToQclass("4") == 4);
+    CHECK(Dines::stringToQclass("F") == 1);
+    CATCH_EXCEPTION(Dines::stringToQclass("50"));
 
     return 0;
 }

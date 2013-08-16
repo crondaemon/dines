@@ -37,9 +37,9 @@ bool operator==(const DnsHeaderFlags& f1, const DnsHeaderFlags& f2);
 bool operator!=(const DnsHeaderFlags& f1, const DnsHeaderFlags& f2);
 
 class DnsHeader {
+    uint16_t _txid;
     DnsHeaderFlags _flags;
     uint16_t _nRecord[4];
-    uint16_t _txid;
     void _checkSection(unsigned section) const;
 
     bool _fuzzFlags;
@@ -76,6 +76,8 @@ public:
     void fuzzFlags();
     void fuzzTxid();
     void fuzzNRecord(unsigned section);
+
+    void parse(char* buf);
 };
 
 #endif 

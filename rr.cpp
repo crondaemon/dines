@@ -25,7 +25,7 @@ ResourceRecord::ResourceRecord(const string& rrDomain, uint16_t rrType,
 {
     // Domain
     _rrDomain_str = rrDomain;
-    _rrDomain_enc = domainEncode(rrDomain);
+    _rrDomain_enc = Dines::domainEncode(rrDomain);
 
     _rrType = htons(rrType);
     _rrClass = htons(rrClass);
@@ -45,8 +45,8 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
     uint16_t klass;
     unsigned int_ttl;
 
-    type = stringToQtype(rrType);
-    klass = stringToQclass(rrClass);
+    type = Dines::stringToQtype(rrType);
+    klass = Dines::stringToQclass(rrClass);
     int_ttl = atoi(ttl.data());
 
     *this = ResourceRecord(rrDomain, type, klass, int_ttl, rdata);
@@ -82,7 +82,7 @@ uint16_t ResourceRecord::rrType() const
 
 string ResourceRecord::rrTypeStr() const
 {
-    return qtypeToString(ntohs(_rrType));
+    return Dines::qtypeToString(ntohs(_rrType));
 }
 
 uint16_t ResourceRecord::rrClass() const
@@ -92,7 +92,7 @@ uint16_t ResourceRecord::rrClass() const
 
 string ResourceRecord::rrClassStr() const
 {
-    return qclassToString(ntohs(_rrClass));
+    return Dines::qclassToString(ntohs(_rrClass));
 }
 
 uint32_t ResourceRecord::ttl() const
@@ -146,7 +146,7 @@ void ResourceRecord::fuzzRRttl()
 
 void ResourceRecord::rrType(string rrType)
 {
-    this->rrType(stringToQtype(rrType));
+    this->rrType(Dines::stringToQtype(rrType));
 }
 
 void ResourceRecord::rrType(unsigned rrType)
@@ -156,7 +156,7 @@ void ResourceRecord::rrType(unsigned rrType)
 
 void ResourceRecord::rrClass(string rrClass)
 {
-    this->rrClass(stringToQclass(rrClass));
+    this->rrClass(Dines::stringToQclass(rrClass));
 }
 
 void ResourceRecord::rrClass(unsigned rrClass)

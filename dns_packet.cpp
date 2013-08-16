@@ -303,8 +303,8 @@ ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string
         const std::string& rrType, const std::string& rrClass, const std::string& ttl,
         const std::string& rdata)
 {
-    unsigned type = stringToQtype(rrType);
-    unsigned klass = stringToQclass(rrClass);
+    unsigned type = Dines::stringToQtype(rrType);
+    unsigned klass = Dines::stringToQclass(rrClass);
     unsigned int_ttl = atoi(ttl.data());
 
     string localrdata = rdata;
@@ -312,7 +312,7 @@ ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string
     if (_rDataIp) {
         if (_log)
             _log("Converting " + rdata + " to IP address");
-        uint32_t addr = _convertIP(rdata);
+        uint32_t addr = Dines::stringToIp32(rdata);
         localrdata = string((char*)&addr, 4);
     }
 
@@ -507,14 +507,6 @@ void DnsPacket::setLogger(Dines::LogFunc l)
     _log = l;
 }
 
-uint32_t DnsPacket::_convertIP(string rdata)
-{
-    uint32_t addr;
-    if (inet_pton(AF_INET, rdata.data(), &addr) != 1)
-        throw runtime_error("Can't convert IP address: " + rdata);
-    return addr;
-}
-
 void DnsPacket::rDataIp()
 {
     if (_log)
@@ -525,17 +517,17 @@ void DnsPacket::rDataIp()
     uint32_t addr;
     for (vector<ResourceRecord>::iterator itr = _answers.begin(); itr != _answers.end();
             ++itr) {
-        addr = _convertIP(itr->rData());
+        addr = Dines::stringToIp32(itr->rData());
         itr->rData(string((char*)&addr, 4));
     }
     for (vector<ResourceRecord>::iterator itr = _authorities.begin(); itr != _authorities.end();
             ++itr) {
-        addr = _convertIP(itr->rData());
+        addr = Dines::stringToIp32(itr->rData());
         itr->rData(string((char*)&addr, 4));
     }
     for (vector<ResourceRecord>::iterator itr = _additionals.begin(); itr != _additionals.end();
             ++itr) {
-        addr = _convertIP(itr->rData());
+        addr = Dines::stringToIp32(itr->rData());
         itr->rData(string((char*)&addr, 4));
     }
 }

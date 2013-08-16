@@ -1,7 +1,8 @@
 
-#include "dns_header.hpp"
+#include <dns_header.hpp>
 
 #include <dns_packet.hpp>
+#include <debug.hpp>
 
 #include <cstring>
 #include <stdexcept>
@@ -18,10 +19,10 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
     _txid = htons(txid);
     memset(&_flags, 0x0, sizeof(DnsHeaderFlags));
     _flags.rd = 1;
-    _nRecord[Dines::R_QUESTION] = nquest;
-    _nRecord[Dines::R_ANSWER] = nans;
-    _nRecord[Dines::R_ADDITIONAL] = nadd;
-    _nRecord[Dines::R_AUTHORITIES] = nauth;
+    _nRecord[Dines::R_QUESTION] = htons(nquest);
+    _nRecord[Dines::R_ANSWER] = htons(nans);
+    _nRecord[Dines::R_ADDITIONAL] = htons(nadd);
+    _nRecord[Dines::R_AUTHORITIES] = htons(nauth);
 
     _fuzzFlags = false;
     _fuzzTxid = false;
@@ -37,14 +38,11 @@ string DnsHeader::data() const
 {
     string out = "";
 
-    uint16_t temp;
-
     out += string((char*)&_txid, 2);
     out += string((char*)&_flags, 2);
 
     for (int i = 0; i < 4; i++) {
-        temp = htons(_nRecord[i]);
-        out += string((char*)&temp, 2);
+        out += string((char*)&_nRecord[i], 2);
     }
 
     return out;
@@ -73,13 +71,14 @@ void DnsHeader::isRecursive(bool isRecursive)
 void DnsHeader::nRecord(unsigned section, uint16_t value)
 {
     _checkSection(section);
-    _nRecord[section] = value;
+    printf("METTO IN SEZIONE %d val %d\n", section, value);
+    _nRecord[section] = htons(value);
 }
 
 uint16_t DnsHeader::nRecord(unsigned section) const
 {
     _checkSection(section);
-    return _nRecord[section];
+    return ntohs(_nRecord[section]);
 }
 
 uint16_t DnsHeader::txid() const
@@ -102,7 +101,7 @@ void DnsHeader::txid(uint16_t txid)
 void DnsHeader::nRecordAdd(unsigned section, unsigned n)
 {
     _checkSection(section);
-    _nRecord[section] += n;
+    _nRecord[section] += htons(ntohs(_nRecord[section]) + n);
 }
 
 void DnsHeader::_checkSection(unsigned section) const
@@ -182,4 +181,11 @@ bool operator==(const DnsHeaderFlags& f1, const DnsHeaderFlags& f2)
 bool operator!=(const DnsHeaderFlags& f1, const DnsHeaderFlags& f2)
 {
     return !(f1 == f2);
+}
+
+void DnsHeader::parse(char* buf)
+{
+    memcpy(&_txid, buf, 2);
+    memcpy(&_flags, buf + 2, 2);
+    memcpy(&_nRecord, buf + 4, 8);
 }

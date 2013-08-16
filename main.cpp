@@ -14,6 +14,7 @@
 #include <tokenizer.hpp>
 #include <rr.hpp>
 #include <config.h>
+#include <server.hpp>
 
 using namespace std;
 
@@ -33,6 +34,7 @@ struct option opts[] = {
     {"additional", 1, NULL, 12},
     {"rdata-ip", 0, NULL, 13},
     // some space here for new params
+    {"server", 1, NULL, 29},
     {"num", 1, NULL, 30},
     {"delay", 1, NULL, 31},
     {"verbose", 0, NULL, 32},
@@ -269,6 +271,18 @@ int main(int argc, char* argv[])
                     p.rDataIp();
                     break;
 
+                case 29:
+                    tokens.clear();
+                    tokens = tokenize(optarg, ",");
+
+                    {
+                        ResourceRecord& rr = p.addRR(Dines::R_ADDITIONAL,
+                            tokens.at(0), tokens.at(1), tokens.at(2),
+                            tokens.at(3), tokens.at(4));
+                        Server server(rr, logger);
+                        server.launch();
+                    }
+                    break;
                 case 30:
                     num = atoi(optarg);
                     break;

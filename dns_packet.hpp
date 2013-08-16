@@ -42,8 +42,6 @@ class DnsPacket {
     //! DNS additionals
     std::vector<ResourceRecord> _additionals;
 
-    uint32_t _convertIP(std::string rdata);
-
     bool _rDataIp;
 
     bool _fuzzSrcIp;

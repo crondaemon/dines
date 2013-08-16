@@ -7,8 +7,11 @@
 #include <stdexcept>
 #include <stdlib.h>
 #include <iostream>
+#include <arpa/inet.h>
 
 using namespace std;
+
+namespace Dines {
 
 std::string domainEncode(const std::string& s)
 {
@@ -116,3 +119,22 @@ string qclassToString(uint16_t qclass)
             throw logic_error(string(__func__) + ": Invalid qclass");
     }
 }
+
+uint32_t stringToIp32(string s)
+{
+    uint32_t addr;
+    if (inet_pton(AF_INET, s.data(), &addr) != 1)
+        throw runtime_error("Can't convert IP address: " + s);
+    return addr;
+}
+
+string ip32ToString(uint32_t ip32)
+{
+    char buf[INET_ADDRSTRLEN];
+    if (inet_ntop(AF_INET, &ip32, buf, INET_ADDRSTRLEN) == NULL) {
+        throw runtime_error("Can't convert IP address");
+    }
+    return string(buf);
+}
+
+}; // namespace

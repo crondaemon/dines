@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 using namespace std;
 
@@ -16,8 +17,8 @@ DnsQuestion::DnsQuestion(const string qdomain, const string qtype, const string 
     unsigned myqtype;
     unsigned myqclass;
 
-    myqtype = stringToQtype(qtype);
-    myqclass = stringToQclass(qclass);
+    myqtype = Dines::stringToQtype(qtype);
+    myqclass = Dines::stringToQclass(qclass);
 
     *this = DnsQuestion(qdomain, myqtype, myqclass);
 }
@@ -26,7 +27,7 @@ DnsQuestion::DnsQuestion(const string qdomain, unsigned qtype, unsigned qclass)
 {
     // Domain
     _qdomain_str = qdomain;
-    _qdomain_enc = domainEncode(qdomain);
+    _qdomain_enc = Dines::domainEncode(qdomain);
 
     // qtype
     _qtype = htons(qtype);
@@ -70,7 +71,7 @@ uint16_t DnsQuestion::qclass() const
 
 string DnsQuestion::qclassStr() const
 {
-    return qclassToString(ntohs(_qclass));
+    return Dines::qclassToString(ntohs(_qclass));
 }
 
 uint16_t DnsQuestion::qtype() const
@@ -80,7 +81,7 @@ uint16_t DnsQuestion::qtype() const
 
 string DnsQuestion::qtypeStr() const
 {
-    return qtypeToString(ntohs(_qtype));
+    return Dines::qtypeToString(ntohs(_qtype));
 }
 
 void DnsQuestion::fuzz()
@@ -107,4 +108,16 @@ void DnsQuestion::fuzzQclass()
 string DnsQuestion::to_string() const
 {
     return _qdomain_str + "/" + qtypeStr() + "/" + qclassStr();
+}
+
+void DnsQuestion::parse(char* buf)
+{
+    unsigned i = 0;
+    while (buf[i] != 0)
+        i++;
+    i++;
+    _qdomain_enc = string(buf, i);
+    //_qdomain_str = // XXX
+    memcpy(&_qtype, buf + i, 2);
+    memcpy(&_qclass, buf + i + 2, 2);
 }

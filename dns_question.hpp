@@ -39,6 +39,8 @@ public:
     void fuzzQclass();
 
     std::string to_string() const;
+
+    void parse(char* buf);
 };
 
 #endif
