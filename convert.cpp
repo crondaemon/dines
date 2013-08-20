@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <arpa/inet.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -137,4 +138,18 @@ string ip32ToString(uint32_t ip32)
     return string(buf);
 }
 
+string rDataConvert(const char* opt, string qtype)
+{
+    if (qtype == "A") {
+        struct in_addr addr;
+        if (inet_pton(AF_INET, opt, &addr) == -1)
+            throw runtime_error("Can't convert " + string(opt));
+        return string((char*)&addr, 4);
+    }
+
+    if (qtype == "NS") {
+        return domainEncode(opt);
+    }
+    throw runtime_error("Conversion of " + string(opt) + " not supported");
+}
 }; // namespace

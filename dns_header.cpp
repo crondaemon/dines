@@ -34,6 +34,22 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
     srand(time(NULL));
 }
 
+DnsHeader::DnsHeader(const DnsHeader& h)
+{
+    *this = h;
+}
+
+DnsHeader& DnsHeader::operator=(const DnsHeader& h)
+{
+    _txid = h._txid;
+    _flags = h._flags;
+    memcpy(&_nRecord, h._nRecord, sizeof(_nRecord));
+    _fuzzFlags = h._fuzzFlags;
+    _fuzzTxid = h._fuzzTxid;
+    memcpy(&_fuzzNRecord, h._fuzzNRecord, sizeof(_fuzzNRecord));
+    return *this;
+}
+
 string DnsHeader::data() const
 {
     string out = "";
@@ -187,4 +203,24 @@ void DnsHeader::parse(char* buf)
     memcpy(&_txid, buf, 2);
     memcpy(&_flags, buf + 2, 2);
     memcpy(&_nRecord, buf + 4, 8);
+}
+
+bool DnsHeader::rd() const
+{
+    return _flags.rd == 1;
+}
+
+bool DnsHeader::ra() const
+{
+    return _flags.ra == 1;
+}
+
+void DnsHeader::rd(bool rec_des)
+{
+    _flags.rd = (rec_des == true ? 1 : 0);
+}
+
+void DnsHeader::ra(bool rec_avail)
+{
+    _flags.ra = (rec_avail == true ? 1 : 0);
 }

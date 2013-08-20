@@ -24,6 +24,8 @@ uint32_t stringToIp32(std::string s);
 
 std::string ip32ToString(uint32_t ip32);
 
+std::string rDataConvert(const char* opt, std::string qtype);
+
 };
 
 #endif

@@ -19,6 +19,9 @@ class DnsQuestion {
 public:
     DnsQuestion(const std::string qdomain = "", unsigned qtype = 0, unsigned qclass = 0);
     DnsQuestion(const std::string qdomain, const std::string qtype, const std::string qclass);
+    DnsQuestion(const DnsQuestion& q);
+
+    DnsQuestion& operator=(const DnsQuestion& q);
 
     bool operator==(const DnsQuestion& q) const;
     bool operator!=(const DnsQuestion& q) const;

@@ -24,9 +24,6 @@ public:
     ResourceRecord(const std::string& rrDomain = "", uint16_t rrType = 0,
         uint16_t rrClass = 0, uint32_t ttl = 0, const std::string& rdata = "");
 
-    ResourceRecord(const std::string& rrDomain, uint16_t rrType,
-        uint16_t rrClass, uint32_t ttl, const char* rdata, unsigned rdatalen);
-
     std::string rrDomain() const;
 
     std::string data() const;

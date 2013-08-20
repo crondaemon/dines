@@ -42,8 +42,6 @@ class DnsPacket {
     //! DNS additionals
     std::vector<ResourceRecord> _additionals;
 
-    bool _rDataIp;
-
     bool _fuzzSrcIp;
 
     bool _fuzzSport;
@@ -52,6 +50,9 @@ class DnsPacket {
 public:
     //! Constructor
     DnsPacket(Dines::LogFunc l = NULL);
+    DnsPacket(const DnsPacket& p);
+
+    DnsPacket& operator=(const DnsPacket& p);
 
     DnsHeader& dnsHdr();
     DnsQuestion& question();
@@ -118,6 +119,7 @@ public:
     DnsQuestion& addQuestion(const std::string qdomain, const std::string& qtype,
         const std::string& qclass);
     DnsQuestion& addQuestion(const std::string qdomain, unsigned qtype, unsigned qclass);
+    DnsQuestion& addQuestion(const DnsQuestion& q);
 
     //! Adds a RR
     ResourceRecord& addRR(Dines::RecordSection section, const std::string rrDomain,
@@ -132,10 +134,6 @@ public:
         unsigned rdatalen);
 
     ResourceRecord& addRR(Dines::RecordSection section, const ResourceRecord& rr);
-
-    // Converts existing resource record rdata into IP addresses. Sets also a flag
-    // for future conversions
-    void rDataIp();
 
     void fuzz();
 

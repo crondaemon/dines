@@ -2,19 +2,17 @@
 #ifndef __SERVER_HPP__
 #define __SERVER_HPP__
 
-#include <dns_header.hpp>
-#include <dns_question.hpp>
-#include <rr.hpp>
+#include <dns_packet.hpp>
 #include <dinestypes.hpp>
 
 class Server {
-    DnsHeader _hdr;
-    DnsQuestion _question;
-    ResourceRecord _rr;
+    DnsPacket _p;
+    uint16_t _port;
     Dines::LogFunc _log;
     std::string _data() const;
 public:
-    Server(const ResourceRecord& rr, Dines::LogFunc log = NULL);
+    Server(const DnsPacket& p, uint16_t port, Dines::LogFunc log = NULL);
+    void setLogger(Dines::LogFunc l);
     void launch();
 };
 

@@ -40,6 +40,22 @@ DnsQuestion::DnsQuestion(const string qdomain, unsigned qtype, unsigned qclass)
     srand(time(NULL));
 }
 
+DnsQuestion::DnsQuestion(const DnsQuestion& q)
+{
+    *this = q;
+}
+
+DnsQuestion& DnsQuestion::operator=(const DnsQuestion& q)
+{
+    _qdomain_str = q._qdomain_str;
+    _qdomain_enc = q._qdomain_enc;
+    _qtype = q._qtype;
+    _qclass = q._qclass;
+    _fuzzQtype = q._fuzzQtype;
+    _fuzzQclass = q._fuzzQclass;
+    return *this;
+}
+
 bool DnsQuestion::operator==(const DnsQuestion& q) const
 {
     return (

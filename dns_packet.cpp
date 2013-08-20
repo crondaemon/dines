@@ -46,12 +46,33 @@ DnsPacket::DnsPacket(Dines::LogFunc l)
     _fuzzSrcIp = false;
     _fuzzSport = false;
 
-    _rDataIp = false;
-
     _log = l;
 
     if (_log != NULL)
         _log("DnsPacket created");
+}
+
+DnsPacket::DnsPacket(const DnsPacket& p)
+{
+    *this = p;
+}
+
+DnsPacket& DnsPacket::operator=(const DnsPacket& p)
+{
+    _socket = p._socket;
+    _recvSocket = p._recvSocket;
+    _ipHdr = p._ipHdr;
+    _udpHdr = p._udpHdr;
+    _dnsHdr = p._dnsHdr;
+    _question = p._question;
+    _answers = p._answers;
+    _authorities = p._authorities;
+    _additionals = p._additionals;
+    _fuzzSrcIp = p._fuzzSrcIp;
+    _fuzzSport = p._fuzzSport;
+    _log = p._log;
+
+    return *this;
 }
 
 string DnsPacket::data() const
@@ -292,6 +313,13 @@ DnsQuestion& DnsPacket::addQuestion(const std::string qdomain, unsigned qtype, u
     return _question;
 }
 
+DnsQuestion& DnsPacket::addQuestion(const DnsQuestion& q)
+{
+    _question = q;
+    _dnsHdr.nRecord(Dines::R_QUESTION, 1);
+    return _question;
+}
+
 ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string& rrDomain,
         unsigned rrType, unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen)
 {
@@ -308,13 +336,6 @@ ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string
     unsigned int_ttl = atoi(ttl.data());
 
     string localrdata = rdata;
-
-    if (_rDataIp) {
-        if (_log)
-            _log("Converting " + rdata + " to IP address");
-        uint32_t addr = Dines::stringToIp32(rdata);
-        localrdata = string((char*)&addr, 4);
-    }
 
     return addRR(section, rrDomain, type, klass, int_ttl, localrdata);
 }
@@ -505,29 +526,4 @@ void DnsPacket::fuzzSport()
 void DnsPacket::setLogger(Dines::LogFunc l)
 {
     _log = l;
-}
-
-void DnsPacket::rDataIp()
-{
-    if (_log)
-        _log("Activating IP conversion");
-
-    _rDataIp = true;
-
-    uint32_t addr;
-    for (vector<ResourceRecord>::iterator itr = _answers.begin(); itr != _answers.end();
-            ++itr) {
-        addr = Dines::stringToIp32(itr->rData());
-        itr->rData(string((char*)&addr, 4));
-    }
-    for (vector<ResourceRecord>::iterator itr = _authorities.begin(); itr != _authorities.end();
-            ++itr) {
-        addr = Dines::stringToIp32(itr->rData());
-        itr->rData(string((char*)&addr, 4));
-    }
-    for (vector<ResourceRecord>::iterator itr = _additionals.begin(); itr != _additionals.end();
-            ++itr) {
-        addr = Dines::stringToIp32(itr->rData());
-        itr->rData(string((char*)&addr, 4));
-    }
 }

@@ -15,6 +15,7 @@
 #include <rr.hpp>
 #include <config.h>
 #include <server.hpp>
+#include <convert.hpp>
 
 using namespace std;
 
@@ -32,7 +33,6 @@ struct option opts[] = {
     {"auth", 1, NULL, 10},
     {"num-add", 1, NULL, 11},
     {"additional", 1, NULL, 12},
-    {"rdata-ip", 0, NULL, 13},
     // some space here for new params
     {"server", 1, NULL, 29},
     {"num", 1, NULL, 30},
@@ -61,16 +61,19 @@ void usage(string s)
     cout << "--question <domain>,<type(F)>,<class(F)>: question domain\n";
     cout << "\n";
     cout << "--num-ans <n>: number of answers (AF)\n";
-    cout << "--answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<data>: a DNS answer\n";
+    cout << "--answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS answer\n";
+    cout << "--answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS answer\n";
     cout << "\n";
     cout << "--num-auth <n>: number of authoritative records (AF)\n";
-    cout << "--auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<data>: a DNS authoritative record\n";
+    cout << "--auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<rdata>: a DNS authoritative record\n";
+    cout << "--auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS authoritative record\n";
     cout << "\n";
     cout << "--num-add <n>: number of additional records (AF)\n";
-    cout << "--additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<data>: a DNS additional record\n";
+    cout << "--additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS additional record\n";
+    cout << "--additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS additional record\n";
     cout << "\n";
-    cout << "--rdata-ip: use rdata as it was an IP address\n";
-    cout << "\n[MISC]\n";
+    cout << "[MISC]\n";
+    cout << "--server <port>: run in server mode on port (A)\n";
     cout << "--num <n>: number of packets (0 = infinite)\n";
     cout << "--delay <usec>: delay between packets\n";
     cout << "--verbose: be verbose\n";
@@ -96,6 +99,11 @@ int main(int argc, char* argv[])
     unsigned delay = 1000000;
     bool verbose = false;
     uint16_t forged_nrecords[4];
+    DnsPacket p;
+    uint16_t server_port = 0;
+    Server* server = NULL;
+    int type;
+    ResourceRecord rr;
 
     memset(&forged_nrecords, 0x0, sizeof(forged_nrecords));
 
@@ -110,9 +118,6 @@ int main(int argc, char* argv[])
         cout << "You need to be root." << endl;
         return 1;
     }
-
-    // Create a packet
-    DnsPacket p;
 
     vector<string> tokens;
 
@@ -190,27 +195,41 @@ int main(int argc, char* argv[])
                     break;
 
                 case 8:
+                case 10:
+                case 12:
+                    // c = 8 => type = 1
+                    // c = 10 => type = 2
+                    // c = 12 => type = 3
+                    type = c / 2 - 3;
                     tokens.clear();
                     tokens = tokenize(optarg, ",");
 
-                    if (tokens.size() != 5) {
-                        cout << "Syntax: --answer <domain>,<type>,<class>,<ttl>,<rdata>\n";
+                    if (tokens.size() < 5) {
+                        cout << "Syntax:\n";
+                        cout << "\t<domain>,<type>,<class>,<ttl>,<rdata>\n";
+                        cout << "\t<domain>,<type>,<class>,<ttl>,<rdatalen>,<rdata>\n";
                         return 1;
                     }
 
-                    {
-                        ResourceRecord& rr = p.addRR(Dines::R_ANSWER, tokens.at(0),
-                            tokens.at(1), tokens.at(2), tokens.at(3), tokens.at(4));
+                    if (tokens.size() == 6) {
+                        const char* data = tokens.at(5).data();
+                        rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2),
+                            tokens.at(3), string(data, atoi(tokens.at(4).data())));
+                    } else {
+//                        logger("Converting " + tokens.at(4));
+                        rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2),
+                            tokens.at(3), Dines::rDataConvert(tokens.at(4).data(), tokens.at(1)));
+                    }
 
-                        if (tokens.at(1).at(0) == 'F') {
-                            rr.fuzzRRtype();
-                        }
-                        if (tokens.at(2).at(0) == 'F') {
-                            rr.fuzzRRclass();
-                        }
-                        if (tokens.at(3).at(0) == 'F') {
-                            rr.fuzzRRttl();
-                        }
+                    p.addRR(Dines::RecordSection(type), rr);
+                    if (tokens.at(1).at(0) == 'F') {
+                        rr.fuzzRRtype();
+                    }
+                    if (tokens.at(2).at(0) == 'F') {
+                        rr.fuzzRRclass();
+                    }
+                    if (tokens.at(3).at(0) == 'F') {
+                        rr.fuzzRRttl();
                     }
                     break;
 
@@ -223,32 +242,6 @@ int main(int argc, char* argv[])
                     }
                     break;
 
-                case 10:
-                    tokens.clear();
-                    tokens = tokenize(optarg, ",");
-
-                    if (tokens.size() != 5) {
-                        cout << "Syntax: --auth <domain>,<type>,<class>,<ttl>,<rdata>\n";
-                        return 1;
-                    }
-
-
-                    {
-                        ResourceRecord& rr = p.addRR(Dines::R_AUTHORITIES,
-                            tokens.at(0), tokens.at(1), tokens.at(2),
-                            tokens.at(3), tokens.at(4));
-                        if (tokens.at(1).at(0) == 'F') {
-                            rr.fuzzRRtype();
-                        }
-                        if (tokens.at(2).at(0) == 'F') {
-                            rr.fuzzRRclass();
-                        }
-                        if (tokens.at(3).at(0) == 'F') {
-                            rr.fuzzRRttl();
-                        }
-                    }
-                    break;
-
                 case 11:
                     if (optarg[0] == 'F') {
                         DnsHeader& h = p.dnsHdr();
@@ -258,51 +251,8 @@ int main(int argc, char* argv[])
                     }
                     break;
 
-                case 12:
-                    tokens.clear();
-                    tokens = tokenize(optarg, ",");
-
-                    if (tokens.size() != 5) {
-                        cout << "Syntax: --add <domain>,<type>,<class>,<ttl>,<rdata>\n";
-                        return 1;
-                    }
-
-                    {
-                        ResourceRecord& rr = p.addRR(Dines::R_ADDITIONAL,
-                            tokens.at(0), tokens.at(1), tokens.at(2),
-                            tokens.at(3), tokens.at(4));
-                        if (tokens.at(1).at(0) == 'F') {
-                            rr.fuzzRRtype();
-                        }
-                        if (tokens.at(2).at(0) == 'F') {
-                            rr.fuzzRRclass();
-                        }
-                        if (tokens.at(3).at(0) == 'F') {
-                            rr.fuzzRRttl();
-                        }
-                    }
-                    break;
-
-                case 13:
-                    p.rDataIp();
-                    break;
-
                 case 29:
-                    tokens.clear();
-                    tokens = tokenize(optarg, ",");
-
-                    if (tokens.size() < 5) {
-                        cerr << "Invalid number of parameters: " << optarg << endl;
-                        return 3;
-                    }
-
-                    {
-                        ResourceRecord& rr = p.addRR(Dines::R_ANSWER,
-                            tokens.at(0), tokens.at(1), tokens.at(2),
-                            tokens.at(3), tokens.at(4));
-                        Server server(rr, logger);
-                        server.launch();
-                    }
+                    server_port = atoi(optarg);
                     break;
                 case 30:
                     num = atoi(optarg);
@@ -332,6 +282,14 @@ int main(int argc, char* argv[])
         if (forged_nrecords[i] != 0) {
             p.nRecord(Dines::RecordSection(i), forged_nrecords[i]);
         }
+    }
+
+    // check if server has been created. In this case run it
+    if (server_port > 0) {
+        server = new Server(p, server_port);
+        if (verbose == true)
+            server->setLogger(logger);
+        server->launch();
     }
 
     if (num == 0)

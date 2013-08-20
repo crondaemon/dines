@@ -135,7 +135,7 @@ int test_rr()
     rr1.rrClass("CHAOS");
     CHECK(rr1.rrClass() == 3);
 
-    ResourceRecord rr2("www.test.com", 1, 1, 64, "\x00\x00\x01\x00", 4);
+    ResourceRecord rr2("www.test.com", 1, 1, 64, string("\x00\x00\x01\x00", 4));
     CHECK(rr2.rDataLen() == 4);
 
     return 0;

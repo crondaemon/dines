@@ -40,14 +40,18 @@ class DnsHeader {
     uint16_t _txid;
     DnsHeaderFlags _flags;
     uint16_t _nRecord[4];
-    void _checkSection(unsigned section) const;
-
     bool _fuzzFlags;
     bool _fuzzTxid;
     bool _fuzzNRecord[4];
+
+    void _checkSection(unsigned section) const;
+
 public:
     DnsHeader(const uint16_t txid = 0, const uint32_t nquest = 0, const uint32_t nans = 0,
         const uint32_t nadd = 0, const uint32_t nauth = 0);
+    DnsHeader(const DnsHeader& h);
+
+    DnsHeader& operator=(const DnsHeader& h);
 
     void nRecord(unsigned section, uint16_t value);
 
@@ -58,6 +62,12 @@ public:
     uint16_t txid() const;
 
     std::string txidStr() const;
+
+    bool rd() const;
+    void rd(bool rec_des);
+
+    bool ra() const;
+    void ra(bool rec_avail);
 
     void txid(uint16_t txid);
 

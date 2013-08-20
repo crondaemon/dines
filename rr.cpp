@@ -13,13 +13,6 @@
 
 using namespace std;
 
-ResourceRecord::ResourceRecord(const std::string& rrDomain, uint16_t rrType,
-        uint16_t rrClass, uint32_t ttl, const char* rdata, unsigned rdatalen)
-{
-    string rd(rdata, rdatalen);
-    *this = ResourceRecord(rrDomain, rrType, rrClass, ttl, rd);
-}
-
 ResourceRecord::ResourceRecord(const string& rrDomain, uint16_t rrType,
         uint16_t rrClass, uint32_t ttl, const string& rdata)
 {
@@ -166,8 +159,20 @@ void ResourceRecord::rrClass(unsigned rrClass)
 
 string ResourceRecord::to_string() const
 {
-    return _rrDomain_str + "/" + rrTypeStr() + "/" + rrClassStr() + "/" +
+    string out = _rrDomain_str + "/" + rrTypeStr() + "/" + rrClassStr() + "/" +
         ttlStr();
+
+    if (Dines::qtypeToString(ntohs(_rrType)) == "A") {
+        char addr[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, _rData.data(), addr, INET_ADDRSTRLEN);
+        out += "/" + string(addr);
+    }
+
+    if (Dines::qtypeToString(ntohs(_rrType)) == "NS") {
+        out += "/" + _rrDomain_str;
+    }
+
+    return out;
 }
 
 void ResourceRecord::rData(string rdata)
