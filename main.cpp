@@ -193,6 +193,11 @@ int main(int argc, char* argv[])
                     tokens.clear();
                     tokens = tokenize(optarg, ",");
 
+                    if (tokens.size() != 5) {
+                        cout << "Syntax: --answer <domain>,<type>,<class>,<ttl>,<rdata>\n";
+                        return 1;
+                    }
+
                     {
                         ResourceRecord& rr = p.addRR(Dines::R_ANSWER, tokens.at(0),
                             tokens.at(1), tokens.at(2), tokens.at(3), tokens.at(4));
@@ -222,6 +227,12 @@ int main(int argc, char* argv[])
                     tokens.clear();
                     tokens = tokenize(optarg, ",");
 
+                    if (tokens.size() != 5) {
+                        cout << "Syntax: --auth <domain>,<type>,<class>,<ttl>,<rdata>\n";
+                        return 1;
+                    }
+
+
                     {
                         ResourceRecord& rr = p.addRR(Dines::R_AUTHORITIES,
                             tokens.at(0), tokens.at(1), tokens.at(2),
@@ -250,6 +261,11 @@ int main(int argc, char* argv[])
                 case 12:
                     tokens.clear();
                     tokens = tokenize(optarg, ",");
+
+                    if (tokens.size() != 5) {
+                        cout << "Syntax: --add <domain>,<type>,<class>,<ttl>,<rdata>\n";
+                        return 1;
+                    }
 
                     {
                         ResourceRecord& rr = p.addRR(Dines::R_ADDITIONAL,
@@ -281,7 +297,7 @@ int main(int argc, char* argv[])
                     }
 
                     {
-                        ResourceRecord& rr = p.addRR(Dines::R_ADDITIONAL,
+                        ResourceRecord& rr = p.addRR(Dines::R_ANSWER,
                             tokens.at(0), tokens.at(1), tokens.at(2),
                             tokens.at(3), tokens.at(4));
                         Server server(rr, logger);
