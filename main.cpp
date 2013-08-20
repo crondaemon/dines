@@ -216,12 +216,10 @@ int main(int argc, char* argv[])
                         rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2),
                             tokens.at(3), string(data, atoi(tokens.at(4).data())));
                     } else {
-//                        logger("Converting " + tokens.at(4));
                         rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2),
                             tokens.at(3), Dines::rDataConvert(tokens.at(4).data(), tokens.at(1)));
                     }
 
-                    p.addRR(Dines::RecordSection(type), rr);
                     if (tokens.at(1).at(0) == 'F') {
                         rr.fuzzRRtype();
                     }
@@ -231,6 +229,8 @@ int main(int argc, char* argv[])
                     if (tokens.at(3).at(0) == 'F') {
                         rr.fuzzRRttl();
                     }
+
+                    p.addRR(Dines::RecordSection(type), rr);
                     break;
 
                 case 9:

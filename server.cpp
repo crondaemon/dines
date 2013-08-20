@@ -90,6 +90,8 @@ void Server::launch()
                 sockaddr_len) == -1) {
             throw runtime_error(string(__func__) + "::sendto() error: " + string(strerror(errno)));
         }
+
+        _p.fuzz();
     }
 }
 

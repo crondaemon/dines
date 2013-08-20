@@ -45,6 +45,28 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
     *this = ResourceRecord(rrDomain, type, klass, int_ttl, rdata);
 }
 
+ResourceRecord::ResourceRecord(const ResourceRecord& rr)
+{
+    *this = rr;
+}
+
+ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
+{
+    _rrDomain_str = rr._rrDomain_str;
+    _rrDomain_enc = rr._rrDomain_enc;
+
+    _rrType = rr._rrType;
+    _rrClass = rr._rrClass;
+    _ttl = rr._ttl;
+    _rData = rr._rData;
+
+    _fuzzRRtype = rr._fuzzRRtype;
+    _fuzzRRclass = rr._fuzzRRclass;
+    _fuzzTTL = rr._fuzzTTL;
+
+    return *this;
+}
+
 string ResourceRecord::data() const
 {
     string out = "";

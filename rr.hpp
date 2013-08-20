@@ -24,6 +24,10 @@ public:
     ResourceRecord(const std::string& rrDomain = "", uint16_t rrType = 0,
         uint16_t rrClass = 0, uint32_t ttl = 0, const std::string& rdata = "");
 
+    ResourceRecord(const ResourceRecord& rr);
+
+    ResourceRecord& operator=(const ResourceRecord& rr);
+
     std::string rrDomain() const;
 
     std::string data() const;

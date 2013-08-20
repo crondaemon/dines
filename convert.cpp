@@ -150,6 +150,8 @@ string rDataConvert(const char* opt, string qtype)
     if (qtype == "NS") {
         return domainEncode(opt);
     }
+
     throw runtime_error("Conversion of " + string(opt) + " not supported");
 }
+
 }; // namespace
