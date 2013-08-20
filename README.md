@@ -22,6 +22,7 @@ Usage
 
 This is the help from dines.
 
+
     Dines 0.4 - The definitive DNS packet forger.
 
     Fields with (F) can be fuzzed. (Example --txid F)
@@ -33,46 +34,57 @@ This is the help from dines.
     Params:
 
     [IP]
-    --src-ip <ip>: Source IP (default: local address), (F)
+    --src-ip <ip>: Source IP (AF)
     --dst-ip <ip>: Destination IP
 
     [UDP]
     --sport <port>: source port (A)
-    --dport <port>: destination port (default: 53)
+    --dport <port>: destination port (A)
 
     [DNS]
-    --txid <id>: transaction id (F)
+    --txid <id>: transaction id (AF)
     --num-questions <n>: number of questions (AF)
     --question <domain>,<type(F)>,<class(F)>: question domain
 
     --num-ans <n>: number of answers (AF)
-    --answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<data>: a DNS answer
+    --answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS answer
+    --answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS answer
 
     --num-auth <n>: number of authoritative records (AF)
-    --auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<data>: a DNS authoritative record
+    --auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<rdata>: a DNS authoritative record
+    --auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS authoritative record
 
     --num-add <n>: number of additional records (AF)
-    --additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<data>: a DNS additional record
+    --additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS additional record
+    --additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS additional record
 
     [MISC]
+    --server <port>: run in server mode on port (A)
     --num <n>: number of packets (0 = infinite)
     --delay <usec>: delay between packets
-    --debug: activate debug
     --verbose: be verbose
     --help: this help
 
-
 To generate a question, issue the follogin command:
 
-    sudo ./dines --src-ip 192.168.1.1 --dst-ip 192.168.1.2 --question www.test.com,1,1 --num 1
+    sudo ./dines --src-ip 192.168.1.1 --dst-ip 192.168.1.2 --question www.test.com,A,IN --num 1
 
 that asks for domain www.test.com, sending 1 packet only. To generate an answer, one can use the following
 command
 
-    sudo ./dines --src-ip 192.168.1.1 --dst-ip 192.168.1.2 --question www.test.com,1,1 --num 1 --rdata-ip --answer www.test.com,1,1,256,192.168.1.1 --answer www.test.com,1,1,256,192.168.1.2
+    sudo ./dines --src-ip 192.168.1.1 --dst-ip 192.168.1.2 --question www.test.com,1,1 --num 1
+        --answer www.test.com,1,1,256,192.168.1.1 --answer www.test.com,1,1,256,192.168.1.2
 
-The switches related to resource records can be repeated multiple times. In order to specify IP addresses on
-the command line, the user must use the --rdata-ip switch. Otherwise, data will we used as is. This allows
-to inject binary data directly, as in the following example
+The switches related to resource records can be repeated multiple times. When resource record switches are used
+in short mode (without rdatalen), rdata is converted according to the query type. Qtype A is converted
+as an IP address, NS as a DNS name, and so on. To inject binary data directly, the extended mode can be used,
+as in the following example
 
-    sudo ./dines --src-ip 192.168.1.1 --dst-ip 192.168.1.2 --question www.test.com,NULL,IN --num 1 --answer www.test.com,NULL,IN,0,$'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a'
+    sudo ./dines --src-ip 192.168.1.1 --dst-ip 192.168.1.2 --question www.test.com,NULL,IN --num 1
+        --answer www.test.com,NULL,IN,0,10,$'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a'
+
+Server Mode
+-----------
+Since version 0.5, dines supports server mode, that implements a minimalistic DNS server that serves arbitrary
+data. The syntax is the very same as in client mode: to activate server mode the user must specify --server
+with the UDP port the server listens on.
