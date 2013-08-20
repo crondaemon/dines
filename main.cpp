@@ -275,6 +275,11 @@ int main(int argc, char* argv[])
                     tokens.clear();
                     tokens = tokenize(optarg, ",");
 
+                    if (tokens.size() < 5) {
+                        cerr << "Invalid number of parameters: " << optarg << endl;
+                        return 3;
+                    }
+
                     {
                         ResourceRecord& rr = p.addRR(Dines::R_ADDITIONAL,
                             tokens.at(0), tokens.at(1), tokens.at(2),

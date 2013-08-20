@@ -71,7 +71,6 @@ void DnsHeader::isRecursive(bool isRecursive)
 void DnsHeader::nRecord(unsigned section, uint16_t value)
 {
     _checkSection(section);
-    printf("METTO IN SEZIONE %d val %d\n", section, value);
     _nRecord[section] = htons(value);
 }
 
