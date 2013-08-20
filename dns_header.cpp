@@ -100,7 +100,7 @@ void DnsHeader::txid(uint16_t txid)
 void DnsHeader::nRecordAdd(unsigned section, unsigned n)
 {
     _checkSection(section);
-    _nRecord[section] += htons(ntohs(_nRecord[section]) + n);
+    _nRecord[section] = htons(ntohs(_nRecord[section]) + n);
 }
 
 void DnsHeader::_checkSection(unsigned section) const
