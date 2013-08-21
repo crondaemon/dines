@@ -25,6 +25,7 @@ ResourceRecord::ResourceRecord(const string& rrDomain, uint16_t rrType,
     _ttl = htonl(ttl);
     _rData = rdata;
 
+    _fuzzRRdomain = false;
     _fuzzRRtype = false;
     _fuzzRRclass = false;
     _fuzzTTL = false;
@@ -60,6 +61,7 @@ ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
     _ttl = rr._ttl;
     _rData = rr._rData;
 
+    _fuzzRRdomain = rr._fuzzRRdomain;
     _fuzzRRtype = rr._fuzzRRtype;
     _fuzzRRclass = rr._fuzzRRclass;
     _fuzzTTL = rr._fuzzTTL;
@@ -134,6 +136,12 @@ unsigned ResourceRecord::rDataLen() const
 
 void ResourceRecord::fuzz()
 {
+    if (_fuzzRRdomain == true) {
+        for (unsigned i = 0; i < _rrDomain_enc.size(); ++i) {
+            _rrDomain_enc[i] = rand() % 255;
+        }
+    }
+
     if (_fuzzRRtype)
         _rrType = rand() % 65535;
 
@@ -142,6 +150,13 @@ void ResourceRecord::fuzz()
 
     if (_fuzzTTL)
         _ttl = rand();
+}
+
+void ResourceRecord::fuzzRRdomain(unsigned len)
+{
+    _rrDomain_str = "[fuzzed]";
+    _rrDomain_enc.resize(len);
+    _fuzzRRdomain = true;
 }
 
 void ResourceRecord::fuzzRRtype()

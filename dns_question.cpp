@@ -35,6 +35,7 @@ DnsQuestion::DnsQuestion(const string qdomain, unsigned qtype, unsigned qclass)
     // qclass
     _qclass = htons(qclass);
 
+    _fuzzQdomain = false;
     _fuzzQtype = false;
     _fuzzQclass = false;
     srand(time(NULL));
@@ -51,8 +52,10 @@ DnsQuestion& DnsQuestion::operator=(const DnsQuestion& q)
     _qdomain_enc = q._qdomain_enc;
     _qtype = q._qtype;
     _qclass = q._qclass;
+    _fuzzQdomain = q._fuzzQdomain;
     _fuzzQtype = q._fuzzQtype;
     _fuzzQclass = q._fuzzQclass;
+
     return *this;
 }
 
@@ -102,6 +105,12 @@ string DnsQuestion::qtypeStr() const
 
 void DnsQuestion::fuzz()
 {
+    if (_fuzzQdomain == true) {
+        for (unsigned i = 0; i < _qdomain_enc.size(); ++i) {
+            _qdomain_enc[i] = rand() % 255;
+        }
+    }
+
     if (_fuzzQtype == true) {
         _qtype = rand() % 65535;
     }
@@ -109,6 +118,13 @@ void DnsQuestion::fuzz()
     if (_fuzzQclass == true) {
         _qclass = rand() % 65535;
     }
+}
+
+void DnsQuestion::fuzzQdomain(unsigned len)
+{
+    _qdomain_str = "[fuzzed]";
+    _qdomain_enc.resize(len);
+    _fuzzQdomain = true;
 }
 
 void DnsQuestion::fuzzQtype()

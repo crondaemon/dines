@@ -14,6 +14,7 @@ class ResourceRecord {
     uint32_t _ttl;
     std::string _rData;
 
+    bool _fuzzRRdomain;
     bool _fuzzRRtype;
     bool _fuzzRRclass;
     bool _fuzzTTL;
@@ -53,6 +54,7 @@ public:
 
     void fuzz();
 
+    void fuzzRRdomain(unsigned len);
     void fuzzRRtype();
     void fuzzRRclass();
     void fuzzRRttl();

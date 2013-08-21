@@ -45,6 +45,7 @@ struct option opts[] = {
 void usage(string s)
 {
     cout << "Fields with (F) can be fuzzed. (Example --txid F)\n";
+    cout << "Fields with (F<n>) can be fuzzed for a specific length (Example --question F20,A,IN)\n";
     cout << "Fields with (R) are repeatable. (Example --answer)\n";
     cout << "Fields with (A) are calculated automatically.\n";
     cout << "\n";
@@ -60,19 +61,19 @@ void usage(string s)
     cout << "--txid <id>: transaction id (AF)\n";
     cout << "--no-rd: no recursion desired (A)\n";
     cout << "--num-questions <n>: number of questions (AF)\n";
-    cout << "--question <domain>,<type(F)>,<class(F)>: question domain\n";
+    cout << "--question <domain(F<n>)>,<type(F)>,<class(F)>: question domain\n";
     cout << "\n";
     cout << "--num-ans <n>: number of answers (AF)\n";
-    cout << "--answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS answer\n";
-    cout << "--answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS answer\n";
+    cout << "--answer(R) <domain(F<n>)>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS answer\n";
+    cout << "--answer(R) <domain(F<n>)>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS answer\n";
     cout << "\n";
     cout << "--num-auth <n>: number of authoritative records (AF)\n";
-    cout << "--auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<rdata>: a DNS authoritative record\n";
-    cout << "--auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS authoritative record\n";
+    cout << "--auth(R) <domain(F<n>)>,<type>,<class(F)>,<ttl(F)>,<rdata>: a DNS authoritative record\n";
+    cout << "--auth(R) <domain(F<n>)>,<type>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS authoritative record\n";
     cout << "\n";
     cout << "--num-add <n>: number of additional records (AF)\n";
-    cout << "--additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS additional record\n";
-    cout << "--additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS additional record\n";
+    cout << "--additional(R) <domain(F<n>)>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS additional record\n";
+    cout << "--additional(R) <domain(F<n>)>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS additional record\n";
     cout << "\n";
     cout << "--server <port>: run in server mode on port (A)\n";
     cout << "\n";
@@ -177,12 +178,25 @@ int main(int argc, char* argv[])
                         cout << "Syntax: --question <domain>,<type>,<class>\n";
                         return 1;
                     }
+
                     p.addQuestion(tokens.at(0), tokens.at(1), tokens.at(2));
-                    if (tokens.at(1).at(0) == 'F') {
+
+                    if (tokens.at(0).at(0) == 'F') {
+                        unsigned len = atoi(tokens.at(0).substr(1).data());
+                        if (len == 0) {
+                            cout << "Invalid format for fuzzer:\n";
+                            cout << "F must be followed by fuzzed length\n";
+                            cout << "Syntax: --question F<n>,<type>,<class>\n\n";
+                            return 2;
+                        }
+                        DnsQuestion& q = p.question();
+                        q.fuzzQdomain(len);
+                    }
+                    if (tokens.at(1) == "F") {
                         DnsQuestion& q = p.question();
                         q.fuzzQtype();
                     }
-                    if (tokens.at(2).at(0) == 'F') {
+                    if (tokens.at(2) == "F") {
                         DnsQuestion& q = p.question();
                         q.fuzzQclass();
                     }
@@ -223,13 +237,23 @@ int main(int argc, char* argv[])
                             tokens.at(3), Dines::rDataConvert(tokens.at(4).data(), tokens.at(1)));
                     }
 
-                    if (tokens.at(1).at(0) == 'F') {
+                    if (tokens.at(0).at(0) == 'F') {
+                        unsigned len = atoi(tokens.at(0).substr(1).data());
+                        if (len == 0) {
+                            cout << "Invalid format for fuzzer:\n";
+                            cout << "F must be followed by fuzzed length\n";
+                            cout << "Syntax: --question F<n>,<type>,<class>\n\n";
+                            return 2;
+                        }
+                        rr.fuzzRRdomain(len);
+                    }
+                    if (tokens.at(1) == "F") {
                         rr.fuzzRRtype();
                     }
-                    if (tokens.at(2).at(0) == 'F') {
+                    if (tokens.at(2) == "F") {
                         rr.fuzzRRclass();
                     }
-                    if (tokens.at(3).at(0) == 'F') {
+                    if (tokens.at(3) == "F") {
                         rr.fuzzRRttl();
                     }
 

@@ -60,6 +60,7 @@ uint16_t stringToQtype(const std::string& s)
 
 string qtypeToString(uint16_t qtype)
 {
+    char num[6];
     switch (qtype) {
         case 1:
             return "A";
@@ -82,7 +83,8 @@ string qtypeToString(uint16_t qtype)
         case 255:
             return "ANY";
         default:
-            throw logic_error(string(__func__) + ": Invalid qtype");
+            snprintf(num, 6, "%u", qtype);
+            return string(num);
     }
 }
 
@@ -103,6 +105,7 @@ uint16_t stringToQclass(const std::string& s)
 
 string qclassToString(uint16_t qclass)
 {
+    char num[6];
     switch (qclass) {
         case 1:
             return "IN";
@@ -117,7 +120,8 @@ string qclassToString(uint16_t qclass)
         case 255:
             return "ANY";
         default:
-            throw logic_error(string(__func__) + ": Invalid qclass");
+            snprintf(num, 6, "%u", qclass);
+            return string(num);
     }
 }
 

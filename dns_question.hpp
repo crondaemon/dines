@@ -14,6 +14,7 @@ class DnsQuestion {
     uint16_t _qtype;
     uint16_t _qclass;
 
+    bool _fuzzQdomain;
     bool _fuzzQtype;
     bool _fuzzQclass;
 public:
@@ -38,6 +39,7 @@ public:
 
     void fuzz();
 
+    void fuzzQdomain(unsigned len);
     void fuzzQtype();
     void fuzzQclass();
 
