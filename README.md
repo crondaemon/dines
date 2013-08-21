@@ -22,10 +22,10 @@ Usage
 
 This is the help from dines.
 
-
     Dines 0.4 - The definitive DNS packet forger.
 
     Fields with (F) can be fuzzed. (Example --txid F)
+    Fields with (F<n>) can be fuzzed for a specific length (Example --question F20,A,IN)
     Fields with (R) are repeatable. (Example --answer)
     Fields with (A) are calculated automatically.
 
@@ -34,38 +34,40 @@ This is the help from dines.
     Params:
 
     [IP]
-    --src-ip <ip>: Source IP (AF)
-    --dst-ip <ip>: Destination IP
+    --src-ip=<ip>: Source IP (AF)
+    --dst-ip=<ip>: Destination IP
 
     [UDP]
-    --sport <port>: source port (A)
-    --dport <port>: destination port (A)
+    --sport=<port>: source port (A)
+    --dport=<port>: destination port (A)
 
     [DNS]
-    --txid <id>: transaction id (AF)
-    --num-questions <n>: number of questions (AF)
-    --question <domain>,<type(F)>,<class(F)>: question domain
+    --txid=<id>: transaction id (AF)
+    --no-rd: no recursion desired (A)
+    --num-questions=<n>: number of questions (AF)
+    --question=<domain(F<n>)>,<type(F)>,<class(F)>: question domain
 
-    --num-ans <n>: number of answers (AF)
-    --answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS answer
-    --answer(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS answer
+    --num-ans=<n>: number of answers (AF)
+    --answer(R)=<domain(F<n>)>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS answer
+    --answer(R)=<domain(F<n>)>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS answer
 
-    --num-auth <n>: number of authoritative records (AF)
-    --auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<rdata>: a DNS authoritative record
-    --auth(R) <domain>,<type>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS authoritative record
+    --num-auth=<n>: number of authoritative records (AF)
+    --auth(R)=<domain(F<n>)>,<type>,<class(F)>,<ttl(F)>,<rdata>: a DNS authoritative record
+    --auth(R)=<domain(F<n>)>,<type>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS authoritative record
 
-    --num-add <n>: number of additional records (AF)
-    --additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS additional record
-    --additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS additional record
+    --num-add=<n>: number of additional records (AF)
+    --additional(R)=<domain(F<n>)>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS additional record
+    --additional(R)=<domain(F<n>)>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS additional record
+
+    --server=<port>: run in server mode on port (A)
 
     [MISC]
-    --server <port>: run in server mode on port (A)
-    --num <n>: number of packets (0 = infinite)
-    --delay <usec>: delay between packets
+    --num=<n>: number of packets (A)
+    --delay=<usec>: delay between packets (A)
     --verbose: be verbose
     --help: this help
 
-To generate a question, issue the follogin command:
+To generate a question, issue the following command:
 
     sudo ./dines --src-ip 192.168.1.1 --dst-ip 192.168.1.2 --question www.test.com,A,IN --num 1
 
