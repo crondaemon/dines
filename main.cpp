@@ -34,7 +34,8 @@ struct option opts[] = {
     {"num-add", 1, NULL, 11},
     {"additional", 1, NULL, 12},
     // some space here for new params
-    {"server", 1, NULL, 29},
+    {"no-rd", 0, NULL, 28},
+    {"server", 2, NULL, 29},
     {"num", 1, NULL, 30},
     {"delay", 1, NULL, 31},
     {"verbose", 0, NULL, 32},
@@ -57,6 +58,7 @@ void usage(string s)
     cout << "--dport <port>: destination port (A)\n";
     cout << "\n[DNS]\n";
     cout << "--txid <id>: transaction id (AF)\n";
+    cout << "--no-rd: no recursion desired (A)\n";
     cout << "--num-questions <n>: number of questions (AF)\n";
     cout << "--question <domain>,<type(F)>,<class(F)>: question domain\n";
     cout << "\n";
@@ -72,8 +74,9 @@ void usage(string s)
     cout << "--additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS additional record\n";
     cout << "--additional(R) <domain>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS additional record\n";
     cout << "\n";
-    cout << "[MISC]\n";
     cout << "--server <port>: run in server mode on port (A)\n";
+    cout << "\n";
+    cout << "[MISC]\n";
     cout << "--num <n>: number of packets (0 = infinite)\n";
     cout << "--delay <usec>: delay between packets\n";
     cout << "--verbose: be verbose\n";
@@ -251,8 +254,15 @@ int main(int argc, char* argv[])
                     }
                     break;
 
+                case 28:
+                    p.isRecursive(false);
+                    break;
+
                 case 29:
-                    server_port = atoi(optarg);
+                    if (optarg)
+                        server_port = atoi(optarg);
+                    else
+                        server_port = 53;
                     break;
                 case 30:
                     num = atoi(optarg);

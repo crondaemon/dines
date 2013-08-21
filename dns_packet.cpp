@@ -260,12 +260,12 @@ string DnsPacket::to_string() const
     s += " txid: " + _dnsHdr.txidStr();
 
     if (isQuestion())
-        s += " Q";
+        s += " Q ";
     else
-        s += " R";
+        s += " R ";
 
     if (_question != DnsQuestion()) {
-        s += " [Question:" + _question.to_string() + "]";
+        s += "[Question:" + _question.to_string() + "]";
     }
 
     if (_answers.size() > 0) {
@@ -350,6 +350,11 @@ ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string
 bool DnsPacket::isRecursive() const
 {
     return _dnsHdr.isRecursive();
+}
+
+void DnsPacket::isRecursive(const bool isRecursive)
+{
+    _dnsHdr.rd(false);
 }
 
 bool DnsPacket::isQuestion() const

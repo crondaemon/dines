@@ -106,6 +106,8 @@ public:
     //! TODO
     bool isRecursive() const;
 
+    void isRecursive(const bool isRecursive);
+
     void isQuestion(bool isQuestion);
 
     //! TODO
