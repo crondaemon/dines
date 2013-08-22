@@ -438,7 +438,7 @@ uint16_t DnsPacket::txid() const
 
 void DnsPacket::txid(string txid)
 {
-    _dnsHdr.txid(atoi(optarg));
+    _dnsHdr.txid(atoi(txid.data()));
 }
 
 void DnsPacket::txid(uint16_t txid)
@@ -448,12 +448,13 @@ void DnsPacket::txid(uint16_t txid)
 
 void DnsPacket::nRecord(Dines::RecordSection section, uint16_t value)
 {
-    char sect[10];
-    char val[11];
-    snprintf(sect, 10, "%u", section);
-    snprintf(val, 11, "%u", value);
-    if (_log)
+    if (_log) {
+        char sect[10];
+        char val[11];
+        snprintf(sect, 10, "%u", section);
+        snprintf(val, 11, "%u", value);
         _log("Setting record section " + string(sect) + " to " + string(val));
+    }
 
     _dnsHdr.nRecord(section, value);
 }

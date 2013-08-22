@@ -32,6 +32,13 @@ using namespace std;
     cout << "." << flush; \
 }
 
+// A dummy log function to avoid output when running tests
+bool log_done;
+void dummylog(string s)
+{
+    log_done = true;
+}
+
 int test_ip()
 {
     DnsPacket p;
@@ -39,6 +46,18 @@ int test_ip()
     p.ipTo("2.3.4.5");
     CHECK(p.ipFrom() == "1.2.3.4");
     CHECK(p.ipTo() == "2.3.4.5");
+    return 0;
+}
+
+int test_udp()
+{
+    DnsPacket p;
+    p.sport("1000");
+    p.dport("2000");
+    CHECK(p.sport() == 1000);
+    CHECK(p.dport() == 2000);
+    CHECK(p.sportStr() == "1000");
+    CHECK(p.dportStr() == "2000");
     return 0;
 }
 
@@ -143,13 +162,26 @@ int test_rr()
 
 int test_query()
 {
-    DnsPacket p;
-    p.addQuestion("www.test.com", "A", "CHAOS");
-    CHECK(p.isQuestion() == true);
-    CHECK(p.question().qdomain() == "www.test.com");
-    CHECK(p.question().qclass() == 3);
-    CHECK(p.question().qtype() == 1);
-    CHECK(p.isRecursive() == true);
+    DnsPacket p1;
+    p1.addQuestion("www.test.com", "A", "CHAOS");
+    CHECK(p1.isQuestion() == true);
+    CHECK(p1.question().qdomain() == "www.test.com");
+    CHECK(p1.question().qclass() == 3);
+    CHECK(p1.question().qtype() == 1);
+    CHECK(p1.isRecursive() == true);
+
+    DnsPacket p2;
+    p2.addQuestion(DnsQuestion("www.test.com", "A", "CHAOS"));
+    p2.txid("1234");
+    p2.isRecursive(false);
+
+    CHECK(p2.txid() == 1234);
+    CHECK(p2.isQuestion() == true);
+    CHECK(p2.isRecursive() == false);
+    CHECK(p2.question().qdomain() == "www.test.com");
+    CHECK(p2.question().qclass() == 3);
+    CHECK(p2.question().qtype() == 1);
+
     return 0;
 }
 
@@ -382,10 +414,31 @@ int test_ip_conversion()
     return 0;
 }
 
+int test_logging()
+{
+    log_done = false;
+    DnsPacket p(dummylog);
+    CHECK(log_done == true);
+    return 0;
+}
+
+int test_copy_constructor_and_assignment()
+{
+    DnsPacket p1;
+    p1.ipFrom("1.2.3.4");
+    DnsPacket p2(p1);
+    DnsPacket p3;
+    p3 = p1;
+    CHECK(p2.ipFrom() == "1.2.3.4");
+    CHECK(p3.ipFrom() == "1.2.3.4");
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     cout << "Tests running";
     TEST(test_ip());
+    TEST(test_udp());
     TEST(test_header());
     TEST(test_question());
     TEST(test_rr());
@@ -400,5 +453,7 @@ int main(int argc, char* argv[])
     TEST(test_invalid_section());
     TEST(test_conversion());
     TEST(test_ip_conversion());
+    TEST(test_logging());
+    TEST(test_copy_constructor_and_assignment());
     cout << "done" << endl;
 }
