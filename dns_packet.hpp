@@ -82,13 +82,9 @@ public:
 
     uint16_t sport() const;
 
-    std::string sportStr() const;
-
     void sport(std::string sport);
 
     uint16_t dport() const;
-
-    std::string dportStr() const;
 
     void dport(std::string dport);
 

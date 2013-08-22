@@ -254,10 +254,10 @@ string DnsPacket::to_string() const
 {
     string s;
 
-    s += this->ipFrom() + ":" + this->sportStr();
+    s += this->ipFrom() + ":" + Dines::convertInt<uint16_t>(this->sport());
     s += " -> ";
-    s += this->ipTo() + ":" + this->dportStr();
-    s += " txid: " + _dnsHdr.txidStr();
+    s += this->ipTo() + ":" + Dines::convertInt<uint16_t>(this->dport());
+    s += " txid: " + Dines::convertInt<uint16_t>(_dnsHdr.txid());
 
     if (isQuestion())
         s += " Q ";
@@ -402,23 +402,9 @@ uint16_t DnsPacket::sport() const
     return ntohs(_udpHdr.source);
 }
 
-string DnsPacket::sportStr() const
-{
-    char buf[6];
-    snprintf(buf, 6, "%u", ntohs(_udpHdr.source));
-    return string(buf);
-}
-
 uint16_t DnsPacket::dport() const
 {
     return ntohs(_udpHdr.dest);
-}
-
-string DnsPacket::dportStr() const
-{
-    char buf[6];
-    snprintf(buf, 6, "%u", ntohs(_udpHdr.dest));
-    return string(buf);
 }
 
 void DnsPacket::sport(string sport)

@@ -117,13 +117,6 @@ uint32_t ResourceRecord::ttl() const
     return ntohl(_ttl);
 }
 
-string ResourceRecord::ttlStr() const
-{
-    char buf[11];
-    snprintf(buf, 11, "%u", ntohl(_ttl));
-    return string(buf);
-}
-
 string ResourceRecord::rData() const
 {
     return _rData;
@@ -196,8 +189,8 @@ void ResourceRecord::rrClass(unsigned rrClass)
 
 string ResourceRecord::to_string() const
 {
-    string out = _rrDomain_str + "/" + rrTypeStr() + "/" + rrClassStr() + "/" +
-        ttlStr();
+    string out = _rrDomain_str + "/" + this->rrTypeStr() + "/" + this->rrClassStr() + "/" +
+        Dines::convertInt<int32_t>(this->ttl());
 
     if (Dines::qtypeToString(ntohs(_rrType)) == "A") {
         char addr[INET_ADDRSTRLEN];

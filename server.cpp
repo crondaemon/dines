@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <errno.h>
+#include <convert.hpp>
 
 using namespace std;
 
@@ -84,7 +85,7 @@ void Server::launch()
 
         if (_log)
             _log("Query from: " + Dines::ip32ToString(peer.sin_addr.s_addr) +
-                " txid: " + h.txidStr());
+                " txid: " + Dines::convertInt<uint16_t>(h.txid()));
 
         if (sendto(servSock, _data().data(), _data().size(), 0, (struct sockaddr*)&peer,
                 sockaddr_len) == -1) {

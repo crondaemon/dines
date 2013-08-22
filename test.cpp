@@ -56,8 +56,6 @@ int test_udp()
     p.dport("2000");
     CHECK(p.sport() == 1000);
     CHECK(p.dport() == 2000);
-    CHECK(p.sportStr() == "1000");
-    CHECK(p.dportStr() == "2000");
     return 0;
 }
 

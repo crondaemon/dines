@@ -44,7 +44,6 @@ public:
     void rrClass(unsigned rrClass);
 
     uint32_t ttl() const;
-    std::string ttlStr() const;
     void ttl(std::string ttl);
     void ttl(unsigned ttl);
 

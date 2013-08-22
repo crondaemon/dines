@@ -26,6 +26,8 @@ std::string ip32ToString(uint32_t ip32);
 
 std::string rDataConvert(const char* opt, std::string qtype);
 
+template<typename C> std::string convertInt(C i);
+
 };
 
 #endif

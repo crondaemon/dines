@@ -60,16 +60,13 @@ public:
     void nRecordAdd(unsigned section, unsigned n);
 
     uint16_t txid() const;
-
-    std::string txidStr() const;
+    void txid(uint16_t txid);
 
     bool rd() const;
     void rd(bool rec_des);
 
     bool ra() const;
     void ra(bool rec_avail);
-
-    void txid(uint16_t txid);
 
     DnsHeaderFlags flags() const;
 
