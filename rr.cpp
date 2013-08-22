@@ -155,7 +155,7 @@ void ResourceRecord::fuzz()
 void ResourceRecord::fuzzRRdomain(unsigned len)
 {
     _rrDomain_str = "[fuzzed]";
-    _rrDomain_enc.resize(len);
+    _rrDomain_enc = string(len, 'x');
     _fuzzRRdomain = true;
 }
 
