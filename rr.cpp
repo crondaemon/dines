@@ -131,15 +131,15 @@ void ResourceRecord::fuzz()
 {
     if (_fuzzRRdomain == true) {
         for (unsigned i = 0; i < _rrDomain_enc.size(); ++i) {
-            _rrDomain_enc[i] = rand() % 255;
+            _rrDomain_enc[i] = rand();
         }
     }
 
     if (_fuzzRRtype)
-        _rrType = rand() % 65535;
+        _rrType = rand();
 
     if (_fuzzRRclass)
-        _rrClass = rand() % 65535;
+        _rrClass = rand();
 
     if (_fuzzTTL)
         _ttl = rand();
@@ -150,21 +150,25 @@ void ResourceRecord::fuzzRRdomain(unsigned len)
     _rrDomain_str = "[fuzzed]";
     _rrDomain_enc = string(len, 'x');
     _fuzzRRdomain = true;
+    this->fuzz();
 }
 
 void ResourceRecord::fuzzRRtype()
 {
     _fuzzRRtype = true;
+    this->fuzz();
 }
 
 void ResourceRecord::fuzzRRclass()
 {
     _fuzzRRclass = true;
+    this->fuzz();
 }
 
 void ResourceRecord::fuzzRRttl()
 {
     _fuzzTTL = true;
+    this->fuzz();
 }
 
 void ResourceRecord::rrType(string rrType)

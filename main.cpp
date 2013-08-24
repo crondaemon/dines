@@ -242,7 +242,8 @@ int main(int argc, char* argv[])
                         if (len == 0) {
                             cout << "Invalid format for fuzzer:\n";
                             cout << "F must be followed by fuzzed length\n";
-                            cout << "Syntax: --question F<n>,<type>,<class>\n\n";
+                            cout << "Syntax: --{answer|auth|add} F<n>,<type>,<class>,ttl,rdata\n\n";
+                            cout << "Syntax: --{answer|auth|add} F<n>,<type>,<class>,ttl,rdatalen,rdata\n\n";
                             return 2;
                         }
                         rr.fuzzRRdomain(len);

@@ -107,16 +107,16 @@ void DnsQuestion::fuzz()
 {
     if (_fuzzQdomain == true) {
         for (unsigned i = 0; i < _qdomain_enc.size(); ++i) {
-            _qdomain_enc[i] = rand() % 255;
+            _qdomain_enc[i] = rand();
         }
     }
 
     if (_fuzzQtype == true) {
-        _qtype = rand() % 65535;
+        _qtype = rand();
     }
 
     if (_fuzzQclass == true) {
-        _qclass = rand() % 65535;
+        _qclass = rand();
     }
 }
 
@@ -125,16 +125,19 @@ void DnsQuestion::fuzzQdomain(unsigned len)
     _qdomain_str = "[fuzzed]";
     _qdomain_enc.resize(len);
     _fuzzQdomain = true;
+    this->fuzz();
 }
 
 void DnsQuestion::fuzzQtype()
 {
     _fuzzQtype = true;
+    this->fuzz();
 }
 
 void DnsQuestion::fuzzQclass()
 {
     _fuzzQclass = true;
+    this->fuzz();
 }
 
 string DnsQuestion::to_string() const

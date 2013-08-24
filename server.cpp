@@ -38,7 +38,7 @@ void Server::launch()
     snprintf(port, 7, "%u", _port);
 
     if (_log)
-        _log("Serving record: " + _p.to_string() + " on port " + string(port));
+        _log("Serving record: " + _p.to_string(true) + " on port " + string(port));
 
     int servSock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (servSock == -1)

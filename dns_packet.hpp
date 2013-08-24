@@ -68,7 +68,7 @@ public:
     void sendNet(bool doCksum = true);
 
     //! to_string
-    std::string to_string() const;
+    std::string to_string(bool dnsonly = false) const;
 
     void ipFrom(std::string ip_from);
 

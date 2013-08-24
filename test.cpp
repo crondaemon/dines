@@ -12,7 +12,7 @@ using namespace std;
 
 #define CHECK(test) { \
     if (!(test)) { \
-        cerr << "[ERROR] " << __FILE__ << ":" << __LINE__ << " (" << __func__ << ")" << endl; \
+        cerr << "[ERROR] " << __FILE__ << ":" << __LINE__ << " (" << __func__ << ")\n"; \
         return 1; \
     } \
     cout << "." << flush; \
@@ -26,7 +26,7 @@ using namespace std;
         invalid = true; \
     } \
     if (invalid == false) { \
-        cerr << "[ERROR] " << __FILE__ << ":" << __LINE__ << " (" << __func__ << ")" << endl; \
+        cerr << "[ERROR] " << __FILE__ << ":" << __LINE__ << " (" << __func__ << ")\n"; \
         return 1; \
     } \
     cout << "." << flush; \
@@ -63,7 +63,7 @@ int test_header()
 {
     DnsHeader h1;
 
-    CHECK(h1.txid() == 0);
+    CHECK(h1.txid() != 0);
     CHECK(h1.nRecord(Dines::R_QUESTION) == 0);
     CHECK(h1.nRecord(Dines::R_ANSWER) == 0);
     CHECK(h1.nRecord(Dines::R_ADDITIONAL) == 0);

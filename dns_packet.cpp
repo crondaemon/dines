@@ -143,12 +143,12 @@ void DnsPacket::_socketCreate()
         throw runtime_error("You must specify destination ip (--dst-ip)");
 
     if (_udpHdr.source == 0)
-        _udpHdr.source = rand() % 0xFFFF;
+        _udpHdr.source = rand();
     if (_udpHdr.dest == 0)
         _udpHdr.dest = htons(53); // put 53 if no port specified
 
     if (_dnsHdr.txid() == 0)
-        _dnsHdr.txid(rand() % 0xFFFF);
+        _dnsHdr.txid(rand());
 
     _socket = socket(PF_INET, SOCK_RAW, IPPROTO_UDP);
 
@@ -204,7 +204,7 @@ void DnsPacket::sendNet(bool doCksum)
     string dns_dgram = this->data();
 
     // ip id
-    _ipHdr.id = rand() % 0xFFFF;
+    _ipHdr.id = rand();
 
     // Adjust lenghts
     _udpHdr.len = htons(sizeof(_udpHdr) + dns_dgram.length());
@@ -250,14 +250,18 @@ string DnsPacket::ipTo() const
     return string(buf);
 }
 
-string DnsPacket::to_string() const
+string DnsPacket::to_string(bool dnsonly) const
 {
     string s;
 
-    s += this->ipFrom() + ":" + Dines::convertInt<uint16_t>(this->sport());
-    s += " -> ";
-    s += this->ipTo() + ":" + Dines::convertInt<uint16_t>(this->dport());
-    s += " txid: " + Dines::convertInt<uint16_t>(_dnsHdr.txid());
+    if (dnsonly == false) {
+        s += this->ipFrom() + ":" + Dines::convertInt<uint16_t>(this->sport());
+        s += " -> ";
+        s += this->ipTo() + ":" + Dines::convertInt<uint16_t>(this->dport());
+        s += " ";
+    }
+
+    s += "txid: " + Dines::convertInt<uint16_t>(_dnsHdr.txid());
 
     if (isQuestion())
         s += " Q ";
@@ -457,7 +461,7 @@ void DnsPacket::fuzz()
     }
 
     if (_fuzzSport) {
-        _udpHdr.source = rand() % 65535;
+        _udpHdr.source = rand();
     }
 
     _dnsHdr.fuzz();
