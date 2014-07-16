@@ -233,14 +233,14 @@ int test_raw_packet()
     p1.addQuestion("www.test.com", "A", "IN");
     p1.txid(0xd6e2);
 
-    u_char pkt1[] = {
+    unsigned char pkt1[] = {
         0xd6, 0xe2, 0x01, 0x00,
         0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x03, 0x77, 0x77, 0x77, 0x04, 0x74, 0x65, 0x73,
         0x74, 0x03, 0x63, 0x6f, 0x6d, 0x00, 0x00, 0x01,
         0x00, 0x01 };
 
-    CHECK(p1.data() == string(reinterpret_cast<char*>(pkt1), 30));
+    CHECK(p1.data() == string(pkt1, pkt1 + 30));
 
     DnsPacket p2;
     p2.addQuestion("www.test.com", "A", "IN");
@@ -248,7 +248,7 @@ int test_raw_packet()
     p2.addRR(Dines::R_ANSWER, "www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
     p2.addRR(Dines::R_ANSWER, "www.test.com", "A", "IN", "64", "\x02\x03\x04\x05");
 
-    u_char pkt2[] = {
+    unsigned char pkt2[] = {
         0xdf, 0xc1, 0x81, 0x00,
         0x00, 0x01, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00,
         0x03, 0x77, 0x77, 0x77, 0x04, 0x74, 0x65, 0x73,
@@ -262,7 +262,7 @@ int test_raw_packet()
         0x00, 0x00, 0x00, 0x40, 0x00, 0x04, 0x02, 0x03,
         0x04, 0x05 };
 
-    CHECK(p2.data() == string(reinterpret_cast<char*>(pkt2), 86));
+    CHECK(p2.data() == string(pkt2, pkt2 + 86));
     return 0;
 }
 
