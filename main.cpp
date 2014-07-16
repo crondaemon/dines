@@ -82,6 +82,9 @@ void usage(string s)
     cout << "--delay=<usec>: delay between packets\n";
     cout << "--verbose: be verbose\n";
     cout << "--help: this help\n";
+    cout << "\nExamples:\n";
+    cout << "\tsudo ./dines --server\n";
+    cout << "\tsudo ./dines --dst-ip 1.2.3.4 --question=www.example.com\n";
     cout << "\n";
 }
 
