@@ -16,6 +16,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <stdlib.h>
+#include <sstream>
 
 using namespace std;
 
@@ -47,6 +48,8 @@ DnsPacket::DnsPacket(Dines::LogFunc l)
     _fuzzSport = false;
 
     _log = l;
+
+    _datagrams = 0;
 
     if (_log != NULL)
         _log("DnsPacket created");
@@ -137,11 +140,6 @@ void DnsPacket::_socketCreate()
     int on = 1;
     struct sockaddr_in servaddr;
 
-    // Sanity checks
-
-    if (_ipHdr.daddr == 0)
-        throw runtime_error("You must specify destination ip (--dst-ip)");
-
     if (_udpHdr.source == 0)
         _udpHdr.source = rand();
     if (_udpHdr.dest == 0)
@@ -228,6 +226,7 @@ void DnsPacket::sendNet(bool doCksum)
             throw runtime_error("send() error: " + string(strerror(errno)));
         }
     }
+    _datagrams--;
 }
 
 string DnsPacket::ipFrom() const
@@ -522,4 +521,42 @@ void DnsPacket::fuzzSport()
 void DnsPacket::setLogger(Dines::LogFunc l)
 {
     _log = l;
+}
+
+void DnsPacket::packets(unsigned num)
+{
+    if (num == 0)
+        _datagrams = 0xFFFFFFFF;
+    else
+        _datagrams = num;
+}
+
+unsigned DnsPacket::packets() const
+{
+    return _datagrams;
+}
+
+string DnsPacket::packetsStr() const
+{
+    if (_datagrams == 0xFFFFFFFF) {
+        return "infinite";
+    } else {
+        return std::to_string(_datagrams);
+    }
+}
+
+bool DnsPacket::invalid() const
+{
+    if (_ipHdr.daddr == 0)
+        return true;
+
+    return false;
+}
+
+string DnsPacket::invalidMsg() const
+{
+    if (_ipHdr.daddr == 0)
+        return "You must specify destination ip (--dst-ip)";
+
+    return "";
 }

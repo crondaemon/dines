@@ -47,6 +47,8 @@ class DnsPacket {
     bool _fuzzSport;
 
     Dines::LogFunc _log;
+
+    unsigned _datagrams;
 public:
     //! Constructor
     DnsPacket(Dines::LogFunc l = NULL);
@@ -140,6 +142,15 @@ public:
     void fuzzSport();
 
     void setLogger(Dines::LogFunc l);
+
+    //! Sets how many packets are to send
+    void packets(unsigned num);
+
+    unsigned packets() const;
+    std::string packetsStr() const;
+
+    bool invalid() const;
+    std::string invalidMsg() const;
 };
 
 

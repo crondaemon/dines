@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <ostream>
 #include <string>
@@ -84,7 +83,7 @@ void usage(string s)
     cout << "--help: this help\n";
     cout << "\nExamples:\n";
     cout << "\tsudo ./dines --server\n";
-    cout << "\tsudo ./dines --dst-ip 1.2.3.4 --question=www.example.com\n";
+    cout << "\tsudo ./dines --dst-ip 1.2.3.4 --question=www.example.com,A,IN\n";
     cout << "\n";
 }
 
@@ -322,41 +321,42 @@ int main(int argc, char* argv[])
         }
     }
 
-    // check if server has been created. In this case run it
+    if (p.invalid()) {
+        cerr << "Invalid parameters:\n\n";
+        cerr << p.invalidMsg() << endl;
+        return 1;
+    }
+
     if (server_port > 0) {
+        // Server mode
         server = new Server(p, server_port);
         if (verbose == true)
             server->setLogger(logger);
         server->launch();
-    }
+    } else {
+        // Client mode
+        p.packets(num);
+        cout << "Sending " << p.packetsStr() << " datagrams\n";
 
-    if (num == 0)
-        num = 0xFFFFFFFF;
+        // Send datagram
+        while (p.packets() > 0) {
+            p.fuzz();
+            try {
+                p.sendNet();
+            } catch(exception& e) {
+                cout << "\n\nError: " << e.what() << "\n";
+                return 1;
+            }
 
-    cout << "Sending ";
-    if (num < 0xFFFFFFFF)
-        cout << num;
-    else
-        cout << "infinite";
-    cout << " datagrams" << endl;
+            if (!verbose) {
+                cout << ".";
+                cout.flush();
+            }
 
-    // Send datagram
-    while (num-- > 0) {
-        p.fuzz();
-        try {
-            p.sendNet();
-        } catch(exception& e) {
-            cout << "\n\nError: " << e.what() << "\n";
-            return 1;
+            if (p.packets() > 0)
+                usleep(delay);
         }
-
-        if (!verbose) {
-            cout << ".";
-            cout.flush();
-        }
-
-        if (num > 0)
-            usleep(delay);
+        cout << endl;
     }
-    cout << endl;
+    return 0;
 }
