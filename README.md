@@ -90,3 +90,8 @@ Server Mode
 Since version 0.5, dines supports server mode, that implements a minimalistic DNS server that serves arbitrary
 data. The syntax is the very same as in client mode: to activate server mode the user must specify --server
 with the UDP port the server listens on.
+
+Related Projects
+----------------
+
+[namescan](github.com/crondaemon/namescan): massive dns open relay scanner
