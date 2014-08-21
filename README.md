@@ -94,4 +94,4 @@ with the UDP port the server listens on.
 Related Projects
 ----------------
 
-[namescan](github.com/crondaemon/namescan): massive dns open relay scanner
+[namescan](http://github.com/crondaemon/namescan): massive dns open relay scanner
