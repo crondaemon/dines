@@ -296,7 +296,6 @@ int main(int argc, char* argv[])
         p.packets(num);
         cout << "Sending " << p.packetsStr() << " datagrams\n";
 
-        // Send datagram
         while (p.packets() > 0) {
             p.fuzz();
             try {
