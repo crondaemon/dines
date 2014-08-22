@@ -39,6 +39,26 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
     uint16_t klass;
     unsigned int_ttl;
 
+    if (rrDomain.at(0) == 'F') {
+        unsigned len = stoul(rrDomain.substr(1).data());
+        if (len == 0) {
+            throw runtime_error(string("Invalid format for fuzzer:\n"
+                "F must be followed by fuzzed length\n"
+                "Syntax: --{answer|auth|add} F<n>,<type>,<class>,ttl,rdata\n\n"
+                "Syntax: --{answer|auth|add} F<n>,<type>,<class>,ttl,rdatalen,rdata\n\n"));
+        }
+        fuzzRRdomain(len);
+    }
+    if (rrType == "F") {
+        _fuzzRRtype = true;
+    }
+    if (rrClass == "F") {
+        _fuzzRRclass = true;
+    }
+    if (ttl == "F") {
+        _fuzzTTL = true;
+    }
+
     type = Dines::stringToQtype(rrType);
     klass = Dines::stringToQclass(rrClass);
     int_ttl = stoul(ttl.data());

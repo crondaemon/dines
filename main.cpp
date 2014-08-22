@@ -18,6 +18,15 @@
 
 using namespace std;
 
+#define PRINT_DOT(x) { \
+    if (!verbose) { \
+        cout << "."; \
+        cout.flush(); \
+    } \
+}
+
+
+
 struct option opts[] = {
     {"src-ip", 1, NULL, 0},
     {"dst-ip", 1, NULL, 1},
@@ -120,12 +129,16 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    if (getuid() != 0) {
-        cout << "You need to be root." << endl;
-        return 1;
-    }
-
     vector<string> tokens;
+
+    // first, scan the argv looking for verbose mode
+    for (int i = 0; i < argc; i++) {
+        if (string(argv[i]) == "--verbose") {
+            logger("Verbose mode on");
+            p.setLogger(logger);
+            verbose = true;
+        }
+    }
 
     try {
         while((c = getopt_long(argc, argv, "", opts, NULL)) != -1) {
@@ -175,33 +188,18 @@ int main(int argc, char* argv[])
                 case 6: // question
                     tokens.clear();
                     tokens = tokenize(optarg, ",");
+                    tokens.resize(3);
 
-                    if (tokens.size() != 3) {
-                        cout << "Syntax: --question <domain>,<type>,<class>\n";
-                        return 1;
-                    }
+//                    cout << "DEBUG " << tokens.at(1) << endl;
+//                    return 1;
+
+//                    if (tokens.size() != 3) {
+//                        cout << "Syntax: --question <domain>,<type>,<class>\n";
+//                        return 1;
+//                    }
 
                     p.addQuestion(tokens.at(0), tokens.at(1), tokens.at(2));
 
-                    if (tokens.at(0).at(0) == 'F') {
-                        unsigned len = stoul(tokens.at(0).substr(1).data());
-                        if (len == 0) {
-                            cout << "Invalid format for fuzzer:\n";
-                            cout << "F must be followed by fuzzed length\n";
-                            cout << "Syntax: --question F<n>,<type>,<class>\n\n";
-                            return 2;
-                        }
-                        DnsQuestion& q = p.question();
-                        q.fuzzQdomain(len);
-                    }
-                    if (tokens.at(1) == "F") {
-                        DnsQuestion& q = p.question();
-                        q.fuzzQtype();
-                    }
-                    if (tokens.at(2) == "F") {
-                        DnsQuestion& q = p.question();
-                        q.fuzzQclass();
-                    }
                     break;
 
                 case 8: // answer
@@ -228,27 +226,6 @@ int main(int argc, char* argv[])
                     } else {
                         rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2),
                             tokens.at(3), Dines::rDataConvert(tokens.at(4).data(), tokens.at(1)));
-                    }
-
-                    if (tokens.at(0).at(0) == 'F') {
-                        unsigned len = stoul(tokens.at(0).substr(1).data());
-                        if (len == 0) {
-                            cout << "Invalid format for fuzzer:\n";
-                            cout << "F must be followed by fuzzed length\n";
-                            cout << "Syntax: --{answer|auth|add} F<n>,<type>,<class>,ttl,rdata\n\n";
-                            cout << "Syntax: --{answer|auth|add} F<n>,<type>,<class>,ttl,rdatalen,rdata\n\n";
-                            return 2;
-                        }
-                        rr.fuzzRRdomain(len);
-                    }
-                    if (tokens.at(1) == "F") {
-                        rr.fuzzRRtype();
-                    }
-                    if (tokens.at(2) == "F") {
-                        rr.fuzzRRclass();
-                    }
-                    if (tokens.at(3) == "F") {
-                        rr.fuzzRRttl();
                     }
 
                     p.addRR(Dines::RecordSection(type), rr);
@@ -297,11 +274,9 @@ int main(int argc, char* argv[])
                     logger("Inter packet gap set to "  + string(optarg));
                     break;
 
-                case 32: // verbose
-                    logger("Verbose mode on");
-                    p.setLogger(logger);
-                    verbose = true;
+                case 32: // verbose (already processed)
                     break;
+
                 default:
                     cout << "Unknown option: " << optarg << endl;
                     return 1;
@@ -346,10 +321,7 @@ int main(int argc, char* argv[])
                 return 1;
             }
 
-            if (!verbose) {
-                cout << ".";
-                cout.flush();
-            }
+            PRINT_DOT();
 
             if (p.packets() > 0)
                 usleep(delay);

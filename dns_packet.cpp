@@ -304,8 +304,41 @@ string DnsPacket::to_string(bool dnsonly) const
 DnsQuestion& DnsPacket::addQuestion(const std::string qdomain, const std::string& qtype,
         const std::string& qclass)
 {
+    string myqtype = qtype;
+    string myqclass = qclass;
+
+    if (qdomain.at(0) == 'F') {
+        unsigned len = stoul(qdomain.substr(1).data());
+        if (len == 0) {
+            throw runtime_error(string("Invalid format for fuzzer:\n"
+                "F must be followed by fuzzed length\n"
+                "Syntax: --question F<n>,<type>,<class>\n\n"));
+        }
+        _question.fuzzQdomain(len);
+    }
+
+    if (myqtype == "") {
+        if (_log)
+            _log("Setting qtype to A");
+        myqtype = "A";
+    }
+
+    if (myqclass == "") {
+        if (_log)
+            _log("Setting qclass to IN");
+        myqclass = "IN";
+    }
+
     _dnsHdr.nRecordAdd(Dines::R_QUESTION, 1);
-    _question = DnsQuestion(qdomain, qtype, qclass);
+    _question = DnsQuestion(qdomain, myqtype, myqclass);
+
+    if (myqtype == "F") {
+        _question.fuzzQtype();
+    }
+
+    if (myqclass == "F") {
+        _question.fuzzQclass();
+    }
     return _question;
 }
 

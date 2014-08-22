@@ -10,6 +10,8 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <typeinfo>
+#include <cctype>
+#include <algorithm>
 
 using namespace std;
 
@@ -36,16 +38,16 @@ std::string domainEncode(const std::string& s)
 
 uint16_t stringToQtype(const std::string& s)
 {
-    if (s == "A") return 1;
-    if (s == "NS") return 2;
-    if (s == "CNAME") return 5;
-    if (s == "NULL") return 10;
-    if (s == "PTR") return 12;
-    if (s == "HINFO") return 13;
-    if (s == "MX") return 15;
-    if (s == "TXT") return 16;
-    if (s == "AXFR") return 252;
-    if (s == "ANY") return 255;
+    if (s == "A" || s == "a") return 1;
+    if (s == "NS" || s == "ns") return 2;
+    if (s == "CNAME" || s == "cname") return 5;
+    if (s == "NULL" || s == "null") return 10;
+    if (s == "PTR" || s == "ptr") return 12;
+    if (s == "HINFO" || s == "hinfo") return 13;
+    if (s == "MX" || s == "mx") return 15;
+    if (s == "TXT" || s == "txt") return 16;
+    if (s == "AXFR" || s == "axfr") return 252;
+    if (s == "ANY" || s == "any") return 255;
 
     // this is used by fuzzer
     if (s == "F") return 1;
@@ -91,12 +93,12 @@ string qtypeToString(uint16_t qtype)
 
 uint16_t stringToQclass(const std::string& s)
 {
-    if (s == "IN" || s == "1") return 0x0001;
-    if (s == "CSNET" || s == "2") return 0x0002;
-    if (s == "CHAOS" || s == "3") return 0x0003;
-    if (s == "HESIOD" || s == "4") return 0x0004;
-    if (s == "NONE" || s == "254") return 0x00fe;
-    if (s == "ALL" || s == "ANY" || s == "255") return 0x00ff;
+    if (s == "IN" || s == "in" || s == "1") return 0x0001;
+    if (s == "CSNET" || s == "csnet" || s == "2") return 0x0002;
+    if (s == "CHAOS" || s == "chaos" || s == "3") return 0x0003;
+    if (s == "HESIOD" || s == "hesiod" || s == "4") return 0x0004;
+    if (s == "NONE" || s == "none" || s == "254") return 0x00fe;
+    if (s == "ALL" || s == "all" || s == "any" || s == "ANY" || s == "255") return 0x00ff;
 
     if (s == "F") return 1;
 
