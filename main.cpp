@@ -18,14 +18,7 @@
 
 using namespace std;
 
-#define PRINT_DOT(x) { \
-    if (!verbose) { \
-        cout << "."; \
-        cout.flush(); \
-    } \
-}
-
-
+#define PRINT_DOT(x) { if (!verbose) { cout << "."; cout.flush(); } }
 
 struct option opts[] = {
     {"src-ip", 1, NULL, 0},
@@ -111,7 +104,7 @@ int main(int argc, char* argv[])
     string qtype = "";
     string qclass = "";
     unsigned num = 0;
-    unsigned delay = 1000000;
+    struct timespec delay = { .tv_sec = 1, .tv_nsec = 0 };
     bool verbose = false;
     uint16_t forged_nrecords[4];
     DnsPacket p;
@@ -119,6 +112,7 @@ int main(int argc, char* argv[])
     Server* server = NULL;
     int type;
     ResourceRecord rr;
+    unsigned temp;
 
     memset(&forged_nrecords, 0x0, sizeof(forged_nrecords));
 
@@ -189,15 +183,6 @@ int main(int argc, char* argv[])
                     tokens.clear();
                     tokens = tokenize(optarg, ",");
                     tokens.resize(3);
-
-//                    cout << "DEBUG " << tokens.at(1) << endl;
-//                    return 1;
-
-//                    if (tokens.size() != 3) {
-//                        cout << "Syntax: --question <domain>,<type>,<class>\n";
-//                        return 1;
-//                    }
-
                     p.addQuestion(tokens.at(0), tokens.at(1), tokens.at(2));
 
                     break;
@@ -270,8 +255,10 @@ int main(int argc, char* argv[])
                     break;
 
                 case 31: // delay
-                    delay = stoul(optarg);
-                    logger("Inter packet gap set to "  + string(optarg));
+                    temp = stoul(optarg);
+                    delay = { .tv_sec = temp / 1000000, .tv_nsec = temp % 1000000 };
+                    logger(string("Inter packet gap set to ")  + std::to_string(delay.tv_sec) +
+                        " sec, " + std::to_string(delay.tv_nsec) + " nsec");
                     break;
 
                 case 32: // verbose (already processed)
@@ -324,7 +311,7 @@ int main(int argc, char* argv[])
             PRINT_DOT();
 
             if (p.packets() > 0)
-                usleep(delay);
+                nanosleep(&delay, NULL);
         }
         cout << endl;
     }

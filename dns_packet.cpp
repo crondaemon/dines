@@ -151,7 +151,7 @@ void DnsPacket::_socketCreate()
     _socket = socket(PF_INET, SOCK_RAW, IPPROTO_UDP);
 
     if (_socket == -1)
-        throw runtime_error(string(__func__) + ": socket creation error: " + string(strerror(errno)));
+        throw runtime_error("socket creation error: " + string(strerror(errno)));
 
     if (setsockopt(_socket, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
         throw runtime_error(string(__func__) + ": unable to set option _IPHDRINCL");
