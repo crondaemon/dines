@@ -336,7 +336,7 @@ ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string
 {
     unsigned type = Dines::stringToQtype(rrType);
     unsigned klass = Dines::stringToQclass(rrClass);
-    unsigned int_ttl = atoi(ttl.data());
+    unsigned int_ttl = stoul(ttl.data());
 
     string localrdata = rdata;
 
@@ -412,12 +412,12 @@ uint16_t DnsPacket::dport() const
 
 void DnsPacket::sport(string sport)
 {
-    _udpHdr.source = htons(atoi(sport.data()));
+    _udpHdr.source = htons(stoul(sport.data()));
 }
 
 void DnsPacket::dport(string dport)
 {
-    _udpHdr.dest = htons(atoi(dport.data()));
+    _udpHdr.dest = htons(stoul(dport.data()));
 }
 
 uint16_t DnsPacket::txid() const
@@ -427,7 +427,7 @@ uint16_t DnsPacket::txid() const
 
 void DnsPacket::txid(string txid)
 {
-    _dnsHdr.txid(atoi(txid.data()));
+    _dnsHdr.txid(stoul(txid.data()));
 }
 
 void DnsPacket::txid(uint16_t txid)

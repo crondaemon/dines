@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
                         DnsHeader& h = p.dnsHdr();
                         h.fuzzNRecord(Dines::R_QUESTION);
                     } else {
-                        forged_nrecords[Dines::R_QUESTION] = atoi(optarg);
+                        forged_nrecords[Dines::R_QUESTION] = stoul(optarg);
                     }
                     break;
 
@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
                     p.addQuestion(tokens.at(0), tokens.at(1), tokens.at(2));
 
                     if (tokens.at(0).at(0) == 'F') {
-                        unsigned len = atoi(tokens.at(0).substr(1).data());
+                        unsigned len = stoul(tokens.at(0).substr(1).data());
                         if (len == 0) {
                             cout << "Invalid format for fuzzer:\n";
                             cout << "F must be followed by fuzzed length\n";
@@ -224,14 +224,14 @@ int main(int argc, char* argv[])
                     if (tokens.size() == 6) {
                         const char* data = tokens.at(5).data();
                         rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2),
-                            tokens.at(3), string(data, atoi(tokens.at(4).data())));
+                            tokens.at(3), string(data, stoul(tokens.at(4).data())));
                     } else {
                         rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2),
                             tokens.at(3), Dines::rDataConvert(tokens.at(4).data(), tokens.at(1)));
                     }
 
                     if (tokens.at(0).at(0) == 'F') {
-                        unsigned len = atoi(tokens.at(0).substr(1).data());
+                        unsigned len = stoul(tokens.at(0).substr(1).data());
                         if (len == 0) {
                             cout << "Invalid format for fuzzer:\n";
                             cout << "F must be followed by fuzzed length\n";
@@ -258,7 +258,7 @@ int main(int argc, char* argv[])
                     if (optarg[0] == 'F') {
                         p.dnsHdr().fuzzNRecord(Dines::R_ANSWER);
                     } else {
-                        forged_nrecords[Dines::R_ANSWER] = atoi(optarg);
+                        forged_nrecords[Dines::R_ANSWER] = stoul(optarg);
                     }
                     break;
 
@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
                     if (optarg[0] == 'F') {
                         p.dnsHdr().fuzzNRecord(Dines::R_ADDITIONAL);
                     } else {
-                        forged_nrecords[Dines::R_ADDITIONAL] = atoi(optarg);
+                        forged_nrecords[Dines::R_ADDITIONAL] = stoul(optarg);
                     }
                     break;
 
@@ -274,7 +274,7 @@ int main(int argc, char* argv[])
                     if (optarg[0] == 'F') {
                         p.dnsHdr().fuzzNRecord(Dines::R_AUTHORITIES);
                     } else {
-                        forged_nrecords[Dines::R_AUTHORITIES] = atoi(optarg);
+                        forged_nrecords[Dines::R_AUTHORITIES] = stoul(optarg);
                     }
                     break;
 
@@ -284,16 +284,16 @@ int main(int argc, char* argv[])
 
                 case 29: // server
                     if (optarg)
-                        server_port = atoi(optarg);
+                        server_port = stoul(optarg);
                     else
                         server_port = 53;
                     break;
                 case 30: // num
-                    num = atoi(optarg);
+                    num = stoul(optarg);
                     break;
 
                 case 31: // delay
-                    delay = atoi(optarg);
+                    delay = stoul(optarg);
                     logger("Inter packet gap set to "  + string(optarg));
                     break;
 

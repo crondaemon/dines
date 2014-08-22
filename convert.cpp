@@ -50,9 +50,9 @@ uint16_t stringToQtype(const std::string& s)
     // this is used by fuzzer
     if (s == "F") return 1;
 
-    unsigned n = atoi(s.c_str());
+    unsigned n = std::stoul(s);
 
-    if (n > 0xFFFF || n == 0) {
+    if (n > 65535) {
         throw runtime_error(string(__func__) + ": Invalid qtype");
     }
 

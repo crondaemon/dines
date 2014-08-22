@@ -41,7 +41,7 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
 
     type = Dines::stringToQtype(rrType);
     klass = Dines::stringToQclass(rrClass);
-    int_ttl = atoi(ttl.data());
+    int_ttl = stoul(ttl.data());
 
     *this = ResourceRecord(rrDomain, type, klass, int_ttl, rdata);
 }
