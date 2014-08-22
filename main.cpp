@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
     try {
         while((c = getopt_long(argc, argv, "", opts, NULL)) != -1) {
             switch(c) {
-                case 0:
+                case 0: // src-ip
                     if (optarg[0] == 'F') {
                         p.fuzzSrcIp();
                     } else {
@@ -138,11 +138,11 @@ int main(int argc, char* argv[])
                     }
                     break;
 
-                case 1:
+                case 1: // dst-ip
                     p.ipTo(optarg);
                     break;
 
-                case 2:
+                case 2: // sport
                     if (optarg[0] == 'F') {
                         p.fuzzSport();
                     } else {
@@ -150,11 +150,11 @@ int main(int argc, char* argv[])
                     }
                     break;
 
-                case 3:
+                case 3: // dport
                     p.dport(optarg);
                     break;
 
-                case 4:
+                case 4: // txid
                     if (optarg[0] == 'F') {
                         DnsHeader& h = p.dnsHdr();
                         h.fuzzTxid();
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
                     }
                     break;
 
-                case 5:
+                case 5: // num-questions
                     if (optarg[0] == 'F') {
                         DnsHeader& h = p.dnsHdr();
                         h.fuzzNRecord(Dines::R_QUESTION);
@@ -172,7 +172,7 @@ int main(int argc, char* argv[])
                     }
                     break;
 
-                case 6:
+                case 6: // question
                     tokens.clear();
                     tokens = tokenize(optarg, ",");
 
@@ -204,18 +204,9 @@ int main(int argc, char* argv[])
                     }
                     break;
 
-                case 7:
-                    if (optarg[0] == 'F') {
-                        DnsHeader& h = p.dnsHdr();
-                        h.fuzzNRecord(Dines::R_ANSWER);
-                    } else {
-                        forged_nrecords[Dines::R_ANSWER] = atoi(optarg);
-                    }
-                    break;
-
-                case 8:
-                case 10:
-                case 12:
+                case 8: // answer
+                case 10: // auth
+                case 12: // additional
                     // c = 8 => type = 1
                     // c = 10 => type = 2
                     // c = 12 => type = 3
@@ -263,44 +254,50 @@ int main(int argc, char* argv[])
                     p.addRR(Dines::RecordSection(type), rr);
                     break;
 
-                case 9:
+                case 7: // num-answers
                     if (optarg[0] == 'F') {
-                        DnsHeader& h = p.dnsHdr();
-                        h.fuzzNRecord(Dines::R_ADDITIONAL);
+                        p.dnsHdr().fuzzNRecord(Dines::R_ANSWER);
+                    } else {
+                        forged_nrecords[Dines::R_ANSWER] = atoi(optarg);
+                    }
+                    break;
+
+                case 9: // num-auth
+                    if (optarg[0] == 'F') {
+                        p.dnsHdr().fuzzNRecord(Dines::R_ADDITIONAL);
                     } else {
                         forged_nrecords[Dines::R_ADDITIONAL] = atoi(optarg);
                     }
                     break;
 
-                case 11:
+                case 11: // num-additional
                     if (optarg[0] == 'F') {
-                        DnsHeader& h = p.dnsHdr();
-                        h.fuzzNRecord(Dines::R_AUTHORITIES);
+                        p.dnsHdr().fuzzNRecord(Dines::R_AUTHORITIES);
                     } else {
                         forged_nrecords[Dines::R_AUTHORITIES] = atoi(optarg);
                     }
                     break;
 
-                case 28:
+                case 28: // no-rd
                     p.isRecursive(false);
                     break;
 
-                case 29:
+                case 29: // server
                     if (optarg)
                         server_port = atoi(optarg);
                     else
                         server_port = 53;
                     break;
-                case 30:
+                case 30: // num
                     num = atoi(optarg);
                     break;
 
-                case 31:
+                case 31: // delay
                     delay = atoi(optarg);
                     logger("Inter packet gap set to "  + string(optarg));
                     break;
 
-                case 32:
+                case 32: // verbose
                     logger("Verbose mode on");
                     p.setLogger(logger);
                     verbose = true;
@@ -315,6 +312,7 @@ int main(int argc, char* argv[])
         return 2;
     }
 
+    // We are forging number of recors. We need to explicitly set them after options processing
     for (unsigned i = 0; i < 4; i++) {
         if (forged_nrecords[i] != 0) {
             p.nRecord(Dines::RecordSection(i), forged_nrecords[i]);
