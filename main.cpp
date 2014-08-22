@@ -106,15 +106,13 @@ int main(int argc, char* argv[])
     unsigned num = 0;
     struct timespec delay = { .tv_sec = 1, .tv_nsec = 0 };
     bool verbose = false;
-    uint16_t forged_nrecords[4];
+    vector<int> forged_nrecords(4, 0);
     DnsPacket p;
     uint16_t server_port = 0;
     Server* server = NULL;
     int type;
     ResourceRecord rr;
     unsigned temp;
-
-    memset(&forged_nrecords, 0x0, sizeof(forged_nrecords));
 
     cout << "\nDines " << PACKAGE_VERSION << " - The definitive DNS packet forger.\n\n";
 
@@ -175,7 +173,7 @@ int main(int argc, char* argv[])
                         DnsHeader& h = p.dnsHdr();
                         h.fuzzNRecord(Dines::R_QUESTION);
                     } else {
-                        forged_nrecords[Dines::R_QUESTION] = stoul(optarg);
+                        forged_nrecords.at(Dines::R_QUESTION) = stoul(optarg);
                     }
                     break;
 
@@ -220,7 +218,7 @@ int main(int argc, char* argv[])
                     if (optarg[0] == 'F') {
                         p.dnsHdr().fuzzNRecord(Dines::R_ANSWER);
                     } else {
-                        forged_nrecords[Dines::R_ANSWER] = stoul(optarg);
+                        forged_nrecords.at(Dines::R_ANSWER) = stoul(optarg);
                     }
                     break;
 
@@ -228,7 +226,7 @@ int main(int argc, char* argv[])
                     if (optarg[0] == 'F') {
                         p.dnsHdr().fuzzNRecord(Dines::R_ADDITIONAL);
                     } else {
-                        forged_nrecords[Dines::R_ADDITIONAL] = stoul(optarg);
+                        forged_nrecords.at(Dines::R_ADDITIONAL) = stoul(optarg);
                     }
                     break;
 
@@ -236,7 +234,7 @@ int main(int argc, char* argv[])
                     if (optarg[0] == 'F') {
                         p.dnsHdr().fuzzNRecord(Dines::R_AUTHORITIES);
                     } else {
-                        forged_nrecords[Dines::R_AUTHORITIES] = stoul(optarg);
+                        forged_nrecords.at(Dines::R_AUTHORITIES) = stoul(optarg);
                     }
                     break;
 
@@ -274,10 +272,10 @@ int main(int argc, char* argv[])
         return 2;
     }
 
-    // We are forging number of recors. We need to explicitly set them after options processing
+    // We are forging the number of records. We need to explicitly set them after options processing
     for (unsigned i = 0; i < 4; i++) {
-        if (forged_nrecords[i] != 0) {
-            p.nRecord(Dines::RecordSection(i), forged_nrecords[i]);
+        if (forged_nrecords.at(i) != 0) {
+            p.nRecord(Dines::RecordSection(i), forged_nrecords.at(i));
         }
     }
 
