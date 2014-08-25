@@ -129,30 +129,43 @@ public:
         const std::string& rrType, const std::string& rrClass, const std::string& ttl,
         const std::string& rdata);
 
+    //! Adds a RR
     ResourceRecord& addRR(Dines::RecordSection section, const std::string& rrDomain,
         unsigned rrType, unsigned rrClass, unsigned ttl, const std::string& rdata);
 
+    //! Adds a RR
     ResourceRecord& addRR(Dines::RecordSection section, const std::string& rrDomain,
         unsigned rrType, unsigned rrClass, unsigned ttl, const char* rdata,
         unsigned rdatalen);
 
+    //! Adds a RR
     ResourceRecord& addRR(Dines::RecordSection section, const ResourceRecord& rr);
 
+    //! Run the fuzzer
     void fuzz();
 
+    //! Set fuzzing for src ip
     void fuzzSrcIp();
 
+    //! Set fuzzing for dst ip
     void fuzzSport();
 
-    void setLogger(Dines::LogFunc l);
+    //! Set the logger
+    void logger(Dines::LogFunc l);
 
     //! Sets how many packets are to send
     void packets(unsigned num);
 
+    //! Return the number of packets left
     unsigned packets() const;
+
+    //! Return the number of packets left (as string)
     std::string packetsStr() const;
 
+    //! Return true if the packet is invalid
     bool invalid() const;
+
+    //! Return a message that describe why a packet is invalid, empty string otherwise
     std::string invalidMsg() const;
 };
 

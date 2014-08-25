@@ -569,7 +569,7 @@ void DnsPacket::fuzzSport()
     _fuzzSport = true;
 }
 
-void DnsPacket::setLogger(Dines::LogFunc l)
+void DnsPacket::logger(Dines::LogFunc l)
 {
     _log = l;
 }
@@ -598,10 +598,7 @@ string DnsPacket::packetsStr() const
 
 bool DnsPacket::invalid() const
 {
-    if (_ipHdr.daddr == 0)
-        return true;
-
-    return false;
+    return (invalidMsg() == "" ? false : true);
 }
 
 string DnsPacket::invalidMsg() const
@@ -610,9 +607,4 @@ string DnsPacket::invalidMsg() const
         return "You must specify destination ip (--dst-ip)";
 
     return "";
-}
-
-void DnsPacket::inCksum()
-{
-
 }

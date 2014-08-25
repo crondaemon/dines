@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < argc; i++) {
         if (string(argv[i]) == "--verbose") {
             logger("Verbose mode on");
-            p.setLogger(logger);
+            p.logger(logger);
             verbose = true;
         }
     }
