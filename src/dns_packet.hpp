@@ -49,6 +49,9 @@ class DnsPacket {
     Dines::LogFunc _log;
 
     unsigned _datagrams;
+
+    //! Perform the internet checksum
+    void inCksum();
 public:
     //! Constructor
     DnsPacket(Dines::LogFunc l = NULL);

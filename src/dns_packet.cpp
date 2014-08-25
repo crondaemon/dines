@@ -1,7 +1,6 @@
 
 #include <dns_packet.hpp>
 
-#include <in_cksum.hpp>
 #include <debug.hpp>
 #include <convert.hpp>
 
@@ -125,8 +124,27 @@ void DnsPacket::doUdpCksum()
     memcpy(temp, &phdr, sizeof(phdr));
     memcpy(temp + sizeof(phdr), &this->_udpHdr, sizeof(struct udphdr));
     memcpy(temp + sizeof(phdr) + sizeof(struct udphdr), dns.c_str(), dns.length());
-    _udpHdr.check = in_cksum((u_short*)temp,
-        sizeof(struct pseudo) + sizeof(struct udphdr) + dns.length());
+
+    // Now the internet checksum
+    int sum = 0;
+    u_short *w = (u_short*)temp;
+    int nleft = sizeof(struct pseudo) + sizeof(struct udphdr) + dns.length();
+
+    _udpHdr.check = 0;
+
+    while (nleft > 1)  {
+      sum += *w++;
+      nleft -= 2;
+    }
+
+    if (nleft == 1) {
+      *(u_char *)(&_udpHdr.check) = *(u_char *)w;
+      sum += _udpHdr.check;
+    }
+
+    sum = (sum >> 16) + (sum & 0xffff);     /* add hi 16 to low 16 */
+    sum += (sum >> 16);                     /* add carry */
+    _udpHdr.check = ~sum;                          /* truncate to 16 bits */
 
     delete temp;
 }
@@ -592,4 +610,9 @@ string DnsPacket::invalidMsg() const
         return "You must specify destination ip (--dst-ip)";
 
     return "";
+}
+
+void DnsPacket::inCksum()
+{
+
 }
