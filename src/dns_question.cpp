@@ -164,7 +164,7 @@ void DnsQuestion::parse(char* buf)
         len = buf[cur];
         cur++;
     }
-    _qdomain_str.pop_back();
+    _qdomain_str.erase(_qdomain_str.size() - 1, _qdomain_str.size());
 
     memcpy(&_qtype, buf + i, 2);
     memcpy(&_qclass, buf + i + 2, 2);
