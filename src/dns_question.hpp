@@ -46,6 +46,8 @@ public:
     std::string to_string() const;
 
     void parse(char* buf);
+
+    bool empty() const;
 };
 
 #endif

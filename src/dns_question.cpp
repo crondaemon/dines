@@ -152,7 +152,28 @@ void DnsQuestion::parse(char* buf)
         i++;
     i++;
     _qdomain_enc = string(buf, i);
-    //_qdomain_str = // XXX
+
+    // Now parse the domain into printable form
+    _qdomain_str = "";
+    int cur = 1;
+    int len = buf[0];
+    while (len != 0) {
+        _qdomain_str += string(buf + cur, len);
+        _qdomain_str += ".";
+        cur += len;
+        len = buf[cur];
+        cur++;
+    }
+    _qdomain_str.pop_back();
+
     memcpy(&_qtype, buf + i, 2);
     memcpy(&_qclass, buf + i + 2, 2);
+}
+
+bool DnsQuestion::empty() const
+{
+    if (_qdomain_str == "" && _qtype == 0 && _qclass == 0)
+        return true;
+
+    return false;
 }

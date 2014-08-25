@@ -104,14 +104,14 @@ public:
 
     void nRecord(Dines::RecordSection section, uint16_t value);
 
-    //! TODO
+    //! Return true is packet has recursion activated
     bool isRecursive() const;
 
     void isRecursive(const bool isRecursive);
 
     void isQuestion(bool isQuestion);
 
-    //! TODO
+    //! Return true if packet is a question
     bool isQuestion() const;
 
     const ResourceRecord& answers(unsigned n) const;

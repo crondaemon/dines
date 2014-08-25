@@ -6,12 +6,12 @@
 #include <dinestypes.hpp>
 
 class Server {
-    DnsPacket _p;
+    DnsPacket _packet;
     uint16_t _port;
     Dines::LogFunc _log;
     std::string _data() const;
 public:
-    Server(const DnsPacket& p, uint16_t port, Dines::LogFunc log = NULL);
+    Server(const DnsPacket& packet, uint16_t port, Dines::LogFunc log = NULL);
     void setLogger(Dines::LogFunc l);
     void launch();
 };

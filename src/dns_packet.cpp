@@ -272,20 +272,17 @@ string DnsPacket::to_string(bool dnsonly) const
     string s;
 
     if (dnsonly == false) {
-        s += this->ipFrom() + ":" + Dines::convertInt<uint16_t>(this->sport());
+        s += this->ipFrom() + ":" + to_string(this->sport());
         s += " -> ";
-        s += this->ipTo() + ":" + Dines::convertInt<uint16_t>(this->dport());
+        s += this->ipTo() + ":" + to_string(this->dport());
         s += " ";
     }
 
-    s += "txid: " + Dines::convertInt<uint16_t>(_dnsHdr.txid());
+    s += "txid: " + std::to_string(_dnsHdr.txid());
 
-    if (isQuestion())
-        s += " Q ";
-    else
-        s += " R ";
+    s += isQuestion() ? " Q " : " R ";
 
-    if (_question != DnsQuestion()) {
+    if (!_question.empty()) {
         s += "[Question:" + _question.to_string() + "]";
     }
 

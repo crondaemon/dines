@@ -408,7 +408,7 @@ int test_conversion()
 
 int test_ip_conversion()
 {
-    // XXX
+    CHECK(Dines::rDataConvert("1.2.3.4", "A") == "\x01\x02\x03\x04");
     return 0;
 }
 
@@ -429,6 +429,17 @@ int test_copy_constructor_and_assignment()
     p3 = p1;
     CHECK(p2.ipFrom() == "1.2.3.4");
     CHECK(p3.ipFrom() == "1.2.3.4");
+    return 0;
+}
+
+int test_parse()
+{
+    DnsQuestion q;
+    char* payload = (char*)"\x03www\x04test\x03""com\x00\x00\x01\x00\x01";
+    q.parse(payload);
+    CHECK(q.qdomain() == "www.test.com");
+    CHECK(q.qtype() == 1);
+    CHECK(q.qclass() == 1);
     return 0;
 }
 
@@ -453,5 +464,7 @@ int main(int argc, char* argv[])
     TEST(test_ip_conversion());
     TEST(test_logging());
     TEST(test_copy_constructor_and_assignment());
+    TEST(test_parse());
+
     cout << "done" << endl;
 }

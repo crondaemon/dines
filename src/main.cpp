@@ -22,7 +22,6 @@ using namespace std;
 
 struct option opts[] = {
     {"src-ip", 1, NULL, 0},
-    {"dst-ip", 1, NULL, 1},
     {"sport", 1, NULL, 2},
     {"dport", 1, NULL, 3},
     {"txid", 1, NULL, 4},
@@ -50,7 +49,10 @@ void usage(string s)
     cout << "Fields with (R) are repeatable. (Example --answer)\n";
     cout << "Fields with (A) are calculated automatically.\n";
     cout << "\n";
-    cout << "Usage: " << s << " <params>\n\n";
+    cout << "Usage:\n";
+    cout << "\tCLIENT MODE: " << s << " [<params>] <dns server>\n";
+    cout << "\tSERVER MODE: " << s << " [<params>] --server=<port>\n";
+    cout << "\n";
     cout << "Params:\n";
     cout << "\n[IP]\n";
     cout << "--src-ip=<ip>: Source IP (AF)\n";
@@ -85,7 +87,7 @@ void usage(string s)
     cout << "--help: this help\n";
     cout << "\nExamples:\n";
     cout << "\tsudo ./dines --server\n";
-    cout << "\tsudo ./dines --dst-ip 1.2.3.4 --question=www.example.com,A,IN\n";
+    cout << "\tsudo ./dines --question=www.example.com 1.2.3.4\n";
     cout << "\n";
 }
 
@@ -113,15 +115,14 @@ int main(int argc, char* argv[])
     int type;
     ResourceRecord rr;
     unsigned temp;
+    vector<string> tokens;
 
     cout << "\nDines " << PACKAGE_VERSION << " - The definitive DNS packet forger.\n\n";
 
-    if (argc < 2) {
+    if (argc == 1) {
         usage(argv[0]);
-        exit(1);
+        return 1;
     }
-
-    vector<string> tokens;
 
     // first, scan the argv looking for verbose mode
     for (int i = 0; i < argc; i++) {
@@ -141,10 +142,6 @@ int main(int argc, char* argv[])
                     } else {
                         p.ipFrom(optarg);
                     }
-                    break;
-
-                case 1: // dst-ip
-                    p.ipTo(optarg);
                     break;
 
                 case 2: // sport
@@ -279,21 +276,44 @@ int main(int argc, char* argv[])
         }
     }
 
-    if (p.invalid()) {
-        cerr << "Invalid parameters:\n\n";
-        cerr << p.invalidMsg() << endl;
-        return 1;
-    }
-
     if (server_port > 0) {
         // Server mode
+        if (argc != optind) {
+            cerr << "When running in server mode you can't specify server destination address" << endl;
+            return 1;
+        }
+
+        p.ipTo("255.255.255.255");
+
+        if (p.invalid()) {
+            cerr << "Invalid parameters:\n\n";
+            cerr << p.invalidMsg() << endl;
+            return 1;
+        }
+
         server = new Server(p, server_port);
         if (verbose == true)
             server->setLogger(logger);
         server->launch();
     } else {
         // Client mode
+
+        if (argc == optind) {
+            cerr << "You must specify the server destination address" << endl;
+            return 1;
+        }
+
+        // The rest of the cmdline contains the addresses to scan
+        p.ipTo(argv[optind]);
+
         p.packets(num);
+
+        if (p.invalid()) {
+            cerr << "Invalid parameters:\n\n";
+            cerr << p.invalidMsg() << endl;
+            return 1;
+        }
+
         cout << "Sending " << p.packetsStr() << " datagrams\n";
 
         while (p.packets() > 0) {

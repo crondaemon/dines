@@ -15,13 +15,13 @@
 
 using namespace std;
 
-Server::Server(const DnsPacket& p, uint16_t port, Dines::LogFunc log) :
-        _p(p), _port(port), _log(log)
+Server::Server(const DnsPacket& packet, uint16_t port, Dines::LogFunc log) :
+        _packet(packet), _port(port), _log(log)
 {
     if (_log)
         _log("Creating server");
 
-    if (_p.nRecord(Dines::R_QUESTION) > 0) {
+    if (_packet.nRecord(Dines::R_QUESTION) > 0) {
         throw runtime_error("Can't specify question when running in server mode");
     }
 }
@@ -38,7 +38,7 @@ void Server::launch()
     snprintf(port, 7, "%u", _port);
 
     if (_log)
-        _log("Serving record: " + _p.to_string(true) + " on port " + string(port));
+        _log("Serving record: " + _packet.to_string(true) + " on port " + string(port));
 
     int servSock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (servSock == -1)
@@ -70,7 +70,7 @@ void Server::launch()
         DnsHeader qhdr;
         qhdr.parse(buf);
 
-        DnsHeader& h = _p.dnsHdr();
+        DnsHeader& h = _packet.dnsHdr();
 
         h.txid(qhdr.txid());
         if (qhdr.rd() == true) {
@@ -80,23 +80,23 @@ void Server::launch()
         DnsQuestion q;
         q.parse(buf + 12);
 
-        _p.addQuestion(q);
-        _p.isQuestion(false);
+        _packet.addQuestion(q);
+        _packet.isQuestion(false);
 
         if (_log)
             _log("Query from: " + Dines::ip32ToString(peer.sin_addr.s_addr) +
-                " txid: " + Dines::convertInt<uint16_t>(h.txid()));
+                " txid: " + to_string(h.txid()));
 
         if (sendto(servSock, _data().data(), _data().size(), 0, (struct sockaddr*)&peer,
                 sockaddr_len) == -1) {
             throw runtime_error(string(__func__) + "::sendto() error: " + string(strerror(errno)));
         }
 
-        _p.fuzz();
+        _packet.fuzz();
     }
 }
 
 string Server::_data() const
 {
-    return _p.data();
+    return _packet.data();
 }
