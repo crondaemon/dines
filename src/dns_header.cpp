@@ -42,6 +42,26 @@ DnsHeader::DnsHeader(const DnsHeader& h)
     *this = h;
 }
 
+bool DnsHeader::operator==(const DnsHeader& h)
+{
+    return !(*this != h);
+}
+
+bool DnsHeader::operator!=(const DnsHeader& h)
+{
+    if (_txid != h._txid)
+        return true;
+
+    if (_flags != h._flags)
+        return true;
+
+    for (unsigned i = 0; i < 4; i++)
+        if (_nRecord[i] != h._nRecord[i])
+            return true;
+
+    return false;
+}
+
 DnsHeader& DnsHeader::operator=(const DnsHeader& h)
 {
     _txid = h._txid;

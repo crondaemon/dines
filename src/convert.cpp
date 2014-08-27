@@ -139,9 +139,7 @@ uint32_t stringToIp32(string s)
 string ip32ToString(uint32_t ip32)
 {
     char buf[INET_ADDRSTRLEN];
-    if (inet_ntop(AF_INET, &ip32, buf, INET_ADDRSTRLEN) == NULL) {
-        throw runtime_error("Can't convert IP address");
-    }
+    inet_ntop(AF_INET, &ip32, buf, INET_ADDRSTRLEN);
     return string(buf);
 }
 
@@ -149,7 +147,7 @@ string rDataConvert(const char* opt, string qtype)
 {
     if (qtype == "A") {
         struct in_addr addr;
-        if (inet_pton(AF_INET, opt, &addr) == -1)
+        if (inet_pton(AF_INET, opt, &addr) != 1)
             throw runtime_error("Can't convert " + string(opt));
         return string((char*)&addr, 4);
     }
@@ -160,42 +158,5 @@ string rDataConvert(const char* opt, string qtype)
 
     throw runtime_error("Conversion of " + string(opt) + " not supported");
 }
-
-template<typename C> string convertInt(C i)
-{
-    string fs = "";
-    if (typeid(i) == typeid(int8_t))
-        fs = "%d";
-    if (typeid(i) == typeid(uint8_t))
-        fs = "%u";
-    if (typeid(i) == typeid(int16_t))
-        fs = "%d";
-    if (typeid(i) == typeid(uint16_t))
-        fs = "%u";
-    if (typeid(i) == typeid(int32_t))
-        fs = "%d";
-    if (typeid(i) == typeid(uint32_t))
-        fs = "%u";
-    if (typeid(i) == typeid(int64_t))
-        fs = "%lld";
-    if (typeid(i) == typeid(uint64_t))
-        fs = "%llu";
-
-    if (fs == "")
-        throw logic_error("Can't convert");
-
-    char buf[50];
-    snprintf(buf, 50, fs.data(), i);
-    return string(buf);
-}
-
-template string convertInt<int8_t>(int8_t);
-template string convertInt<uint8_t>(uint8_t);
-template string convertInt<int16_t>(int16_t);
-template string convertInt<uint16_t>(uint16_t);
-template string convertInt<int32_t>(int32_t);
-template string convertInt<uint32_t>(uint32_t);
-template string convertInt<int64_t>(int64_t);
-template string convertInt<uint64_t>(uint64_t);
 
 }; // namespace

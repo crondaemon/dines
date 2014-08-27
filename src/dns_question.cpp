@@ -23,7 +23,7 @@ DnsQuestion::DnsQuestion(const string qdomain, const string qtype, const string 
     *this = DnsQuestion(qdomain, myqtype, myqclass);
 }
 
-DnsQuestion::DnsQuestion(const string qdomain, unsigned qtype, unsigned qclass)
+DnsQuestion::DnsQuestion(const string qdomain, uint16_t qtype, uint16_t qclass)
 {
     // Domain
     _qdomain_str = qdomain;
@@ -81,6 +81,16 @@ string DnsQuestion::data() const
 string DnsQuestion::qdomain() const
 {
     return _qdomain_str;
+}
+
+void DnsQuestion::qtype(uint16_t qtype)
+{
+    _qtype = htons(qtype);
+}
+
+void DnsQuestion::qclass(uint16_t qclass)
+{
+    _qclass = htons(qclass);
 }
 
 uint16_t DnsQuestion::qclass() const
@@ -142,6 +152,7 @@ void DnsQuestion::fuzzQclass()
 
 string DnsQuestion::to_string() const
 {
+
     return _qdomain_str + "/" + qtypeStr() + "/" + qclassStr();
 }
 

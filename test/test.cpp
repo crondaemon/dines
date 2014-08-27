@@ -105,6 +105,24 @@ int test_header()
     CHECK(h3.nRecord(Dines::R_AUTHORITIES) == 4);
     CHECK(h3.txid() == 0x1234);
 
+    DnsHeader h4(h3);
+    CHECK(h4 == h3);
+    h3.txid(55);
+    CHECK(h4 != h3);
+    h3.txid(h4.txid());
+    h3.rd(1);
+    CHECK(h4 != h3);
+    h3.rd(0);
+    h3.nRecord(Dines::R_QUESTION, 2);
+    CHECK(h4 != h3);
+
+    h3.rd(1);
+    CHECK(h3.rd() == true);
+    h3.ra(true);
+    CHECK(h3.ra() == true);
+    h3.ra(false);
+    CHECK(h3.ra() == false);
+
     return 0;
 }
 
@@ -114,6 +132,7 @@ int test_question()
     CHECK(q1.qdomain() == "www.test.com");
     CHECK(q1.qtype() == 1);
     CHECK(q1.qclass() == 1);
+    CHECK(q1.to_string() == "www.test.com/A/IN");
 
     DnsQuestion q2("www.test.com", "TXT", "CHAOS");
     CHECK(q2.qdomain() == "www.test.com");
@@ -130,8 +149,21 @@ int test_question()
     CHECK(q4.qdomain() == "www.test.com");
     CHECK(q4.qtype() == 0x10);
     CHECK(q4.qclass() == 3);
-
     CHECK(q4.data() == string("\x03\x77\x77\x77\x04\x74\x65\x73\x74\x03\x63\x6F\x6D\x00\x00\x10\x00\x03", 18));
+
+    DnsQuestion q5(q1);
+    CHECK(q1 == q5);
+    CHECK(q1 != q4);
+    q5.qtype(2);
+    CHECK(q5.qtype() == 2);
+    CHECK(q5.qtypeStr() == "NS");
+    q5.qclass(2);
+    CHECK(q5.qclass() == 2);
+    CHECK(q5.qclassStr() == "CSNET");
+    CHECK(!q5.empty());
+
+    DnsQuestion q6;
+    CHECK(q6.empty());
 
     return 0;
 }
@@ -374,34 +406,81 @@ int test_invalid_section()
 int test_conversion()
 {
     CHECK(Dines::stringToQtype("A") == 1);
+    CHECK(Dines::stringToQtype("a") == 1);
     CHECK(Dines::stringToQtype("NS") == 2);
+    CHECK(Dines::stringToQtype("ns") == 2);
     CHECK(Dines::stringToQtype("CNAME") == 5);
+    CHECK(Dines::stringToQtype("cname") == 5);
+    CHECK(Dines::stringToQtype("NULL") == 10);
+    CHECK(Dines::stringToQtype("null") == 10);
     CHECK(Dines::stringToQtype("PTR") == 12);
+    CHECK(Dines::stringToQtype("ptr") == 12);
     CHECK(Dines::stringToQtype("HINFO") == 13);
+    CHECK(Dines::stringToQtype("hinfo") == 13);
     CHECK(Dines::stringToQtype("MX") == 15);
+    CHECK(Dines::stringToQtype("mx") == 15);
     CHECK(Dines::stringToQtype("TXT") == 16);
+    CHECK(Dines::stringToQtype("txt") == 16);
     CHECK(Dines::stringToQtype("AXFR") == 252);
+    CHECK(Dines::stringToQtype("axfr") == 252);
     CHECK(Dines::stringToQtype("ANY") == 255);
+    CHECK(Dines::stringToQtype("any") == 255);
     CHECK(Dines::stringToQtype("F") == 1);
     CHECK(Dines::stringToQtype("20") == 20);
     CATCH_EXCEPTION(Dines::stringToQtype("TEST"));
     CATCH_EXCEPTION(Dines::stringToQtype("70000"));
 
+    CHECK(Dines::qtypeToString(1) == "A");
+    CHECK(Dines::qtypeToString(2) == "NS");
+    CHECK(Dines::qtypeToString(5) == "CNAME");
+    CHECK(Dines::qtypeToString(10) == "NULL");
+    CHECK(Dines::qtypeToString(12) == "PTR");
+    CHECK(Dines::qtypeToString(13) == "HINFO");
+    CHECK(Dines::qtypeToString(15) == "MX");
+    CHECK(Dines::qtypeToString(16) == "TXT");
+    CHECK(Dines::qtypeToString(252) == "AXFR");
+    CHECK(Dines::qtypeToString(255) == "ANY");
+    CHECK(Dines::qtypeToString(77) == "77");
+
     CHECK(Dines::stringToQclass("IN") == 1);
+    CHECK(Dines::stringToQclass("in") == 1);
+    CHECK(Dines::stringToQclass("1") == 1);
     CHECK(Dines::stringToQclass("CSNET") == 2);
+    CHECK(Dines::stringToQclass("csnet") == 2);
     CHECK(Dines::stringToQclass("2") == 2);
     CHECK(Dines::stringToQclass("CHAOS") == 3);
+    CHECK(Dines::stringToQclass("chaos") == 3);
     CHECK(Dines::stringToQclass("3") == 3);
     CHECK(Dines::stringToQclass("HESIOD") == 4);
+    CHECK(Dines::stringToQclass("hesiod") == 4);
     CHECK(Dines::stringToQclass("4") == 4);
     CHECK(Dines::stringToQclass("NONE") == 254);
+    CHECK(Dines::stringToQclass("none") == 254);
     CHECK(Dines::stringToQclass("254") == 254);
     CHECK(Dines::stringToQclass("ALL") == 255);
+    CHECK(Dines::stringToQclass("all") == 255);
     CHECK(Dines::stringToQclass("ANY") == 255);
+    CHECK(Dines::stringToQclass("any") == 255);
     CHECK(Dines::stringToQclass("255") == 255);
-    CHECK(Dines::stringToQclass("4") == 4);
     CHECK(Dines::stringToQclass("F") == 1);
     CATCH_EXCEPTION(Dines::stringToQclass("50"));
+
+    CHECK(Dines::qclassToString(1) == "IN");
+    CHECK(Dines::qclassToString(2) == "CSNET");
+    CHECK(Dines::qclassToString(3) == "CHAOS");
+    CHECK(Dines::qclassToString(4) == "HESIOD");
+    CHECK(Dines::qclassToString(254) == "NONE");
+    CHECK(Dines::qclassToString(255) == "ANY");
+    CHECK(Dines::qclassToString(7) == "7");
+
+    CHECK(Dines::stringToIp32("1.2.3.4") == 0x04030201);
+    CATCH_EXCEPTION(Dines::stringToIp32("1.2.not.good"));
+    CHECK(Dines::ip32ToString(0x04030201) == "1.2.3.4");
+
+    CHECK(Dines::rDataConvert("1.2.3.4", "A") == string("\x01\x02\x03\x04"));
+    CATCH_EXCEPTION(Dines::rDataConvert("1.2.not.good", "A"));
+    CHECK(Dines::rDataConvert("test.com", "NS") == string("\x04test\x03""com\x00", 10));
+    CATCH_EXCEPTION(Dines::rDataConvert("test", "test"));
 
     return 0;
 }

@@ -53,6 +53,10 @@ public:
 
     DnsHeader& operator=(const DnsHeader& h);
 
+    bool operator==(const DnsHeader& h);
+
+    bool operator!=(const DnsHeader& h);
+
     void nRecord(unsigned section, uint16_t value);
 
     uint16_t nRecord(unsigned section) const;
