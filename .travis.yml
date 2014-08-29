@@ -2,4 +2,4 @@ language: cpp
 script:
     - autoreconf -i
     - ./configure
-    - make test
+    - make tests
