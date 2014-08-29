@@ -4,6 +4,7 @@
 
 #include <string>
 #include <stdint.h>
+#include <dinestypes.hpp>
 
 class ResourceRecord {
     std::string _rrDomain_str;
@@ -18,6 +19,8 @@ class ResourceRecord {
     bool _fuzzRRtype;
     bool _fuzzRRclass;
     bool _fuzzTTL;
+
+    Dines::LogFunc _log;
 public:
     ResourceRecord(const std::string& rrDomain, const std::string& rrType,
         const std::string& rrClass, const std::string& ttl, const std::string& rdata);
@@ -29,9 +32,11 @@ public:
 
     ResourceRecord& operator=(const ResourceRecord& rr);
 
-    std::string rrDomain() const;
 
     std::string data() const;
+
+    void rrDomain(std::string domain);
+    std::string rrDomain() const;
 
     uint16_t rrType() const;
     std::string rrTypeStr() const;
@@ -51,7 +56,7 @@ public:
     std::string rData() const;
     unsigned rDataLen() const;
 
-    void fuzz();
+    ResourceRecord& fuzz();
 
     void fuzzRRdomain(unsigned len);
     void fuzzRRtype();
@@ -59,6 +64,9 @@ public:
     void fuzzRRttl();
 
     std::string to_string() const;
+
+    //! Set the logger
+    void logger(Dines::LogFunc l);
 };
 
 #endif

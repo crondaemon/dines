@@ -54,7 +54,7 @@ class DnsPacket {
     void inCksum();
 public:
     //! Constructor
-    DnsPacket(Dines::LogFunc l = NULL);
+    DnsPacket();
     DnsPacket(const DnsPacket& p);
 
     DnsPacket& operator=(const DnsPacket& p);

@@ -7,6 +7,9 @@
 
 namespace Dines {
 
+//! Generate a random string of length
+std::string random_string(size_t length);
+
 //! Encodes a string into a DNS domain name
 std::string domainEncode(const std::string& s);
 

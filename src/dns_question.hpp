@@ -4,6 +4,8 @@
 
 #include <arpa/inet.h>
 #include <string>
+#include <utils.hpp>
+#include <dinestypes.hpp>
 
 class DnsQuestion {
     //! plain version of the domain name
@@ -17,6 +19,8 @@ class DnsQuestion {
     bool _fuzzQdomain;
     bool _fuzzQtype;
     bool _fuzzQclass;
+
+    Dines::LogFunc _log;
 public:
     DnsQuestion(const std::string qdomain = "", uint16_t qtype = 0, uint16_t qclass = 0);
     DnsQuestion(const std::string qdomain, const std::string qtype, const std::string qclass);
@@ -39,7 +43,7 @@ public:
     uint16_t qclass() const;
     std::string qclassStr() const;
 
-    void fuzz();
+    DnsQuestion& fuzz();
 
     void fuzzQdomain(unsigned len);
     void fuzzQtype();
@@ -50,6 +54,9 @@ public:
     void parse(char* buf);
 
     bool empty() const;
+
+    //! Set the logger
+    void logger(Dines::LogFunc l);
 };
 
 #endif

@@ -2,7 +2,7 @@
 #include <dns_packet.hpp>
 
 #include <debug.hpp>
-#include <convert.hpp>
+#include <utils.hpp>
 
 #include <stdio.h>
 #include <sys/socket.h>
@@ -19,7 +19,7 @@
 
 using namespace std;
 
-DnsPacket::DnsPacket(Dines::LogFunc l)
+DnsPacket::DnsPacket()
 {
     _ipHdr.ihl = 5;
     _ipHdr.version = 4;
@@ -46,12 +46,9 @@ DnsPacket::DnsPacket(Dines::LogFunc l)
     _fuzzSrcIp = false;
     _fuzzSport = false;
 
-    _log = l;
+    _log = NULL;
 
-    _datagrams = 0;
-
-    if (_log != NULL)
-        _log("DnsPacket created");
+    this->packets(0);
 }
 
 DnsPacket::DnsPacket(const DnsPacket& p)
@@ -319,41 +316,9 @@ string DnsPacket::to_string(bool dnsonly) const
 DnsQuestion& DnsPacket::addQuestion(const std::string qdomain, const std::string& qtype,
         const std::string& qclass)
 {
-    string myqtype = qtype;
-    string myqclass = qclass;
-
-    if (qdomain.at(0) == 'F') {
-        unsigned len = stoul(qdomain.substr(1).data());
-        if (len == 0) {
-            throw runtime_error(string("Invalid format for fuzzer:\n"
-                "F must be followed by fuzzed length\n"
-                "Syntax: --question F<n>,<type>,<class>\n\n"));
-        }
-        _question.fuzzQdomain(len);
-    }
-
-    if (myqtype == "") {
-        if (_log)
-            _log("Setting qtype to A");
-        myqtype = "A";
-    }
-
-    if (myqclass == "") {
-        if (_log)
-            _log("Setting qclass to IN");
-        myqclass = "IN";
-    }
-
     _dnsHdr.nRecordAdd(Dines::R_QUESTION, 1);
-    _question = DnsQuestion(qdomain, myqtype, myqclass);
+    _question = DnsQuestion(qdomain, qtype, qclass);
 
-    if (myqtype == "F") {
-        _question.fuzzQtype();
-    }
-
-    if (myqclass == "F") {
-        _question.fuzzQclass();
-    }
     return _question;
 }
 
@@ -547,7 +512,7 @@ ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const ResourceRec
             rrPtr = &_additionals;
             break;
         default:
-            throw runtime_error("Unexpected section");
+            throw runtime_error("Unexpected section " + std::to_string(section));
     }
 
     _dnsHdr.nRecordAdd(section, 1);

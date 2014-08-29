@@ -1,5 +1,5 @@
 
-#include <convert.hpp>
+#include <utils.hpp>
 
 #include <tokenizer.hpp>
 
@@ -16,6 +16,41 @@
 using namespace std;
 
 namespace Dines {
+
+static std::vector<char> charset()
+{
+    return vector<char>(
+    {'0','1','2','3','4',
+    '5','6','7','8','9',
+    'A','B','C','D','E','F',
+    'G','H','I','J','K',
+    'L','M','N','O','P',
+    'Q','R','S','T','U',
+    'V','W','X','Y','Z',
+    'a','b','c','d','e','f',
+    'g','h','i','j','k',
+    'l','m','n','o','p',
+    'q','r','s','t','u',
+    'v','w','x','y','z'
+    });
+};
+
+// Internal randon string generator
+static std::string random_string_int( size_t length, std::function<char(void)> rand_char )
+{
+    std::string str(length, 0);
+    std::generate_n(str.begin(), length, rand_char);
+    return str;
+}
+
+std::string random_string(size_t length)
+{
+    const auto ch_set = charset();
+    std::default_random_engine rng(std::random_device{}());
+    std::uniform_int_distribution<> dist(0, ch_set.size()-1);
+    auto randchar = [ch_set,&dist,&rng ](){return ch_set[ dist(rng) ];};
+    return random_string_int(length, randchar);
+}
 
 std::string domainEncode(const std::string& s)
 {

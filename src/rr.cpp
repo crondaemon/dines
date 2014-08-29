@@ -2,7 +2,7 @@
 #include <rr.hpp>
 
 #include <dns_packet.hpp>
-#include <convert.hpp>
+#include <utils.hpp>
 
 #include <iostream>
 #include <arpa/inet.h>
@@ -11,21 +11,39 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <algorithm>
+
 using namespace std;
 
 ResourceRecord::ResourceRecord(const string& rrDomain, uint16_t rrType,
         uint16_t rrClass, uint32_t ttl, const string& rdata)
 {
     // Domain
-    _rrDomain_str = rrDomain;
-    _rrDomain_enc = Dines::domainEncode(rrDomain);
+    if (rrDomain.size() > 0 && rrDomain.at(0) == 'F') {
+        unsigned len;
+        try {
+            len = stoul(rrDomain.substr(1).data());
+        } catch (exception& e) {
+            len = 0;
+        }
+        if (len == 0) {
+            throw runtime_error(string("Invalid format for fuzzer:\n"
+                "F must be followed by fuzzed length\n"
+                "Syntax: --{answer|auth|add} F<n>,<type>,<class>,ttl,rdata\n\n"
+                "Syntax: --{answer|auth|add} F<n>,<type>,<class>,ttl,rdatalen,rdata\n\n"));
+        }
+        fuzzRRdomain(len);
+    } else {
+        _rrDomain_str = rrDomain;
+        _rrDomain_enc = Dines::domainEncode(rrDomain);
+        _fuzzRRdomain = false;
+    }
 
     _rrType = htons(rrType);
     _rrClass = htons(rrClass);
     _ttl = htonl(ttl);
     _rData = rdata;
 
-    _fuzzRRdomain = false;
     _fuzzRRtype = false;
     _fuzzRRclass = false;
     _fuzzTTL = false;
@@ -39,29 +57,26 @@ ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
     uint16_t klass;
     unsigned int_ttl;
 
-    if (rrDomain.at(0) == 'F') {
-        unsigned len = stoul(rrDomain.substr(1).data());
-        if (len == 0) {
-            throw runtime_error(string("Invalid format for fuzzer:\n"
-                "F must be followed by fuzzed length\n"
-                "Syntax: --{answer|auth|add} F<n>,<type>,<class>,ttl,rdata\n\n"
-                "Syntax: --{answer|auth|add} F<n>,<type>,<class>,ttl,rdatalen,rdata\n\n"));
-        }
-        fuzzRRdomain(len);
-    }
     if (rrType == "F") {
         _fuzzRRtype = true;
-    }
-    if (rrClass == "F") {
-        _fuzzRRclass = true;
-    }
-    if (ttl == "F") {
-        _fuzzTTL = true;
+        type = 0;
+    } else {
+        type = Dines::stringToQtype(rrType);
     }
 
-    type = Dines::stringToQtype(rrType);
-    klass = Dines::stringToQclass(rrClass);
-    int_ttl = stoul(ttl.data());
+    if (rrClass == "F") {
+        _fuzzRRclass = true;
+        klass = 0;
+    } else {
+        klass = Dines::stringToQclass(rrClass);
+    }
+
+    if (ttl == "F") {
+        _fuzzTTL = true;
+        int_ttl = 0;
+    } else {
+        int_ttl = stoul(ttl.data());
+    }
 
     *this = ResourceRecord(rrDomain, type, klass, int_ttl, rdata);
 }
@@ -147,12 +162,11 @@ unsigned ResourceRecord::rDataLen() const
     return _rData.size();
 }
 
-void ResourceRecord::fuzz()
+ResourceRecord& ResourceRecord::fuzz()
 {
     if (_fuzzRRdomain == true) {
-        for (unsigned i = 0; i < _rrDomain_enc.size(); ++i) {
-            _rrDomain_enc[i] = rand();
-        }
+        _rrDomain_str = Dines::random_string(_rrDomain_str.size());
+        _rrDomain_enc = Dines::domainEncode(_rrDomain_str);
     }
 
     if (_fuzzRRtype)
@@ -163,12 +177,14 @@ void ResourceRecord::fuzz()
 
     if (_fuzzTTL)
         _ttl = rand();
+
+    return *this;
 }
 
 void ResourceRecord::fuzzRRdomain(unsigned len)
 {
-    _rrDomain_str = "[fuzzed]";
-    _rrDomain_enc = string(len, 'x');
+    _rrDomain_str = string(len, 'x');
+    _rrDomain_enc = Dines::domainEncode(_rrDomain_str);
     _fuzzRRdomain = true;
     this->fuzz();
 }
@@ -211,6 +227,12 @@ void ResourceRecord::rrClass(unsigned rrClass)
     _rrClass = htons(rrClass);
 }
 
+void ResourceRecord::rrDomain(string domain)
+{
+    _rrDomain_str = domain;
+    _rrDomain_enc = Dines::domainEncode(domain);
+}
+
 string ResourceRecord::to_string() const
 {
     string out = _rrDomain_str + "/" + this->rrTypeStr() + "/" + this->rrClassStr() + "/" +
@@ -223,7 +245,7 @@ string ResourceRecord::to_string() const
     }
 
     if (Dines::qtypeToString(ntohs(_rrType)) == "NS") {
-        out += "/" + _rrDomain_str;
+        out += "/" + this->rData();
     }
 
     return out;
@@ -232,4 +254,9 @@ string ResourceRecord::to_string() const
 void ResourceRecord::rData(string rdata)
 {
     _rData = rdata;
+}
+
+void ResourceRecord::logger(Dines::LogFunc l)
+{
+    _log = l;
 }

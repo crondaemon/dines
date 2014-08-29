@@ -3,8 +3,7 @@
 #include <debug.hpp>
 #include <iostream>
 #include <string.h>
-#include <convert.hpp>
-//#include <stdio.h>
+#include <utils.hpp>
 
 using namespace std;
 
@@ -174,18 +173,43 @@ int test_rr()
 
     CHECK(rr1.rrDomain() == "www.test.com");
     CHECK(rr1.rrType() == 1);
+    CHECK(rr1.rrTypeStr() == "A");
     CHECK(rr1.rrClass() == 1);
+    CHECK(rr1.rrClassStr() == "IN");
     CHECK(rr1.ttl() == 64);
     CHECK(rr1.rDataLen() == 4);
-
+    rr1.rrDomain("www.test1.com");
+    CHECK(rr1.rrDomain() == "www.test1.com");
     rr1.rrType("A");
     CHECK(rr1.rrType() == 1);
-
     rr1.rrClass("CHAOS");
     CHECK(rr1.rrClass() == 3);
 
     ResourceRecord rr2("www.test.com", 1, 1, 64, string("\x00\x00\x01\x00", 4));
     CHECK(rr2.rDataLen() == 4);
+
+    CATCH_EXCEPTION(ResourceRecord rr3("Fnotvalid", 1, 1, 64, "\x01\x02\x03\x04"));
+
+    // Test the fuzzer
+    ResourceRecord rr4("F5", "F", "F", "F", "\x01\x02\x03\x04");
+    string s1(rr4.rrDomain().data());
+    rr4.fuzz();
+    string s2(rr4.rrDomain().data());
+    CHECK(s1 != s2);
+    rr4.fuzzRRtype();
+    CHECK(rr4.rrType() != rr4.fuzz().rrType());
+
+    return 0;
+}
+
+int test_rr_tostring()
+{
+    ResourceRecord rr1("www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+    CHECK(rr1.to_string() == "www.test.com/A/IN/64/1.2.3.4");
+
+    rr1.rrType("NS");
+    rr1.rData("ns.test.com");
+    CHECK(rr1.to_string() == "www.test.com/NS/IN/64/ns.test.com");
 
     return 0;
 }
@@ -234,6 +258,9 @@ int test_answer()
     CHECK(p.nRecord(Dines::R_ANSWER) == 2);
     p.nRecord(Dines::R_ANSWER, 3);
     CHECK(p.nRecord(Dines::R_ANSWER) == 3);
+
+    CATCH_EXCEPTION(p.addRR(Dines::RecordSection(77), ResourceRecord()));
+
     return 0;
 }
 
@@ -494,7 +521,9 @@ int test_ip_conversion()
 int test_logging()
 {
     log_done = false;
-    DnsPacket p(dummylog);
+    DnsPacket p;
+    p.logger(dummylog);
+    p.nRecord(Dines::R_ADDITIONAL, 1);
     CHECK(log_done == true);
     return 0;
 }
@@ -522,6 +551,30 @@ int test_parse()
     return 0;
 }
 
+int test_packets()
+{
+    DnsPacket p;
+    CHECK(p.packets() == 0xFFFFFFFF);
+    p.packets(0);
+    CHECK(p.packets() == 0xFFFFFFFF);
+    CHECK(p.packetsStr() == "infinite");
+    p.packets(10);
+    CHECK(p.packets() == 10);
+    CHECK(p.packetsStr() == "10");
+    return 0;
+}
+
+int test_invalid()
+{
+    DnsPacket p;
+    CHECK(p.invalid() == true);
+    CHECK(p.invalidMsg() == "You must specify destination ip (--dst-ip)");
+    p.ipTo("1.2.3.4");
+    CHECK(p.invalid() == false);
+    CHECK(p.invalidMsg() == "");
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     cout << "Tests running";
@@ -530,6 +583,7 @@ int main(int argc, char* argv[])
     TEST(test_header());
     TEST(test_question());
     TEST(test_rr());
+    TEST(test_rr_tostring());
     TEST(test_query());
     TEST(test_answer());
     TEST(test_many_rr());
@@ -544,6 +598,8 @@ int main(int argc, char* argv[])
     TEST(test_logging());
     TEST(test_copy_constructor_and_assignment());
     TEST(test_parse());
+    TEST(test_packets());
+    TEST(test_invalid());
 
-    cout << "done" << endl;
+    cout << "done" << "\n";
 }

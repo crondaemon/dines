@@ -1,8 +1,6 @@
 
 #include <dns_question.hpp>
 
-#include <convert.hpp>
-
 #include <iostream>
 #include <arpa/inet.h>
 #include <stdexcept>
@@ -14,13 +12,26 @@ using namespace std;
 
 DnsQuestion::DnsQuestion(const string qdomain, const string qtype, const string qclass)
 {
-    unsigned myqtype;
-    unsigned myqclass;
+    string myqtype;
+    string myqclass;
 
-    myqtype = Dines::stringToQtype(qtype);
-    myqclass = Dines::stringToQclass(qclass);
+    if (qtype == "") {
+        if (_log)
+            _log("Setting qtype to A");
+        myqtype = "A";
+    } else {
+        myqtype = qtype;
+    }
 
-    *this = DnsQuestion(qdomain, myqtype, myqclass);
+    if (qclass == "") {
+        if (_log)
+            _log("Setting qclass to IN");
+        myqclass = "IN";
+    } else {
+        myqclass = qclass;
+    }
+
+    *this = DnsQuestion(qdomain, Dines::stringToQtype(myqtype), Dines::stringToQclass(myqclass));
 }
 
 DnsQuestion::DnsQuestion(const string qdomain, uint16_t qtype, uint16_t qclass)
@@ -38,7 +49,6 @@ DnsQuestion::DnsQuestion(const string qdomain, uint16_t qtype, uint16_t qclass)
     _fuzzQdomain = false;
     _fuzzQtype = false;
     _fuzzQclass = false;
-    srand(time(NULL));
 }
 
 DnsQuestion::DnsQuestion(const DnsQuestion& q)
@@ -113,12 +123,11 @@ string DnsQuestion::qtypeStr() const
     return Dines::qtypeToString(ntohs(_qtype));
 }
 
-void DnsQuestion::fuzz()
+DnsQuestion& DnsQuestion::fuzz()
 {
     if (_fuzzQdomain == true) {
-        for (unsigned i = 0; i < _qdomain_enc.size(); ++i) {
-            _qdomain_enc[i] = rand();
-        }
+        _qdomain_str = Dines::random_string(_qdomain_str.size());
+        _qdomain_enc = Dines::domainEncode(_qdomain_str);
     }
 
     if (_fuzzQtype == true) {
@@ -128,12 +137,14 @@ void DnsQuestion::fuzz()
     if (_fuzzQclass == true) {
         _qclass = rand();
     }
+
+    return *this;
 }
 
 void DnsQuestion::fuzzQdomain(unsigned len)
 {
-    _qdomain_str = "[fuzzed]";
-    _qdomain_enc.resize(len);
+    _qdomain_str = string(len, 'x');
+    _qdomain_enc = Dines::domainEncode(_qdomain_str);
     _fuzzQdomain = true;
     this->fuzz();
 }
@@ -187,4 +198,9 @@ bool DnsQuestion::empty() const
         return true;
 
     return false;
+}
+
+void DnsQuestion::logger(Dines::LogFunc l)
+{
+    _log = l;
 }
