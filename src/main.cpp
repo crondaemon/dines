@@ -71,8 +71,8 @@ void usage(string s)
     cout << "--answer(R)=<domain(F<n>)>,<type(F)>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS answer\n";
     cout << "\n";
     cout << "--num-auth=<n>: number of authoritative records (AF)\n";
-    cout << "--auth(R)=<domain(F<n>)>,<type>,<class(F)>,<ttl(F)>,<rdata>: a DNS authoritative record\n";
-    cout << "--auth(R)=<domain(F<n>)>,<type>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS authoritative record\n";
+    cout << "--auth(R)=<domain|F<n>>,<type>,<class(F)>,<ttl(F)>,<rdata>: a DNS authoritative record\n";
+    cout << "--auth(R)=<domain|F<n>>,<type>,<class(F)>,<ttl(F)>,<rdatalen>,<rdata>: a DNS authoritative record\n";
     cout << "\n";
     cout << "--num-add=<n>: number of additional records (AF)\n";
     cout << "--additional(R)=<domain(F<n>)>,<type(F)>,<class(F)>,<ttl(F)>,<rdata>: a DNS additional record\n";
