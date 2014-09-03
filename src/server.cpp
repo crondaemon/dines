@@ -25,10 +25,11 @@ Server::Server(const DnsPacket& packet, uint16_t port, Dines::LogFunc log) :
     }
 }
 
-void Server::setLogger(Dines::LogFunc l)
+void Server::logger(Dines::LogFunc l)
 {
     _log = l;
-    _log("Activating logger");
+    if (_log)
+        _log("Activating logger");
 }
 
 void Server::launch()

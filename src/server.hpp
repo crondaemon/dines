@@ -12,7 +12,7 @@ class Server {
     std::string _data() const;
 public:
     Server(const DnsPacket& packet, uint16_t port, Dines::LogFunc log = NULL);
-    void setLogger(Dines::LogFunc l);
+    void logger(Dines::LogFunc l);
     void launch();
 };
 

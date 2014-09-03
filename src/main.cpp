@@ -293,7 +293,7 @@ int main(int argc, char* argv[])
 
         server = new Server(p, server_port);
         if (verbose == true)
-            server->setLogger(logger);
+            server->logger(logger);
         server->launch();
     } else {
         // Client mode
