@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
                             tokens.at(3), string(data, stoul(tokens.at(4).data())));
                     } else {
                         rr = ResourceRecord(tokens.at(0), tokens.at(1), tokens.at(2),
-                            tokens.at(3), Dines::rDataConvert(tokens.at(4).data(), tokens.at(1)));
+                            tokens.at(3), Dines::rDataConvert(tokens.at(4).data(), Dines::stringToQtype(tokens.at(1))));
                     }
 
                     p.addRR(Dines::RecordSection(type), rr);

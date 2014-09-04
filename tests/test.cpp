@@ -504,17 +504,17 @@ int test_conversion()
     CATCH_EXCEPTION(Dines::stringToIp32("1.2.not.good"));
     CHECK(Dines::ip32ToString(0x04030201) == "1.2.3.4");
 
-    CHECK(Dines::rDataConvert("1.2.3.4", "A") == string("\x01\x02\x03\x04"));
-    CATCH_EXCEPTION(Dines::rDataConvert("1.2.not.good", "A"));
-    CHECK(Dines::rDataConvert("test.com", "NS") == string("\x04test\x03""com\x00", 10));
-    CATCH_EXCEPTION(Dines::rDataConvert("test", "test"));
+    CHECK(Dines::rDataConvert("1.2.3.4", 1) == string("\x01\x02\x03\x04"));
+    CATCH_EXCEPTION(Dines::rDataConvert("1.2.not.good", 1));
+    CHECK(Dines::rDataConvert("test.com", 2) == string("\x04test\x03""com\x00", 10));
+    CATCH_EXCEPTION(Dines::rDataConvert("test", 1));
 
     return 0;
 }
 
 int test_ip_conversion()
 {
-    CHECK(Dines::rDataConvert("1.2.3.4", "A") == "\x01\x02\x03\x04");
+    CHECK(Dines::rDataConvert("1.2.3.4", 1) == "\x01\x02\x03\x04");
     return 0;
 }
 

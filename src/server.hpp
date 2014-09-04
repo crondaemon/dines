@@ -3,7 +3,7 @@
 #define __SERVER_HPP__
 
 #include <dns_packet.hpp>
-#include <dinestypes.hpp>
+#include <utils.hpp>
 
 class Server {
     DnsPacket _packet;

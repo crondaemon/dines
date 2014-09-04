@@ -4,7 +4,7 @@
 
 #include <string>
 #include <stdint.h>
-#include <dinestypes.hpp>
+#include <utils.hpp>
 
 class ResourceRecord {
     std::string _rrDomain_str;

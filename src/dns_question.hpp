@@ -5,7 +5,6 @@
 #include <arpa/inet.h>
 #include <string>
 #include <utils.hpp>
-#include <dinestypes.hpp>
 
 class DnsQuestion {
     //! plain version of the domain name

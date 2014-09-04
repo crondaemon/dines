@@ -178,16 +178,16 @@ string ip32ToString(uint32_t ip32)
     return string(buf);
 }
 
-string rDataConvert(const char* opt, string qtype)
+string rDataConvert(const char* opt, uint16_t qtype)
 {
-    if (qtype == "A") {
+    if (qtype == 1) {
         struct in_addr addr;
         if (inet_pton(AF_INET, opt, &addr) != 1)
             throw runtime_error("Can't convert " + string(opt));
         return string((char*)&addr, 4);
     }
 
-    if (qtype == "NS") {
+    if (qtype == 2) {
         return domainEncode(opt);
     }
 

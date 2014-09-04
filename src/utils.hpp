@@ -7,6 +7,15 @@
 
 namespace Dines {
 
+typedef enum {
+    R_QUESTION = 0,
+    R_ANSWER = 1,
+    R_ADDITIONAL = 2,
+    R_AUTHORITIES = 3
+} RecordSection;
+
+typedef void (*LogFunc)(std::string);
+
 //! Generate a random string of length
 std::string random_string(size_t length);
 
@@ -27,7 +36,7 @@ uint32_t stringToIp32(std::string s);
 
 std::string ip32ToString(uint32_t ip32);
 
-std::string rDataConvert(const char* opt, std::string qtype);
+std::string rDataConvert(const char* opt, uint16_t qtype);
 
 template<typename C> std::string convertInt(C i);
 

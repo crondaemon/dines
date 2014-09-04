@@ -12,7 +12,6 @@
 #include <dns_question.hpp>
 #include <rr.hpp>
 #include <tokenizer.hpp>
-#include <dinestypes.hpp>
 
 class DnsPacket {
     int _socket;
