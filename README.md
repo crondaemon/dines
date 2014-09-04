@@ -71,7 +71,7 @@ Params:
 
 Examples:
 	sudo ./dines --server
-	sudo ./dines --server --answer=www.example.com,1,1,1.2.3.4
+	sudo ./dines --server --answer=www.example.com,A,IN,64,1.2.3.4
 	sudo ./dines --question=www.example.com 1.2.3.4
 ```
 
