@@ -351,9 +351,7 @@ ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string
     unsigned klass = Dines::stringToQclass(rrClass);
     unsigned int_ttl = stoul(ttl.data());
 
-    string localrdata = rdata;
-
-    return addRR(section, rrDomain, type, klass, int_ttl, localrdata);
+    return addRR(section, rrDomain, type, klass, int_ttl, rdata);
 }
 
 ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string& rrDomain,
