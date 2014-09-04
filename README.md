@@ -78,8 +78,7 @@ Examples:
 To generate a question, issue the following command:
 
 ```
-sudo ./dines --src-ip 192.168.1.2 --question www.test.com,A,IN
-    --num 1 192.168.1.1
+sudo ./dines --src-ip 192.168.1.2 --question www.test.com,A,IN --num 1 192.168.1.1
 ```
 
 that asks for domain www.test.com, sending 1 packet only. To generate an answer, one can use the following
