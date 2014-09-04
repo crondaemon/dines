@@ -275,7 +275,7 @@ string DnsPacket::to_string(bool dnsonly) const
         s += " ";
     }
 
-    s += "txid: " + std::to_string(_dnsHdr.txid());
+    s += "txid: " + std::to_string<long>(_dnsHdr.txid(), std::hex);
 
     s += isQuestion() ? " Q " : " R ";
 
