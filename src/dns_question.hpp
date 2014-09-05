@@ -21,8 +21,8 @@ class DnsQuestion {
 
     Dines::LogFunc _log;
 public:
-    DnsQuestion(const std::string qdomain = "", uint16_t qtype = 0, uint16_t qclass = 0);
-    DnsQuestion(const std::string qdomain, const std::string qtype, const std::string qclass);
+    DnsQuestion(const std::string qdomain = "", const std::string qtype = "A", const std::string qclass = "IN");
+    DnsQuestion(const std::string qdomain, uint16_t qtype, uint16_t qclass);
     DnsQuestion(const DnsQuestion& q);
 
     DnsQuestion& operator=(const DnsQuestion& q);

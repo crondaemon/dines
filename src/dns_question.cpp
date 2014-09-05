@@ -12,43 +12,46 @@ using namespace std;
 
 DnsQuestion::DnsQuestion(const string qdomain, const string qtype, const string qclass)
 {
-    string myqtype;
-    string myqclass;
+    _fuzzQtype = false;
+    _fuzzQclass = false;
 
-    if (qtype == "") {
-        if (_log)
-            _log("Setting qtype to A");
-        myqtype = "A";
-    } else {
-        myqtype = qtype;
+    *this = DnsQuestion(qdomain, Dines::stringToQtype(qtype), Dines::stringToQclass(qclass));
+
+    if (qtype == "F") {
+        this->fuzzQtype();
     }
 
-    if (qclass == "") {
-        if (_log)
-            _log("Setting qclass to IN");
-        myqclass = "IN";
-    } else {
-        myqclass = qclass;
+    if (qclass == "F") {
+        this->fuzzQclass();
     }
-
-    *this = DnsQuestion(qdomain, Dines::stringToQtype(myqtype), Dines::stringToQclass(myqclass));
 }
 
 DnsQuestion::DnsQuestion(const string qdomain, uint16_t qtype, uint16_t qclass)
 {
     // Domain
-    _qdomain_str = qdomain;
-    _qdomain_enc = Dines::domainEncode(qdomain);
-
+    if (qdomain.size() > 0 && qdomain.at(0) == 'F') {
+        unsigned len;
+        try {
+            len = stoul(qdomain.substr(1).data());
+        } catch (exception& e) {
+            len = 0;
+        }
+        if (len == 0) {
+            throw runtime_error(string("Invalid format for fuzzer:\n"
+                "F must be followed by fuzzed length\n"
+                "Syntax: --question F<n>,<type>,<class>\n\n"));
+        }
+        fuzzQdomain(len);
+    } else {
+        _qdomain_str = qdomain;
+        _qdomain_enc = Dines::domainEncode(qdomain);
+        _fuzzQdomain = false;
+    }
     // qtype
     _qtype = htons(qtype);
 
     // qclass
     _qclass = htons(qclass);
-
-    _fuzzQdomain = false;
-    _fuzzQtype = false;
-    _fuzzQclass = false;
 }
 
 DnsQuestion::DnsQuestion(const DnsQuestion& q)
@@ -131,11 +134,11 @@ DnsQuestion& DnsQuestion::fuzz()
     }
 
     if (_fuzzQtype == true) {
-        _qtype = rand();
+        _qtype = rand() % 0xFFFF;
     }
 
     if (_fuzzQclass == true) {
-        _qclass = rand();
+        _qclass = rand() % 0xFFFF;
     }
 
     return *this;
@@ -194,7 +197,7 @@ void DnsQuestion::parse(char* buf)
 
 bool DnsQuestion::empty() const
 {
-    if (_qdomain_str == "" && _qtype == 0 && _qclass == 0)
+    if (_qdomain_str == "" && ntohs(_qtype) == 1 && ntohs(_qclass) == 1)
         return true;
 
     return false;

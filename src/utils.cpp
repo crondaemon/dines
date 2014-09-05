@@ -85,7 +85,9 @@ uint16_t stringToQtype(const std::string& s)
     if (s == "ANY" || s == "any") return 255;
 
     // this is used by fuzzer
-    if (s == "F") return 1;
+    if (s == "F") {
+        return 1;
+    }
 
     unsigned n = std::stoul(s);
 
@@ -138,7 +140,7 @@ uint16_t stringToQclass(const std::string& s)
     if (s == "F") return 1;
 
     // Invalid class
-    throw runtime_error(string(__func__) + ": Invalid qclass");
+    throw runtime_error(string(__func__) + ": Invalid qclass " + s);
 }
 
 string qclassToString(uint16_t qclass)

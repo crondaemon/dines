@@ -361,11 +361,13 @@ int test_fuzz_header()
 
 int test_fuzz_question()
 {
-    DnsQuestion q("www.test.com", "A", "IN");
-    q.fuzzQtype();
-    q.fuzzQclass();
+    DnsQuestion q("F10", "F", "F");
 
     uint16_t x;
+
+    string d = q.qdomain();
+    q.fuzz();
+    CHECK(d != q.qdomain());
 
     x = q.qtype();
     q.fuzz();
@@ -374,6 +376,8 @@ int test_fuzz_question()
     x = q.qclass();
     q.fuzz();
     CHECK(x != q.qclass());
+
+    CATCH_EXCEPTION(DnsQuestion("Ferror", "A", "IN"));
 
     return 0;
 }
