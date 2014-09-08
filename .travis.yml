@@ -1,5 +1,19 @@
-language: cpp
+language:
+    - cpp
+
+compiler:
+    - gcc
+
+before_install:
+    - sudo pip install cpp-coveralls
+    - sudo apt-get install python-yaml
+    - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+    - sudo apt-get update -qq
+    - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++-4.8; fi
+    - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+
 script:
-    - autoreconf -i
-    - ./configure
-    - make tests
+    - autoreconf -i && ./configure --enable-gcov && make && ./test_dines
+
+after_success:
+    - cpp-coveralls --gcov /usr/bin/gcov-4.8 --exclude tests --gcov-options '\-lp'
