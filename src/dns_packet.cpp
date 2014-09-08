@@ -248,9 +248,7 @@ string DnsPacket::ipFrom() const
 {
     char buf[INET_ADDRSTRLEN];
 
-    if (!inet_ntop(AF_INET, &_ipHdr.saddr, buf, INET_ADDRSTRLEN))
-        throw runtime_error("Error converting address");
-
+    inet_ntop(AF_INET, &_ipHdr.saddr, buf, INET_ADDRSTRLEN);
     return string(buf);
 }
 
@@ -258,9 +256,7 @@ string DnsPacket::ipTo() const
 {
     char buf[INET_ADDRSTRLEN];
 
-    if (!inet_ntop(AF_INET, &_ipHdr.daddr, buf, INET_ADDRSTRLEN))
-        throw runtime_error("Error converting address");
-
+    inet_ntop(AF_INET, &_ipHdr.daddr, buf, INET_ADDRSTRLEN);
     return string(buf);
 }
 
@@ -269,19 +265,16 @@ string DnsPacket::to_string(bool dnsonly) const
     string s;
 
     if (dnsonly == false) {
-        s += this->ipFrom() + ":" + to_string(this->sport());
+        s += this->ipFrom() + ":" + std::to_string(this->sport());
         s += " -> ";
-        s += this->ipTo() + ":" + to_string(this->dport());
+        s += this->ipTo() + ":" + std::to_string(this->dport());
         s += " ";
     }
 
     s += "txid: " + std::to_string(_dnsHdr.txid());
 
     s += isQuestion() ? " Q " : " R ";
-
-    if (!_question.empty()) {
-        s += "[Question:" + _question.to_string() + "]";
-    }
+    s += "[Question:" + _question.to_string() + "]";
 
     if (_answers.size() > 0) {
         s += "[Answers:";

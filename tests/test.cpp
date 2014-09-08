@@ -579,6 +579,26 @@ int test_invalid()
     return 0;
 }
 
+int test_dns_packet()
+{
+    DnsQuestion q("www.polito.it", "A", "IN");
+    ResourceRecord rr("www.polito.it", "A", "IN", "64", "\x01\x02\x03\x04");
+    DnsPacket p;
+    p.ipFrom("1.2.3.4");
+    p.sport("100");
+    p.ipTo("2.3.4.5");
+    p.dport("53");
+    p.txid("100");
+    p.addQuestion(q);
+    CHECK(p.to_string() == "1.2.3.4:100 -> 2.3.4.5:53 txid: 100 Q [Question:www.polito.it/A/IN]");
+    p.addRR(Dines::R_ANSWER, rr);
+    p.addRR(Dines::R_ADDITIONAL, rr);
+    p.addRR(Dines::R_AUTHORITIES, rr);
+    CHECK(p.to_string() == "1.2.3.4:100 -> 2.3.4.5:53 txid: 100 R [Question:www.polito.it/A/IN][Answers:www.polito.it/A/IN/64/1.2.3.4][Authorities:www.polito.it/A/IN/64/1.2.3.4][Additionals:www.polito.it/A/IN/64/1.2.3.4]");
+    CHECK(p.to_string(true) == "txid: 100 R [Question:www.polito.it/A/IN][Answers:www.polito.it/A/IN/64/1.2.3.4][Authorities:www.polito.it/A/IN/64/1.2.3.4][Additionals:www.polito.it/A/IN/64/1.2.3.4]");
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     cout << "Tests running";
@@ -604,6 +624,7 @@ int main(int argc, char* argv[])
     TEST(test_parse());
     TEST(test_packets());
     TEST(test_invalid());
+    TEST(test_dns_packet());
 
     cout << "done" << "\n";
 }
