@@ -6,3 +6,5 @@ test_dines_SOURCES = src/debug.hpp src/dns_header.hpp src/dns_header.cpp src/dns
 test_dines_CXXFLAGS = -Wall -std=c++0x -Isrc -Itests
 tests: test_dines
 	./test_dines
+clean-local:
+	-rm -rf *.csmes *.csexe src/*.csmes src/*.csexe
