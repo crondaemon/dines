@@ -39,6 +39,8 @@ stamp-h1
 
 # cc suite
 *.cs*
+*.gcno
+*.gcda
 
 # exe
 dines
