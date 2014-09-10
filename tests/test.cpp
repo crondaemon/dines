@@ -93,7 +93,7 @@ int test_header()
     h2.txid(0x1234);
     CHECK(h2.txid() == 0x1234);
 
-    CHECK(h2.data() == string("\x12\x34\x80\x00\x00\x01\x00\x02\x00\x03\x00\x04", 12));
+    CHECK(h2.data() == string("\x12\x34\x80\x00\x00\x01\x00\x02\x00\x04\x00\x03", 12));
 
     DnsHeader h3;
     h3 = h2;

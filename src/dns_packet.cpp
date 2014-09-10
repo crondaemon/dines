@@ -79,7 +79,9 @@ string DnsPacket::data() const
     string out = "";
 
     out += _dnsHdr.data();
-    out += _question.data();
+
+    if (!_question.empty())
+        out += _question.data();
 
     for (vector<ResourceRecord>::const_iterator itr = _answers.begin();
             itr != _answers.end(); ++itr)
@@ -374,6 +376,11 @@ uint16_t DnsPacket::nRecord(Dines::RecordSection section) const
     return _dnsHdr.nRecord(section);
 }
 
+void DnsPacket::question(const DnsQuestion& q)
+{
+    _question = q;
+}
+
 DnsQuestion& DnsPacket::question()
 {
     return _question;
@@ -483,6 +490,11 @@ void DnsPacket::fuzz()
     }
 }
 
+void DnsPacket::dnsHdr(const DnsHeader& h)
+{
+    _dnsHdr = h;
+}
+
 DnsHeader& DnsPacket::dnsHdr()
 {
     return _dnsHdr;
@@ -560,4 +572,10 @@ string DnsPacket::invalidMsg() const
         return "You must specify destination ip (--dst-ip)";
 
     return "";
+}
+
+void DnsPacket::parse(char* buf)
+{
+    _dnsHdr.parse(buf);
+    _question.parse(buf + 12);
 }

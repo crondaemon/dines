@@ -292,7 +292,7 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        server = new Server(p, server_port);
+        server = new Server(&p, server_port);
         if (verbose == true)
             server->logger(logger);
         server->launch();

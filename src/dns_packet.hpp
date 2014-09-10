@@ -58,9 +58,11 @@ public:
 
     DnsPacket& operator=(const DnsPacket& p);
 
+    void dnsHdr(const DnsHeader& h);
     DnsHeader& dnsHdr();
+    void question(const DnsQuestion& q);
     DnsQuestion& question();
-    ResourceRecord& rr(Dines::RecordSection section, unsigned n);
+    ResourceRecord& rr(Dines::RecordSection section, unsigned n) const;
 
     //! Compute the UDP checksum
     void doUdpCksum();
@@ -166,6 +168,9 @@ public:
 
     //! Return a message that describe why a packet is invalid, empty string otherwise
     std::string invalidMsg() const;
+
+    //! Parse a message from a buffer
+    void parse(char* buf);
 };
 
 

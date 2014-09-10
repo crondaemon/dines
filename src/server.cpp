@@ -14,14 +14,17 @@
 
 using namespace std;
 
-Server::Server(const DnsPacket& packet, uint16_t port, Dines::LogFunc log) :
-        _packet(packet), _port(port), _log(log)
+Server::Server(const DnsPacket* packet, uint16_t port, bool autoanswer)
 {
-    if (_log)
-        _log("Creating server");
-
-    if (_packet.nRecord(Dines::R_QUESTION) > 0) {
-        throw runtime_error("Can't specify question when running in server mode");
+    _log = NULL;
+    _port = port;
+    _autoanswer = autoanswer;
+    _packets = -1;
+    if (packet) {
+        _outgoing = *packet;
+        if (_outgoing.nRecord(Dines::R_QUESTION) > 0) {
+            throw runtime_error("Can't specify question when running in server mode");
+        }
     }
 }
 
@@ -32,13 +35,15 @@ void Server::logger(Dines::LogFunc l)
         _log("Activating logger");
 }
 
+void Server::autoanswer(bool a)
+{
+    _autoanswer = a;
+}
+
 void Server::launch()
 {
-    char port[7];
-    snprintf(port, 7, "%u", _port);
-
-    if (_log)
-        _log("Serving record: " + _packet.to_string(true) + " on port " + string(port));
+    if (_autoanswer && _log)
+        _log("Serving record: " + _outgoing.to_string(true) + " on port " + std::to_string(_port));
 
     int servSock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (servSock == -1)
@@ -61,42 +66,29 @@ void Server::launch()
 
     int datalen;
 
-    while(1) {
+    while(_packets > 0) {
         datalen = recvfrom(servSock, buf, buflen, 0, (struct sockaddr*)&peer, &sockaddr_len);
         if (datalen == -1) {
             throw runtime_error(string(__func__) + ": can't recvfrom()");
         }
 
-        DnsHeader qhdr;
-        qhdr.parse(buf);
-
-        DnsHeader& h = _packet.dnsHdr();
-
-        h.txid(qhdr.txid());
-        if (qhdr.rd() == true) {
-            h.ra(true);
-        }
-
-        DnsQuestion q;
-        q.parse(buf + 12);
-
-        _packet.addQuestion(q);
-        _packet.isQuestion(false);
-
+        _incoming.parse(buf);
         if (_log)
-            _log("Query from: " + Dines::ip32ToString(peer.sin_addr.s_addr) +
-                " txid: " + to_string(h.txid()));
+            _log("Incoming packet: " + _incoming.to_string(true));
 
-        if (sendto(servSock, _data().data(), _data().size(), 0, (struct sockaddr*)&peer,
+        if (_incoming.dnsHdr().rd() == true) {
+            _outgoing.dnsHdr().ra(true);
+        }
+        _outgoing.dnsHdr().txid(_incoming.dnsHdr().txid());
+//        _outgoing.question(_incoming.question());
+        _outgoing.isQuestion(false);
+
+        if (sendto(servSock, _outgoing.data().data(), _outgoing.data().size(), 0, (struct sockaddr*)&peer,
                 sockaddr_len) == -1) {
             throw runtime_error(string(__func__) + "::sendto() error: " + string(strerror(errno)));
         }
 
-        _packet.fuzz();
+        _outgoing.fuzz();
+        _packets--;
     }
-}
-
-string Server::_data() const
-{
-    return _packet.data();
 }
