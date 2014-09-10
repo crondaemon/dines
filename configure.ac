@@ -5,5 +5,5 @@ AC_CONFIG_HEADERS([config.h])
 AC_PROG_CXX
 AC_CONFIG_FILES([Makefile])
 AC_ARG_ENABLE(gcov,
-AC_HELP_STRING([--enable-gcov],[Enable gcov code coverage (requires GCC)]), [CXXFLAGS="-g -static --coverage"])
+    AC_HELP_STRING([--enable-gcov],[Enable gcov code coverage (requires GCC)]), [CXXFLAGS="-g -ftest-coverage -fprofile-arcs"])
 AC_OUTPUT
