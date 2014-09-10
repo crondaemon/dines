@@ -112,7 +112,6 @@ int main(int argc, char* argv[])
     vector<int> forged_nrecords(4, 0);
     DnsPacket p;
     uint16_t server_port = 0;
-    Server* server = NULL;
     int type;
     ResourceRecord rr;
     unsigned temp;
@@ -292,10 +291,10 @@ int main(int argc, char* argv[])
             return 1;
         }
 
-        server = new Server(&p, server_port);
+        Server server(&p, server_port);
         if (verbose == true)
-            server->logger(logger);
-        server->launch();
+            server.logger(logger);
+        server.launch();
     } else {
         // Client mode
 
