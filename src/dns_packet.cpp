@@ -49,8 +49,7 @@ DnsPacket::DnsPacket()
     _log = NULL;
 
     _spoofing = false;
-
-    this->packets(0);
+    _packets = 1;
 }
 
 DnsPacket::DnsPacket(const DnsPacket& p)
@@ -267,7 +266,7 @@ void DnsPacket::sendNet(bool doCksum)
 
     }
 
-    _datagrams--;
+    _packets--;
 }
 
 string DnsPacket::ipFrom() const
@@ -587,22 +586,22 @@ void DnsPacket::logger(Dines::LogFunc l)
 void DnsPacket::packets(unsigned num)
 {
     if (num == 0)
-        _datagrams = 0xFFFFFFFF;
+        _packets = 0xFFFFFFFF;
     else
-        _datagrams = num;
+        _packets = num;
 }
 
 unsigned DnsPacket::packets() const
 {
-    return _datagrams;
+    return _packets;
 }
 
 string DnsPacket::packetsStr() const
 {
-    if (_datagrams == 0xFFFFFFFF) {
+    if (_packets == 0xFFFFFFFF) {
         return "infinite";
     } else {
-        return std::to_string(_datagrams);
+        return std::to_string(_packets);
     }
 }
 

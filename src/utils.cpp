@@ -117,7 +117,7 @@ uint16_t stringToQtype(const std::string s)
     if (s == "ANY" || s == "any") return 255;
 
     // this is used by fuzzer
-    if (s == "F") {
+    if (s == "F" || s == "") {
         return 1;
     }
 
@@ -170,6 +170,8 @@ uint16_t stringToQclass(const std::string s)
     if (s == "ALL" || s == "all" || s == "any" || s == "ANY" || s == "255") return 0x00ff;
 
     if (s == "F") return 1;
+
+    if (s == "") return 1;
 
     // Invalid class
     throw runtime_error(string(__func__) + ": Invalid qclass " + s);

@@ -247,6 +247,7 @@ int main(int argc, char* argv[])
                     break;
                 case 30: // num
                     num = stoul(optarg);
+                    p.packets(num);
                     break;
 
                 case 31: // delay
@@ -269,7 +270,7 @@ int main(int argc, char* argv[])
         return 2;
     }
 
-//    try {
+    try {
         // We are forging the number of records. We need to explicitly set them after options processing
         for (unsigned i = 0; i < 4; i++) {
             if (forged_nrecords.at(i) != 0) {
@@ -307,8 +308,6 @@ int main(int argc, char* argv[])
             // The rest of the cmdline contains the addresses to scan
             p.ipTo(argv[optind]);
 
-            p.packets(num);
-
             if (p.invalid()) {
                 cerr << "Invalid parameters:\n\n";
                 cerr << p.invalidMsg() << endl;
@@ -333,9 +332,9 @@ int main(int argc, char* argv[])
             }
             cout << endl;
         }
-//    } catch(exception& e) {
-//        logger(string("Runtime error: ") + e.what());
-//        return 1;
-//    }
+    } catch(exception& e) {
+        logger(string("Runtime error: ") + e.what());
+        return 1;
+    }
     return 0;
 }
