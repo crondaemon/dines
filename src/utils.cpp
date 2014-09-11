@@ -2,6 +2,7 @@
 #include <utils.hpp>
 
 #include <tokenizer.hpp>
+#include <debug.hpp>
 
 #include <vector>
 #include <stdexcept>
@@ -12,6 +13,8 @@
 #include <typeinfo>
 #include <cctype>
 #include <algorithm>
+#include <sstream>
+#include <string.h>
 
 using namespace std;
 
@@ -52,7 +55,7 @@ std::string random_string(size_t length)
     return random_string_int(length, randchar);
 }
 
-std::string domainEncode(const std::string& s)
+std::string domainEncode(const std::string s)
 {
     std::string out = "";
     std::vector<std::string> frags = tokenize(s, ".");
@@ -68,10 +71,39 @@ std::string domainEncode(const std::string& s)
     return out;
 }
 
+unsigned domainDecode(char* base, unsigned offset, std::string& encoded, std::string & decoded)
+{
+    uint16_t jump;
+    unsigned len;
+
+    if (base[offset] == '\0') {
+        decoded.erase(decoded.size() - 1, decoded.size());
+        return 1;
+    }
+
+    if (((u_char*)base)[offset] >> 6 == 3) {
+        // Compressed
+        memcpy(&jump, base + offset, 2);
+        jump = ntohs(jump);
+        jump = (jump & 0x3FFF);
+        len = base[jump];
+        encoded += string(base + jump, len + 1);
+        decoded += string(base + jump + 1, len) + ".";
+        domainDecode(base, jump + 1 + len, encoded, decoded);
+        return 2;
+    } else {
+        // Not compressed
+        len = base[offset];
+        encoded += string(base + offset, len + 1);
+        decoded += string(base + 1 + offset, len) + ".";
+        return (len + 1 + domainDecode(base, offset + 1 + len, encoded, decoded));
+    }
+}
+
 // A reference for qtypes and qclasses
 // http://edgedirector.com/app/type.htm
 
-uint16_t stringToQtype(const std::string& s)
+uint16_t stringToQtype(const std::string s)
 {
     if (s == "A" || s == "a") return 1;
     if (s == "NS" || s == "ns") return 2;
@@ -128,7 +160,7 @@ string qtypeToString(uint16_t qtype)
     }
 }
 
-uint16_t stringToQclass(const std::string& s)
+uint16_t stringToQclass(const std::string s)
 {
     if (s == "IN" || s == "in" || s == "1") return 0x0001;
     if (s == "CSNET" || s == "csnet" || s == "2") return 0x0002;
@@ -194,6 +226,14 @@ string rDataConvert(const char* opt, uint16_t qtype)
     }
 
     throw runtime_error("Conversion of " + string(opt) + " not supported");
+}
+
+std::string toHex(uint32_t value)
+{
+    std::ostringstream oss;
+    if (!(oss<<std::hex<<value))
+        throw logic_error("Invalid argument");
+    return oss.str();
 }
 
 }; // namespace

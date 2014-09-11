@@ -87,7 +87,7 @@ public:
     void fuzzTxid();
     void fuzzNRecord(unsigned section);
 
-    void parse(char* buf);
+    size_t parse(char* buf, unsigned offset);
 };
 
 #endif 

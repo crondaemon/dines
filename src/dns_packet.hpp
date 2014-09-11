@@ -16,6 +16,7 @@
 class DnsPacket {
     int _socket;
     int _recvSocket;
+    bool _spoofing;
 
     //! Creates the socket
     void _socketCreate();
@@ -77,8 +78,10 @@ public:
     std::string to_string(bool dnsonly = false) const;
 
     void ipFrom(std::string ip_from);
+    void ipFrom(uint32_t ip);
 
     void ipTo(std::string ip_to);
+    void ipTo(uint32_t ip);
 
     //! IP source as string
     std::string ipFrom() const;
@@ -128,19 +131,21 @@ public:
     //! Adds a RR
     ResourceRecord& addRR(Dines::RecordSection section, const std::string rrDomain,
         const std::string& rrType, const std::string& rrClass, const std::string& ttl,
-        const std::string& rdata);
+        const std::string& rdata, bool counter_increment = true);
 
     //! Adds a RR
     ResourceRecord& addRR(Dines::RecordSection section, const std::string& rrDomain,
-        unsigned rrType, unsigned rrClass, unsigned ttl, const std::string& rdata);
+        unsigned rrType, unsigned rrClass, unsigned ttl, const std::string& rdata,
+        bool counter_increment = true);
 
     //! Adds a RR
     ResourceRecord& addRR(Dines::RecordSection section, const std::string& rrDomain,
         unsigned rrType, unsigned rrClass, unsigned ttl, const char* rdata,
-        unsigned rdatalen);
+        unsigned rdatalen, bool counter_increment= true);
 
     //! Adds a RR
-    ResourceRecord& addRR(Dines::RecordSection section, const ResourceRecord& rr);
+    ResourceRecord& addRR(Dines::RecordSection section, const ResourceRecord& rr,
+        bool counter_increment = true);
 
     //! Run the fuzzer
     void fuzz();
@@ -169,7 +174,7 @@ public:
     //! Return a message that describe why a packet is invalid, empty string otherwise
     std::string invalidMsg() const;
 
-    //! Parse a message from a buffer
+    //! Parse a message from a buffer. The buffer must point to the start of the dns packet
     void parse(char* buf);
 };
 

@@ -209,7 +209,7 @@ int test_rr_tostring()
 
     rr1.rrType("NS");
     rr1.rData("ns.test.com");
-    CHECK(rr1.to_string() == "www.test.com/NS/IN/64/ns.test.com");
+    CHECK(rr1.to_string() == "www.test.com/NS/IN/64");
 
     return 0;
 }
@@ -249,7 +249,7 @@ int test_answer()
 
     CHECK(p.nRecord(Dines::R_ANSWER) == 1);
     CHECK(p.answers(0).rrDomain() == "www.test.com");
-    CHECK(*(unsigned*)p.answers(0).rData().data() == 0x0101A8C0);
+    CHECK(p.answers(0).rData() == "192.168.1.1");
     CHECK(p.answers(0).ttl() == 64);
     CHECK(p.answers(0).rDataLen() == 4);
 
@@ -572,7 +572,7 @@ int test_invalid()
 {
     DnsPacket p;
     CHECK(p.invalid() == true);
-    CHECK(p.invalidMsg() == "You must specify destination ip (--dst-ip)");
+    CHECK(p.invalidMsg() == "You must specify destination ip");
     p.ipTo("1.2.3.4");
     CHECK(p.invalid() == false);
     CHECK(p.invalidMsg() == "");
@@ -590,12 +590,77 @@ int test_dns_packet()
     p.dport("53");
     p.txid("100");
     p.addQuestion(q);
-    CHECK(p.to_string() == "1.2.3.4:100 -> 2.3.4.5:53 txid: 100 Q [Question:www.polito.it/A/IN]");
+    CHECK(p.to_string() == "1.2.3.4:100 -> 2.3.4.5:53 txid: 0x64 Q [Question:www.polito.it/A/IN]");
     p.addRR(Dines::R_ANSWER, rr);
     p.addRR(Dines::R_ADDITIONAL, rr);
     p.addRR(Dines::R_AUTHORITIES, rr);
-    CHECK(p.to_string() == "1.2.3.4:100 -> 2.3.4.5:53 txid: 100 R [Question:www.polito.it/A/IN][Answers:www.polito.it/A/IN/64/1.2.3.4][Authorities:www.polito.it/A/IN/64/1.2.3.4][Additionals:www.polito.it/A/IN/64/1.2.3.4]");
-    CHECK(p.to_string(true) == "txid: 100 R [Question:www.polito.it/A/IN][Answers:www.polito.it/A/IN/64/1.2.3.4][Authorities:www.polito.it/A/IN/64/1.2.3.4][Additionals:www.polito.it/A/IN/64/1.2.3.4]");
+    CHECK(p.to_string() == "1.2.3.4:100 -> 2.3.4.5:53 txid: 0x64 R [Question:www.polito.it/A/IN][Answers:www.polito.it/A/IN/64/1.2.3.4][Authorities:www.polito.it/A/IN/64/1.2.3.4][Additionals:www.polito.it/A/IN/64/1.2.3.4]");
+    CHECK(p.to_string(true) == "txid: 0x64 R [Question:www.polito.it/A/IN][Answers:www.polito.it/A/IN/64/1.2.3.4][Authorities:www.polito.it/A/IN/64/1.2.3.4][Additionals:www.polito.it/A/IN/64/1.2.3.4]");
+    return 0;
+}
+
+int test_domain_decode()
+{
+    int b;
+    string encoded;
+    string decoded;
+
+    char* buf1 = (char*)"\x03\x77\x77\x77\x06\x70\x6f\x6c\x69\x74\x6f\x02\x69\x74\x00";
+    b = Dines::domainDecode(buf1, 0, encoded, decoded);
+    CHECK(decoded == "www.polito.it");
+    CHECK(b == 15);
+
+    char* buf2 = (char*)
+        "\x4c\xa8\x81\x80\x00\x01\x00\x02\x00\x04"
+        "\x00\x05\x03\x77\x77\x77\x06\x70\x6f\x6c"
+        "\x69\x74\x6f\x02\x69\x74\x00\x00\x01\x00"
+        "\x01\xc0\x0c\x00\x05\x00\x01\x00\x01\x4a"
+        "\xdb\x00\x0a\x07\x77\x65\x62\x66\x61\x72"
+        "\x6d\xc0\x10\xc0\x2b\x00\x01\x00\x01\x00"
+        "\x01\x4a\xdb\x00\x04\x82\xc0\xb6\x21\xc0"
+        "\x10\x00\x02\x00\x01\x00\x01\x4a\xdb\x00"
+        "\x0b\x08\x6c\x65\x6f\x6e\x61\x72\x64\x6f"
+        "\xc0\x10\xc0\x10\x00\x02\x00\x01\x00\x01"
+        "\x4a\xdb\x00\x0e\x03\x6e\x73\x31\x04\x67"
+        "\x61\x72\x72\x03\x6e\x65\x74\x00\xc0\x10"
+        "\x00\x02\x00\x01\x00\x01\x4a\xdb\x00\x06"
+        "\x03\x6e\x73\x33\xc0\x10\xc0\x10\x00\x02"
+        "\x00\x01\x00\x01\x4a\xdb\x00\x08\x05\x67"
+        "\x69\x6f\x76\x65\xc0\x10\xc0\x68\x00\x01"
+        "\x00\x01\x00\x00\x5c\x9c\x00\x04\xc1\xce"
+        "\x8d\x26\xc0\x68\x00\x1c\x00\x01\x00\x00"
+        "\x5c\x9c\x00\x10\x20\x01\x07\x60\xff\xff"
+        "\xff\xff\x00\x00\x00\x00\x00\x00\x00\xaa"
+        "\xc0\x82\x00\x01\x00\x01\x00\x01\x4a\xdb"
+        "\x00\x04\x82\xc0\x04\x1e\xc0\x94\x00\x01"
+        "\x00\x01\x00\x01\x46\x95\x00\x04\x82\xc0"
+        "\x03\x18\xc0\x51\x00\x01\x00\x01\x00\x01"
+        "\x46\x95\x00\x04\x82\xc0\x03\x15";
+
+    encoded = "";
+    decoded = "";
+    b = Dines::domainDecode(buf2, 12, encoded, decoded);
+    CHECK(decoded == "www.polito.it");
+    CHECK(b == 15);
+
+    encoded = "";
+    decoded = "";
+    b = Dines::domainDecode(buf2, 31, encoded, decoded);
+    CHECK(decoded == "www.polito.it");
+    CHECK(b == 2);
+
+    encoded = "";
+    decoded = "";
+    b = Dines::domainDecode(buf2, 53, encoded, decoded);
+    CHECK(decoded == "webfarm.polito.it");
+    CHECK(b == 2);
+
+    encoded = "";
+    decoded = "";
+    b = Dines::domainDecode(buf2, 92, encoded, decoded);
+    CHECK(decoded == "polito.it");
+    CHECK(b == 2);
+
     return 0;
 }
 
@@ -625,6 +690,7 @@ int main(int argc, char* argv[])
     TEST(test_packets());
     TEST(test_invalid());
     TEST(test_dns_packet());
+    TEST(test_domain_decode());
 
     cout << "done" << "\n";
 }

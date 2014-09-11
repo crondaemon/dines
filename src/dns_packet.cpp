@@ -48,6 +48,8 @@ DnsPacket::DnsPacket()
 
     _log = NULL;
 
+    _spoofing = false;
+
     this->packets(0);
 }
 
@@ -237,12 +239,34 @@ void DnsPacket::sendNet(bool doCksum)
         _log(this->to_string());
 
     if (send(_socket, output.data(), output.length(), 0) < 0) {
-        if (errno == 22) {
-            cout << "Invalid parameter (probably fuzzer is shaking it).\n";
+        if (_log && errno == 22) {
+            _log("Invalid parameter (probably fuzzer is shaking it)");
         } else {
             throw runtime_error("send() error: " + string(strerror(errno)));
         }
     }
+
+    if (!_spoofing) {
+        char buf[65535];
+        struct sockaddr_in addr;
+        socklen_t fromlen = sizeof(addr);
+        ssize_t bytes = recvfrom(_socket, buf, 65535, 0, (struct sockaddr*)&addr, &fromlen);
+        if (bytes == -1) {
+            throw runtime_error("Error in recvfrom(): " + string(strerror(errno)));
+        }
+        DnsPacket p;
+        p.parse(buf + sizeof(_ipHdr) + sizeof(_udpHdr));
+        struct iphdr* iph;
+        iph = (struct iphdr*)buf;
+
+        p.ipFrom(iph->saddr);
+        p.ipTo(iph->daddr);
+
+        if (_log)
+            _log(string("Received ") + p.to_string());
+
+    }
+
     _datagrams--;
 }
 
@@ -273,17 +297,19 @@ string DnsPacket::to_string(bool dnsonly) const
         s += " ";
     }
 
-    s += "txid: " + std::to_string(_dnsHdr.txid());
+    s += "txid: 0x" + Dines::toHex(_dnsHdr.txid());
 
     s += isQuestion() ? " Q " : " R ";
-    s += "[Question:" + _question.to_string() + "]";
+    if (!_question.empty())
+        s += "[Question:" + _question.to_string() + "]";
 
     if (_answers.size() > 0) {
         s += "[Answers:";
         for (vector<ResourceRecord>::const_iterator itr = _answers.begin();
                 itr != _answers.end(); ++itr) {
-            s += itr->to_string();
+            s += itr->to_string() + ",";
         }
+        s.pop_back();
         s += "]";
     }
 
@@ -291,8 +317,9 @@ string DnsPacket::to_string(bool dnsonly) const
         s += "[Authorities:";
         for (vector<ResourceRecord>::const_iterator itr = _authorities.begin();
                 itr != _authorities.end(); ++itr) {
-            s += itr->to_string();
+            s += itr->to_string() + ",";
         }
+        s.pop_back();
         s += "]";
     }
 
@@ -300,8 +327,9 @@ string DnsPacket::to_string(bool dnsonly) const
         s += "[Additionals:";
         for (vector<ResourceRecord>::const_iterator itr = _additionals.begin();
                 itr != _additionals.end(); ++itr) {
-            s += itr->to_string();
+            s += itr->to_string() + ",";
         }
+        s.pop_back();
         s += "]";
     }
 
@@ -331,8 +359,35 @@ DnsQuestion& DnsPacket::addQuestion(const DnsQuestion& q)
     return _question;
 }
 
+ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const ResourceRecord& rr, bool counter_increment)
+{
+    std::vector<ResourceRecord> *rrPtr;
+
+    switch (section) {
+        case Dines::R_ANSWER:
+            rrPtr = &_answers;
+            break;
+        case Dines::R_AUTHORITIES:
+            rrPtr = &_authorities;
+            break;
+        case Dines::R_ADDITIONAL:
+            rrPtr = &_additionals;
+            break;
+        default:
+            throw runtime_error("Unexpected section " + std::to_string(section));
+    }
+
+    if (counter_increment)
+        _dnsHdr.nRecordAdd(section, 1);
+
+    rrPtr->push_back(rr);
+    isQuestion(false);
+    return rrPtr->front();
+}
+
 ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string& rrDomain,
-        unsigned rrType, unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen)
+        unsigned rrType, unsigned rrClass, unsigned ttl, const char* rdata, unsigned rdatalen,
+        bool counter_increment)
 {
     string rd(rdata, rdatalen);
     return addRR(section, rrDomain, rrType, rrClass, ttl, rd);
@@ -340,7 +395,7 @@ ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string
 
 ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string rrDomain,
         const std::string& rrType, const std::string& rrClass, const std::string& ttl,
-        const std::string& rdata)
+        const std::string& rdata, bool counter_increment)
 {
     unsigned type = Dines::stringToQtype(rrType);
     unsigned klass = Dines::stringToQclass(rrClass);
@@ -350,7 +405,7 @@ ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string
 }
 
 ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string& rrDomain,
-        unsigned rrType, unsigned rrClass, unsigned ttl, const std::string& rdata)
+        unsigned rrType, unsigned rrClass, unsigned ttl, const std::string& rdata, bool counter_increment)
 {
     ResourceRecord rr(rrDomain, rrType, rrClass, ttl, rdata);
     return addRR(section, rr);
@@ -378,6 +433,7 @@ uint16_t DnsPacket::nRecord(Dines::RecordSection section) const
 
 void DnsPacket::question(const DnsQuestion& q)
 {
+    _dnsHdr.nRecord(Dines::R_QUESTION, 1);
     _question = q;
 }
 
@@ -401,14 +457,27 @@ const ResourceRecord& DnsPacket::authorities(unsigned n) const
     return _authorities.at(n);
 }
 
+void DnsPacket::ipFrom(uint32_t ip)
+{
+    _spoofing = true;
+    _ipHdr.saddr = ip;
+}
+
 void DnsPacket::ipFrom(string ip_from)
 {
+    _spoofing = true;
     _ipHdr.saddr = inet_addr(ip_from.data());
 }
 
 void DnsPacket::ipTo(string ip_to)
 {
     _ipHdr.daddr = inet_addr(ip_to.data());
+}
+
+void DnsPacket::ipTo(uint32_t ip)
+{
+    _spoofing = true;
+    _ipHdr.daddr = ip;
 }
 
 uint16_t DnsPacket::sport() const
@@ -500,30 +569,6 @@ DnsHeader& DnsPacket::dnsHdr()
     return _dnsHdr;
 }
 
-ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const ResourceRecord& rr)
-{
-    std::vector<ResourceRecord> *rrPtr;
-
-    switch (section) {
-        case Dines::R_ANSWER:
-            rrPtr = &_answers;
-            break;
-        case Dines::R_AUTHORITIES:
-            rrPtr = &_authorities;
-            break;
-        case Dines::R_ADDITIONAL:
-            rrPtr = &_additionals;
-            break;
-        default:
-            throw runtime_error("Unexpected section " + std::to_string(section));
-    }
-
-    _dnsHdr.nRecordAdd(section, 1);
-    rrPtr->push_back(rr);
-    isQuestion(false);
-    return rrPtr->front();
-}
-
 void DnsPacket::fuzzSrcIp()
 {
     _fuzzSrcIp = true;
@@ -569,13 +614,36 @@ bool DnsPacket::invalid() const
 string DnsPacket::invalidMsg() const
 {
     if (_ipHdr.daddr == 0)
-        return "You must specify destination ip (--dst-ip)";
+        return "You must specify destination ip";
 
     return "";
 }
 
 void DnsPacket::parse(char* buf)
 {
-    _dnsHdr.parse(buf);
-    _question.parse(buf + 12);
+    unsigned i;
+    unsigned offset = 0;
+    offset += _dnsHdr.parse(buf, offset);
+    offset += _question.parse(buf, offset);
+
+    // Parse answers
+    for (i = 0; i < _dnsHdr.nRecord(Dines::R_ANSWER); i++) {
+        ResourceRecord rr;
+        offset += rr.parse(buf, offset);
+        this->addRR(Dines::R_ANSWER, rr, false);
+    }
+
+    // Parse auth
+    for (i = 0; i < _dnsHdr.nRecord(Dines::R_AUTHORITIES); i++) {
+        ResourceRecord rr;
+        offset += rr.parse(buf, offset);
+        this->addRR(Dines::R_AUTHORITIES, rr, false);
+    }
+
+    // Parse add
+    for (i = 0; i < _dnsHdr.nRecord(Dines::R_ADDITIONAL); i++) {
+        ResourceRecord rr;
+        offset += rr.parse(buf, offset);
+        this->addRR(Dines::R_ADDITIONAL, rr, false);
+    }
 }

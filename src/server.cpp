@@ -56,7 +56,7 @@ void Server::launch()
     servaddr.sin_port = htons(_port);
 
     if (bind(servSock, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0 )
-        throw runtime_error("Can't bind() listening socket");
+        throw runtime_error(string("Can't bind() listening socket: ") + strerror(errno));
 
     const unsigned buflen = 65535;
     char buf[buflen];
@@ -76,19 +76,31 @@ void Server::launch()
         if (_log)
             _log("Incoming packet: " + _incoming.to_string(true));
 
-        if (_incoming.dnsHdr().rd() == true) {
-            _outgoing.dnsHdr().ra(true);
-        }
-        _outgoing.dnsHdr().txid(_incoming.dnsHdr().txid());
-//        _outgoing.question(_incoming.question());
-        _outgoing.isQuestion(false);
+        if (_autoanswer) {
+            if (_incoming.dnsHdr().rd() == true) {
+                _outgoing.dnsHdr().ra(true);
+            }
+            _outgoing.dnsHdr().txid(_incoming.dnsHdr().txid());
+            _outgoing.question(_incoming.question());
+            _outgoing.isQuestion(false);
 
-        if (sendto(servSock, _outgoing.data().data(), _outgoing.data().size(), 0, (struct sockaddr*)&peer,
-                sockaddr_len) == -1) {
-            throw runtime_error(string(__func__) + "::sendto() error: " + string(strerror(errno)));
-        }
+            if (sendto(servSock, _outgoing.data().data(), _outgoing.data().size(), 0, (struct sockaddr*)&peer,
+                    sockaddr_len) == -1) {
+                throw runtime_error(string(__func__) + "::sendto() error: " + string(strerror(errno)));
+            }
 
-        _outgoing.fuzz();
+            _outgoing.fuzz();
+        }
         _packets--;
     }
+}
+
+void Server::packets(uint64_t p)
+{
+    _packets = p;
+}
+
+void Server::port(uint16_t p)
+{
+    _port = p;
 }

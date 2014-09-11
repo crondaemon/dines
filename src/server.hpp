@@ -18,6 +18,7 @@ public:
     void autoanswer(bool a);
     void logger(Dines::LogFunc l);
     void launch();
+    void packets(uint64_t p);
 };
 
 #endif

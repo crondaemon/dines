@@ -269,68 +269,73 @@ int main(int argc, char* argv[])
         return 2;
     }
 
-    // We are forging the number of records. We need to explicitly set them after options processing
-    for (unsigned i = 0; i < 4; i++) {
-        if (forged_nrecords.at(i) != 0) {
-            p.nRecord(Dines::RecordSection(i), forged_nrecords.at(i));
-        }
-    }
-
-    if (server_port > 0) {
-        // Server mode
-        if (argc != optind) {
-            cerr << "When running in server mode you can't specify server destination address" << endl;
-            return 1;
+//    try {
+        // We are forging the number of records. We need to explicitly set them after options processing
+        for (unsigned i = 0; i < 4; i++) {
+            if (forged_nrecords.at(i) != 0) {
+                p.nRecord(Dines::RecordSection(i), forged_nrecords.at(i));
+            }
         }
 
-        p.ipTo("255.255.255.255");
-
-        if (p.invalid()) {
-            cerr << "Invalid parameters:\n\n";
-            cerr << p.invalidMsg() << endl;
-            return 1;
-        }
-
-        Server server(&p, server_port);
-        if (verbose == true)
-            server.logger(logger);
-        server.launch();
-    } else {
-        // Client mode
-
-        if (argc == optind) {
-            cerr << "You must specify the server destination address" << endl;
-            return 1;
-        }
-
-        // The rest of the cmdline contains the addresses to scan
-        p.ipTo(argv[optind]);
-
-        p.packets(num);
-
-        if (p.invalid()) {
-            cerr << "Invalid parameters:\n\n";
-            cerr << p.invalidMsg() << endl;
-            return 1;
-        }
-
-        cout << "Sending " << p.packetsStr() << " datagrams\n";
-
-        while (p.packets() > 0) {
-            p.fuzz();
-            try {
-                p.sendNet();
-            } catch(exception& e) {
-                cout << "\n\nError: " << e.what() << "\n";
+        if (server_port > 0) {
+            // Server mode
+            if (argc != optind) {
+                cerr << "When running in server mode you can't specify server destination address" << endl;
                 return 1;
             }
 
-            PRINT_DOT();
+            p.ipTo("255.255.255.255");
 
-            if (p.packets() > 0)
-                nanosleep(&delay, NULL);
+            if (p.invalid()) {
+                cerr << "Invalid parameters:\n\n";
+                cerr << p.invalidMsg() << endl;
+                return 1;
+            }
+
+            Server server(&p, server_port);
+            if (verbose == true)
+                server.logger(logger);
+            server.launch();
+        } else {
+            // Client mode
+
+            if (argc == optind) {
+                cerr << "You must specify the server destination address" << endl;
+                return 1;
+            }
+
+            // The rest of the cmdline contains the addresses to scan
+            p.ipTo(argv[optind]);
+
+            p.packets(num);
+
+            if (p.invalid()) {
+                cerr << "Invalid parameters:\n\n";
+                cerr << p.invalidMsg() << endl;
+                return 1;
+            }
+
+            logger(string("Sending ") + p.packetsStr() + " datagrams");
+
+            // Create a fake server to receive answers
+            Server s(NULL);
+            s.packets(1);
+
+            while (p.packets() > 0) {
+                p.fuzz();
+                p.sendNet();
+
+                if (!verbose)
+                    PRINT_DOT();
+
+                if (p.packets() > 0)
+                    nanosleep(&delay, NULL);
+            }
+            cout << endl;
         }
-        cout << endl;
-    }
+//    } catch(exception& e) {
+//        logger(string("Runtime error: ") + e.what());
+//        return 1;
+//    }
     return 0;
 }

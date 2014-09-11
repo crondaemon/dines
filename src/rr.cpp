@@ -3,6 +3,7 @@
 
 #include <dns_packet.hpp>
 #include <utils.hpp>
+#include <debug.hpp>
 
 #include <iostream>
 #include <arpa/inet.h>
@@ -154,7 +155,14 @@ uint32_t ResourceRecord::ttl() const
 
 string ResourceRecord::rData() const
 {
-    return _rData;
+    string out;
+    if (Dines::qtypeToString(ntohs(_rrType)) == "A") {
+        char addr[INET_ADDRSTRLEN];
+        inet_ntop(AF_INET, _rData.data(), addr, INET_ADDRSTRLEN);
+        out += string(addr);
+    }
+
+    return out;
 }
 
 unsigned ResourceRecord::rDataLen() const
@@ -235,19 +243,13 @@ void ResourceRecord::rrDomain(string domain)
 
 string ResourceRecord::to_string() const
 {
-    string out = _rrDomain_str + "/" + this->rrTypeStr() + "/" + this->rrClassStr() + "/" +
+    string out = "";
+
+    out = _rrDomain_str + "/" + this->rrTypeStr() + "/" + this->rrClassStr() + "/" +
         std::to_string(this->ttl());
-
-    if (Dines::qtypeToString(ntohs(_rrType)) == "A") {
-        char addr[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, _rData.data(), addr, INET_ADDRSTRLEN);
-        out += "/" + string(addr);
-    }
-
-    if (Dines::qtypeToString(ntohs(_rrType)) == "NS") {
-        out += "/" + this->rData();
-    }
-
+    string rd = this->rData();
+    if (rd != "")
+        out += "/" + rd;
     return out;
 }
 
@@ -259,4 +261,20 @@ void ResourceRecord::rData(string rdata)
 void ResourceRecord::logger(Dines::LogFunc l)
 {
     _log = l;
+}
+
+size_t ResourceRecord::parse(char* buf, unsigned offset)
+{
+    unsigned len;
+    unsigned i;
+
+    i = Dines::domainDecode(buf, offset, _rrDomain_enc, _rrDomain_str);
+
+    memcpy(&_rrType, buf + offset + i, 2);
+    memcpy(&_rrClass, buf + offset + i + 2, 2);
+    memcpy(&_ttl, buf + offset + i + 4, 4);
+    memcpy(&len, buf + offset + i + 8, 2);
+    len = ntohs(len);
+    _rData = string(buf + offset + i + 10, len);
+    return (i + 10 + len);
 }

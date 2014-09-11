@@ -170,29 +170,15 @@ string DnsQuestion::to_string() const
     return _qdomain_str + "/" + qtypeStr() + "/" + qclassStr();
 }
 
-void DnsQuestion::parse(char* buf)
+size_t DnsQuestion::parse(char* buf, unsigned offset)
 {
-    unsigned i = 0;
-    while (buf[i] != 0)
-        i++;
-    i++;
-    _qdomain_enc = string(buf, i);
+    unsigned i;
 
-    // Now parse the domain into printable form
-    _qdomain_str = "";
-    int cur = 1;
-    int len = buf[0];
-    while (len != 0) {
-        _qdomain_str += string(buf + cur, len);
-        _qdomain_str += ".";
-        cur += len;
-        len = buf[cur];
-        cur++;
-    }
-    _qdomain_str.erase(_qdomain_str.size() - 1, _qdomain_str.size());
+    i = Dines::domainDecode(buf, offset, _qdomain_enc, _qdomain_str);
 
-    memcpy(&_qtype, buf + i, 2);
-    memcpy(&_qclass, buf + i + 2, 2);
+    memcpy(&_qtype, buf + offset + i, 2);
+    memcpy(&_qclass, buf + offset + i + 2, 2);
+    return (_qdomain_enc.size() + 4);
 }
 
 bool DnsQuestion::empty() const

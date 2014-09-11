@@ -20,15 +20,18 @@ typedef void (*LogFunc)(std::string);
 std::string random_string(size_t length);
 
 //! Encodes a string into a DNS domain name
-std::string domainEncode(const std::string& s);
+std::string domainEncode(const std::string s);
+
+//! Decodes a DNS domain name into a string
+unsigned domainDecode(char* base, unsigned offset, std::string& encoded, std::string & decoded);
 
 //! Converts a string into an integer qtype. It accepts both symbolic values, (as "TXT"),
 //! and string numbers (as "1");
-uint16_t stringToQtype(const std::string& s);
+uint16_t stringToQtype(const std::string s);
 
 std::string qtypeToString(uint16_t qtype);
 
-uint16_t stringToQclass(const std::string& s);
+uint16_t stringToQclass(const std::string s);
 
 std::string qclassToString(uint16_t qclass);
 
@@ -38,7 +41,9 @@ std::string ip32ToString(uint32_t ip32);
 
 std::string rDataConvert(const char* opt, uint16_t qtype);
 
-template<typename C> std::string convertInt(C i);
+std::string toHex(uint32_t value);
+
+std::string ipToString(uint32_t ip);
 
 };
 

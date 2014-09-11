@@ -50,7 +50,7 @@ public:
 
     std::string to_string() const;
 
-    void parse(char* buf);
+    size_t parse(char* buf, unsigned offset = 0);
 
     bool empty() const;
 

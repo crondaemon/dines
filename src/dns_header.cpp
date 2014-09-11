@@ -215,11 +215,12 @@ bool operator!=(const DnsHeaderFlags& f1, const DnsHeaderFlags& f2)
     return !(f1 == f2);
 }
 
-void DnsHeader::parse(char* buf)
+size_t DnsHeader::parse(char* buf, unsigned offset)
 {
-    memcpy(&_txid, buf, 2);
-    memcpy(&_flags, buf + 2, 2);
-    memcpy(&_nRecord, buf + 4, 8);
+    memcpy(&_txid, buf + offset, 2);
+    memcpy(&_flags, buf + offset + 2, 2);
+    memcpy(&_nRecord, buf + offset + 4, 8);
+    return 12;
 }
 
 bool DnsHeader::rd() const
