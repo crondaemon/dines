@@ -558,7 +558,7 @@ int test_parse()
 int test_packets()
 {
     DnsPacket p;
-    CHECK(p.packets() == 0xFFFFFFFF);
+    CHECK(p.packets() == 1);
     p.packets(0);
     CHECK(p.packets() == 0xFFFFFFFF);
     CHECK(p.packetsStr() == "infinite");
