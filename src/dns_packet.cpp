@@ -314,7 +314,8 @@ void DnsPacket::sendNet(bool doCksum)
 
         p.ipFrom(addr.sin_addr.s_addr);
         p.ipTo(this->ipFrom());
-//        p.dport(ntohs(_udpHdr.dest));
+        p.sport(ntohs(addr.sin_port));
+        p.dport(ntohs(_udpHdr.source));
 
         if (_log)
             _log(string("Received ") + p.to_string());
@@ -699,4 +700,14 @@ void DnsPacket::parse(char* buf)
         offset += rr.parse(buf, offset);
         this->addRR(Dines::R_ADDITIONAL, rr, false);
     }
+}
+
+void DnsPacket::sport(uint16_t sport)
+{
+    _udpHdr.source = htons(sport);
+}
+
+void DnsPacket::dport(uint16_t dport)
+{
+    _udpHdr.dest = htons(dport);
 }

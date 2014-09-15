@@ -98,10 +98,12 @@ public:
     uint16_t sport() const;
 
     void sport(std::string sport);
+    void sport(uint16_t sport);
 
     uint16_t dport() const;
 
     void dport(std::string dport);
+    void dport(uint16_t dport);
 
     uint16_t txid() const;
 
