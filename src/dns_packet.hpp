@@ -20,6 +20,12 @@ class DnsPacket {
 
     //! Creates the socket
     void _socketCreate();
+    void _socketCreateRaw();
+    void _socketCreateUdp();
+
+    std::string _outputPack(bool doCksum = true);
+    std::string _outputPackRaw(bool doCksum = true);
+    std::string _outputPackUdp();
 
     //! IP layer
     struct iphdr _ipHdr;

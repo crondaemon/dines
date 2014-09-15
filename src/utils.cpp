@@ -77,7 +77,9 @@ unsigned domainDecode(char* base, unsigned offset, std::string& encoded, std::st
     unsigned len;
 
     if (base[offset] == '\0') {
-        decoded.erase(decoded.size() - 1, decoded.size());
+//        cout << "PIPPERO " << decoded.size() << "\n";
+        if (decoded.size() > 0)
+            decoded.erase(decoded.size() - 1, decoded.size());
         return 1;
     }
 

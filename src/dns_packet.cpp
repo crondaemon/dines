@@ -151,13 +151,6 @@ void DnsPacket::doUdpCksum()
 
 void DnsPacket::_socketCreate()
 {
-    if (_socket > 0) {
-        return;
-    }
-
-    int on = 1;
-    struct sockaddr_in servaddr;
-
     if (_udpHdr.source == 0)
         _udpHdr.source = rand();
     if (_udpHdr.dest == 0)
@@ -165,6 +158,17 @@ void DnsPacket::_socketCreate()
 
     if (_dnsHdr.txid() == 0)
         _dnsHdr.txid(rand());
+
+    if (_spoofing)
+        _socketCreateRaw();
+    else
+        _socketCreateUdp();
+}
+
+void DnsPacket::_socketCreateRaw()
+{
+    int on = 1;
+    struct sockaddr_in servaddr;
 
     _socket = socket(PF_INET, SOCK_RAW, IPPROTO_UDP);
 
@@ -211,10 +215,8 @@ void DnsPacket::_socketCreate()
     }
 }
 
-void DnsPacket::sendNet(bool doCksum)
+string DnsPacket::_outputPackRaw(bool doCksum)
 {
-    _socketCreate();
-
     // Create output to send
     string output;
     string dns_dgram = this->data();
@@ -234,10 +236,63 @@ void DnsPacket::sendNet(bool doCksum)
     output += string((char*)&_udpHdr, sizeof(_udpHdr));
     output += dns_dgram;
 
+    return output;
+}
+
+string DnsPacket::_outputPackUdp()
+{
+    return this->data();
+}
+
+string DnsPacket::_outputPack(bool doCksum)
+{
+    if (_spoofing)
+        return _outputPackRaw(doCksum);
+    else
+        return _outputPackUdp();
+}
+
+void DnsPacket::_socketCreateUdp()
+{
+    _socket = socket(AF_INET, SOCK_DGRAM, 0);
+    if (_socket == -1)
+        throw runtime_error(string("Can't create socket: ") + strerror(errno));
+
+    struct sockaddr_in sa;
+
+    memset(&sa, 0, sizeof(struct sockaddr_in));
+    sa.sin_family = AF_INET;
+    sa.sin_port = _udpHdr.source;
+    sa.sin_addr.s_addr = htonl(INADDR_ANY);
+
+    if (bind(_socket, (struct sockaddr *)&sa, sizeof(struct sockaddr)) == -1)
+        throw runtime_error(string("Can't bind: ") + strerror(errno));
+}
+
+void DnsPacket::sendNet(bool doCksum)
+{
+    int ret;
+
+    if (_socket == -1)
+        _socketCreate();
+
+    string output = _outputPack(doCksum);
+
     if (_log)
         _log(this->to_string());
 
-    if (send(_socket, output.data(), output.length(), 0) < 0) {
+    if (!_spoofing) {
+        struct sockaddr_in dest;
+        memset(&dest, 0, sizeof(struct sockaddr_in));
+        dest.sin_family = AF_INET;
+        dest.sin_port = _udpHdr.dest;
+        dest.sin_addr.s_addr = _ipHdr.daddr;
+        ret = sendto(_socket, output.data(), output.length(), 0, (struct sockaddr*)&dest, sizeof(dest));
+    } else {
+        ret = send(_socket, output.data(), output.length(), 0);
+    }
+
+    if (ret < 0) {
         if (_log && errno == 22) {
             _log("Invalid parameter (probably fuzzer is shaking it)");
         } else {
@@ -245,6 +300,7 @@ void DnsPacket::sendNet(bool doCksum)
         }
     }
 
+    // Get the response
     if (!_spoofing) {
         char buf[65535];
         struct sockaddr_in addr;
@@ -254,16 +310,14 @@ void DnsPacket::sendNet(bool doCksum)
             throw runtime_error("Error in recvfrom(): " + string(strerror(errno)));
         }
         DnsPacket p;
-        p.parse(buf + sizeof(_ipHdr) + sizeof(_udpHdr));
-        struct iphdr* iph;
-        iph = (struct iphdr*)buf;
+        p.parse(buf);
 
-        p.ipFrom(iph->saddr);
-        p.ipTo(iph->daddr);
+        p.ipFrom(addr.sin_addr.s_addr);
+        p.ipTo(this->ipFrom());
+//        p.dport(ntohs(_udpHdr.dest));
 
         if (_log)
             _log(string("Received ") + p.to_string());
-
     }
 
     _packets--;

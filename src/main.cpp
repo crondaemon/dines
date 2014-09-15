@@ -270,7 +270,9 @@ int main(int argc, char* argv[])
         return 2;
     }
 
+#ifndef DEBUG
     try {
+#endif
         // We are forging the number of records. We need to explicitly set them after options processing
         for (unsigned i = 0; i < 4; i++) {
             if (forged_nrecords.at(i) != 0) {
@@ -314,11 +316,7 @@ int main(int argc, char* argv[])
                 return 1;
             }
 
-            logger(string("Sending ") + p.packetsStr() + " datagrams");
-
-            // Create a fake server to receive answers
-            Server s(NULL);
-            s.packets(1);
+            logger(string("Sending ") + p.packetsStr() + " datagram" + (p.packets() > 1 ? "s" : ""));
 
             while (p.packets() > 0) {
                 p.fuzz();
@@ -332,9 +330,11 @@ int main(int argc, char* argv[])
             }
             cout << endl;
         }
+#ifndef DEBUG
     } catch(exception& e) {
         logger(string("Runtime error: ") + e.what());
         return 1;
     }
+#endif
     return 0;
 }
