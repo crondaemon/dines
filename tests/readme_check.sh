@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Make sure dines is compiled
+make dines
+
 # First take the help from REAME
 readme=`cat README.md | sed -n "/HELP START/,/HELP END/p" | head -n-2 | tail -n+3`
 
