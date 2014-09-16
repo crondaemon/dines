@@ -4,6 +4,7 @@
 
 #include <string>
 #include <stdint.h>
+#include <stdexcept>
 
 namespace Dines {
 
@@ -44,6 +45,10 @@ std::string rDataConvert(const char* opt, uint16_t qtype);
 std::string toHex(uint32_t value);
 
 std::string ipToString(uint32_t ip);
+
+//! Throws an exception for a given function, printing the errno as string
+#define BASIC_EXCEPTION_THROW(function) \
+    throw runtime_error(string(function) + "() error: " + strerror(errno));
 
 };
 

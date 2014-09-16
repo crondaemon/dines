@@ -56,7 +56,7 @@ void Server::launch()
     servaddr.sin_port = htons(_port);
 
     if (bind(servSock, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0 )
-        throw runtime_error(string("Can't bind() listening socket: ") + strerror(errno));
+        BASIC_EXCEPTION_THROW("bind");
 
     const unsigned buflen = 65535;
     char buf[buflen];
@@ -86,7 +86,7 @@ void Server::launch()
 
             if (sendto(servSock, _outgoing.data().data(), _outgoing.data().size(), 0, (struct sockaddr*)&peer,
                     sockaddr_len) == -1) {
-                throw runtime_error(string(__func__) + "::sendto() error: " + string(strerror(errno)));
+                BASIC_EXCEPTION_THROW("sendto");
             }
 
             _outgoing.fuzz();

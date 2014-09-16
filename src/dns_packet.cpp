@@ -158,7 +158,7 @@ void DnsPacket::_getFirstIP()
     int family;
 
     if (getifaddrs(&ifaddr) == -1)
-        throw runtime_error(string("getifaddrs() error: ") + strerror(errno));
+        BASIC_EXCEPTION_THROW("getifaddrs");
 
     for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
         if (ifa->ifa_addr == NULL) {
@@ -195,15 +195,14 @@ void DnsPacket::_socketCreate()
 void DnsPacket::_socketCreateRaw()
 {
     int on = 1;
-    struct sockaddr_in servaddr;
 
     _socket = socket(PF_INET, SOCK_RAW, IPPROTO_UDP);
 
     if (_socket == -1)
-        throw runtime_error("socket creation error: " + string(strerror(errno)));
+        BASIC_EXCEPTION_THROW("socket");
 
     if (setsockopt(_socket, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
-        throw runtime_error(string(__func__) + ": unable to set option _IPHDRINCL");
+        BASIC_EXCEPTION_THROW("setsockopt");
 
     // Set L3/L4
     struct sockaddr_in sin;
@@ -213,33 +212,7 @@ void DnsPacket::_socketCreateRaw()
     sin.sin_addr.s_addr = _ipHdr.daddr;
 
     if (connect(_socket, (struct sockaddr*)&sin, sizeof(sin)) < 0)
-        throw runtime_error(string(__func__) + "::connect() (" + string(strerror(errno)) + ")");
-
-    if (_ipHdr.saddr == 0) {
-        // we are not spoofing. Set the source address from localhost
-        struct sockaddr_in sa;
-        unsigned sa_len = sizeof(sa);
-        getsockname(_socket, (struct sockaddr*)&sa, &sa_len);
-        _ipHdr.saddr = sa.sin_addr.s_addr;
-
-        _recvSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-        if (_recvSocket == -1)
-            throw runtime_error("Can't create listening socket");
-
-        memset(&servaddr, 0, sizeof(servaddr));
-        servaddr.sin_family = AF_INET;
-        servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-        servaddr.sin_port = _udpHdr.source;
-
-        if (_log) {
-            char buf[10];
-            snprintf(buf, 10, "%u", htons(_udpHdr.source));
-            _log("Creating listening socket on port " + string(buf));
-        }
-
-        if (bind(_recvSocket, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0 )
-            throw runtime_error("Can't bind() listening socket");
-    }
+        BASIC_EXCEPTION_THROW("connect");
 }
 
 string DnsPacket::_outputPackRaw(bool doCksum)
@@ -283,7 +256,7 @@ void DnsPacket::_socketCreateUdp()
 {
     _socket = socket(AF_INET, SOCK_DGRAM, 0);
     if (_socket == -1)
-        throw runtime_error(string("Can't create socket: ") + strerror(errno));
+        BASIC_EXCEPTION_THROW("socket");
 
     struct sockaddr_in sa;
 
@@ -293,11 +266,11 @@ void DnsPacket::_socketCreateUdp()
     sa.sin_addr.s_addr = htonl(INADDR_ANY);
 
     if (bind(_socket, (struct sockaddr *)&sa, sizeof(struct sockaddr)) == -1)
-        throw runtime_error(string("Can't bind: ") + strerror(errno));
+        BASIC_EXCEPTION_THROW("bind");
 
     int opt = 1;
     if (setsockopt(_socket, IPPROTO_IP, IP_PKTINFO, &opt, sizeof(opt)) == -1)
-        throw runtime_error(string("Can't set IP_PKTINFO: ") + strerror(errno));
+        BASIC_EXCEPTION_THROW("setsockopt");
 }
 
 void DnsPacket::sendNet(bool doCksum)
@@ -348,7 +321,7 @@ void DnsPacket::sendNet(bool doCksum)
         if (_log && errno == 22) {
             _log("Invalid parameter (probably fuzzer is shaking it)");
         } else {
-            throw runtime_error(api + " error: " + strerror(errno));
+            BASIC_EXCEPTION_THROW(api);
         }
     }
 
@@ -371,7 +344,7 @@ void DnsPacket::sendNet(bool doCksum)
 
         // Get the response
         if (recvmsg(_socket, &mh, 0) == -1)
-            throw runtime_error(string("recvmsg() error: ") + strerror(errno));
+            BASIC_EXCEPTION_THROW("recvmsg");
 
         // Parse the packet into a DnsPacket
         p.parse((char*)mh.msg_iov[0].iov_base);

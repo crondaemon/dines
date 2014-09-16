@@ -125,7 +125,7 @@ uint16_t stringToQtype(const std::string s)
     unsigned n = std::stoul(s);
 
     if (n > 65535) {
-        throw runtime_error(string(__func__) + ": Invalid qtype");
+        throw runtime_error(string(__func__) + "(): Invalid qtype " + s);
     }
 
     return n;
