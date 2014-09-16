@@ -31,6 +31,7 @@ typedef struct {
             ra: 1;
 #endif
 } DnsHeaderFlags;
+#pragma pack()
 
 bool operator==(const DnsHeaderFlags& f1, const DnsHeaderFlags& f2);
 bool operator!=(const DnsHeaderFlags& f1, const DnsHeaderFlags& f2);

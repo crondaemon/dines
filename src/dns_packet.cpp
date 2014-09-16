@@ -16,6 +16,8 @@
 #include <iostream>
 #include <stdlib.h>
 #include <sstream>
+#include <ifaddrs.h>
+#include <netdb.h>
 
 using namespace std;
 
@@ -144,13 +146,38 @@ void DnsPacket::doUdpCksum()
 
     sum = (sum >> 16) + (sum & 0xffff);     /* add hi 16 to low 16 */
     sum += (sum >> 16);                     /* add carry */
-    _udpHdr.check = ~sum;                          /* truncate to 16 bits */
+    _udpHdr.check = ~sum;                   /* truncate to 16 bits */
 
     delete temp;
 }
 
+void DnsPacket::_getFirstIP()
+{
+    struct ifaddrs *ifaddr;
+    struct ifaddrs *ifa;
+    int family;
+
+    if (getifaddrs(&ifaddr) == -1)
+        throw runtime_error(string("getifaddrs() error: ") + strerror(errno));
+
+    for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+        if (ifa->ifa_addr == NULL) {
+            continue;
+        }
+
+        family = ifa->ifa_addr->sa_family;
+        if (family == AF_INET && string(ifa->ifa_name) != "lo") {
+            _ipHdr.saddr = ((struct sockaddr_in*)ifa->ifa_addr)->sin_addr.s_addr;
+            break;
+        }
+    }
+}
+
 void DnsPacket::_socketCreate()
 {
+    if (_ipHdr.saddr == 0)
+        this->_getFirstIP();
+
     if (_udpHdr.source == 0)
         _udpHdr.source = rand();
     if (_udpHdr.dest == 0)
@@ -267,11 +294,22 @@ void DnsPacket::_socketCreateUdp()
 
     if (bind(_socket, (struct sockaddr *)&sa, sizeof(struct sockaddr)) == -1)
         throw runtime_error(string("Can't bind: ") + strerror(errno));
+
+    int opt = 1;
+    if (setsockopt(_socket, IPPROTO_IP, IP_PKTINFO, &opt, sizeof(opt)) == -1)
+        throw runtime_error(string("Can't set IP_PKTINFO: ") + strerror(errno));
 }
 
 void DnsPacket::sendNet(bool doCksum)
 {
     int ret;
+    string api;
+
+    // the remote/source sockaddr is put here
+    struct sockaddr_in peeraddr;
+    memset(&peeraddr, 0, sizeof(struct sockaddr_in));
+
+    struct msghdr mh;
 
     if (_socket == -1)
         _socketCreate();
@@ -281,46 +319,82 @@ void DnsPacket::sendNet(bool doCksum)
     if (_log)
         _log(this->to_string());
 
+    mh.msg_name = &peeraddr;
+    mh.msg_namelen = sizeof(peeraddr);
+
     if (!_spoofing) {
-        struct sockaddr_in dest;
-        memset(&dest, 0, sizeof(struct sockaddr_in));
-        dest.sin_family = AF_INET;
-        dest.sin_port = _udpHdr.dest;
-        dest.sin_addr.s_addr = _ipHdr.daddr;
-        ret = sendto(_socket, output.data(), output.length(), 0, (struct sockaddr*)&dest, sizeof(dest));
+        struct iovec iov[1];
+        iov[0].iov_base = (void*)output.data();
+        iov[0].iov_len = output.size();
+
+        peeraddr.sin_family = AF_INET;
+        peeraddr.sin_port = _udpHdr.dest;
+        peeraddr.sin_addr.s_addr = _ipHdr.daddr;
+
+        mh.msg_iov = iov;
+        mh.msg_iovlen = 1;
+
+        mh.msg_control = 0;
+        mh.msg_controllen = 0;
+
+        ret = sendmsg(_socket, &mh, 0);
+        api = "sendmsg()";
     } else {
-        ret = send(_socket, output.data(), output.length(), 0);
+        ret = send(_socket, output.data(), output.size(), 0);
+        api = "send()";
     }
 
     if (ret < 0) {
         if (_log && errno == 22) {
             _log("Invalid parameter (probably fuzzer is shaking it)");
         } else {
-            throw runtime_error("send() error: " + string(strerror(errno)));
+            throw runtime_error(api + " error: " + strerror(errno));
         }
     }
 
-    // Get the response
+    // When not spoofing we have to get the packet back
     if (!_spoofing) {
-        char buf[65535];
-        struct sockaddr_in addr;
-        socklen_t fromlen = sizeof(addr);
-        ssize_t bytes = recvfrom(_socket, buf, 65535, 0, (struct sockaddr*)&addr, &fromlen);
-        if (bytes == -1) {
-            throw runtime_error("Error in recvfrom(): " + string(strerror(errno)));
-        }
         DnsPacket p;
-        p.parse(buf);
 
-        p.ipFrom(addr.sin_addr.s_addr);
-        p.ipTo(this->ipFrom());
-        p.sport(ntohs(addr.sin_port));
+        // Control buffer
+        char cmbuf[0x100];
+
+        struct iovec iov[1];
+
+        iov[0].iov_base = (void*)malloc(1000);
+        iov[0].iov_len = 1000;
+
+        mh.msg_iov = iov;
+        mh.msg_iovlen = 1;
+        mh.msg_control = cmbuf;
+        mh.msg_controllen = sizeof(cmbuf);
+
+        // Get the response
+        if (recvmsg(_socket, &mh, 0) == -1)
+            throw runtime_error(string("recvmsg() error: ") + strerror(errno));
+
+        // Parse the packet into a DnsPacket
+        p.parse((char*)mh.msg_iov[0].iov_base);
+        p.ipFrom(peeraddr.sin_addr.s_addr);
+        p.sport(ntohs(peeraddr.sin_port));
         p.dport(ntohs(_udpHdr.source));
 
+        // Get a control buffer and get destination ip from it
+        for (struct cmsghdr *cmsg = CMSG_FIRSTHDR(&mh); cmsg != NULL; cmsg = CMSG_NXTHDR(&mh, cmsg)) {
+            // ignore the control headers that don't match what we want
+            if (cmsg->cmsg_level != IPPROTO_IP || cmsg->cmsg_type != IP_PKTINFO) {
+                continue;
+            }
+            struct in_pktinfo *pi = (struct in_pktinfo*)CMSG_DATA(cmsg);
+            p.ipTo(pi->ipi_spec_dst.s_addr);
+        }
+
+        // Print the result
         if (_log)
             _log(string("Received ") + p.to_string());
-    }
 
+        free(iov[0].iov_base);
+    }
     _packets--;
 }
 

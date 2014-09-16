@@ -27,6 +27,9 @@ class DnsPacket {
     std::string _outputPackRaw(bool doCksum = true);
     std::string _outputPackUdp();
 
+    // Get first interface ip address
+    void _getFirstIP();
+
     //! IP layer
     struct iphdr _ipHdr;
 
