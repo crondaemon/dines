@@ -21,8 +21,10 @@ To run dines tests:
 
 This is the help from dines.
 
+<!--- HELP START --->
 ```
-Dines 0.5.1 - The definitive DNS packet forger.
+
+Dines 0.5.3 - The definitive DNS packet forger.
 
 Fields with (F) can be fuzzed. (Example --txid F)
 Fields with (F<n>) can be fuzzed for a specific length (Example --question F20,A,IN)
@@ -74,6 +76,7 @@ Examples:
 	sudo ./dines --server --answer=www.example.com,A,IN,64,1.2.3.4
 	sudo ./dines --question=www.example.com 1.2.3.4
 ```
+<!--- HELP END --->
 
 To generate a question, issue the following command:
 

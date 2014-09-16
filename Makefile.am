@@ -6,5 +6,6 @@ test_dines_SOURCES = src/debug.hpp src/dns_header.hpp src/dns_header.cpp src/dns
 test_dines_CXXFLAGS = -Wall -std=c++0x -Isrc -Itests
 tests: test_dines
 	./test_dines
+	./tests/readme_check.sh
 clean-local:
 	for dir in . src tests; do rm -rf $$dir/*~ $$dir/*.csmes $$dir/*.csexe $$dir/*.gcno $$dir/*.gcda $$dir/*.gcov; done;
