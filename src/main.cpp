@@ -39,6 +39,7 @@ struct option opts[] = {
     {"num", 1, NULL, 30},
     {"delay", 1, NULL, 31},
     {"verbose", 0, NULL, 32},
+    {"help", 0, NULL, 33},
     {NULL, 0, NULL, 0}
 };
 
@@ -259,6 +260,10 @@ int main(int argc, char* argv[])
 
                 case 32: // verbose (already processed)
                     break;
+
+                case 33: // help
+                    usage(argv[0]);
+                    return 0;
 
                 default:
                     cout << "Unknown option: " << optarg << endl;
