@@ -46,6 +46,10 @@ std::string toHex(uint32_t value);
 
 std::string ipToString(uint32_t ip);
 
+std::string bufToHex(char* buf, size_t len, std::string sep = ":");
+
+std::string stringToHex(std::string source, std::string sep = ":");
+
 //! Throws an exception for a given function, printing the errno as string
 #define BASIC_EXCEPTION_THROW(function) \
     throw runtime_error(string(function) + "() error: " + strerror(errno));

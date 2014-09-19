@@ -239,4 +239,27 @@ std::string toHex(uint32_t value)
     return oss.str();
 }
 
+string bufToHex(char* buf, size_t len, string sep)
+{
+    unsigned i;
+    string out = "";
+    char frag[4];
+    for (i = 0; i < len; i++) {
+        snprintf(frag, 4, "%.2X%s", *((u_char*)&((char*)buf)[i]), sep.data());
+        out += string(frag, 3);
+    }
+    return out;
+}
+
+string stringToHex(string source, string sep)
+{
+    string out = "";
+    char frag[4];
+    for (string::iterator i = source.begin(); i != source.end(); ++i) {
+        snprintf(frag, 4, "%.2X%s", *(u_char*)&i, sep.data());
+        out += string(frag, 3);
+    }
+    return out;
+}
+
 }; // namespace
