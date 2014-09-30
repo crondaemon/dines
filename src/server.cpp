@@ -100,6 +100,10 @@ void Server::_recursion(int sock, struct sockaddr_in peer)
     upstream_packet.ipTo(_upstream);
     // Inject the packet and get the response back
     DnsPacket* return_packet = upstream_packet.sendNet();
+    if (_log) {
+        _log("Recursion out " + upstream_packet.to_string());
+        _log("Recursion in " + return_packet->to_string());
+    }
     // Force the txid in the response
     return_packet->txid(_incoming.txid());
 

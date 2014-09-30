@@ -279,7 +279,19 @@ size_t ResourceRecord::parse(char* buf, unsigned offset)
     memcpy(&_ttl, buf + offset + i + 4, 4);
     memcpy(&len, buf + offset + i + 8, 2);
     len = ntohs(len);
-    _rData = string(buf + offset + i + 10, len);
+
+    string enc;
+    string dec;
+
+    switch (ntohs(_rrType)) {
+        case Dines::QTYPE_NS:
+            Dines::domainDecode(buf, offset + i + 10, enc, dec);
+            _rData = enc;
+            break;
+        default:
+            _rData = string(buf + offset + i + 10, len);
+    }
+
     return (i + 10 + len);
 }
 

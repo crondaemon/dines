@@ -15,6 +15,11 @@ typedef enum {
     R_ADDITIONAL = 3
 } RecordSection;
 
+typedef enum {
+    QTYPE_A = 1,
+    QTYPE_NS = 2
+} QTypes;
+
 typedef void (*LogFunc)(std::string);
 
 //! Generate a random string of length
