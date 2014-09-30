@@ -12,22 +12,22 @@ using namespace std;
 
 DnsQuestion::DnsQuestion(const string qdomain, const string qtype, const string qclass)
 {
-    _fuzzQtype = false;
-    _fuzzQclass = false;
-
     *this = DnsQuestion(qdomain, Dines::stringToQtype(qtype), Dines::stringToQclass(qclass));
 
     if (qtype == "F") {
-        this->fuzzQtype();
+        this->fuzzQtype(true);
     }
 
     if (qclass == "F") {
-        this->fuzzQclass();
+        this->fuzzQclass(true);
     }
 }
 
 DnsQuestion::DnsQuestion(const string qdomain, uint16_t qtype, uint16_t qclass)
 {
+    _fuzzQtype = false;
+    _fuzzQclass = false;
+
     // Domain
     if (qdomain.size() > 0 && qdomain.at(0) == 'F') {
         unsigned len;
@@ -152,27 +152,38 @@ void DnsQuestion::fuzzQdomain(unsigned len)
     this->fuzz();
 }
 
-void DnsQuestion::fuzzQtype()
+void DnsQuestion::fuzzQtype(bool fuzz)
 {
-    _fuzzQtype = true;
+    _fuzzQtype = fuzz;
     this->fuzz();
 }
 
-void DnsQuestion::fuzzQclass()
+bool DnsQuestion::fuzzQtype() const
 {
-    _fuzzQclass = true;
+    return _fuzzQtype;
+}
+
+bool DnsQuestion::fuzzQclass() const
+{
+    return _fuzzQclass;
+}
+
+void DnsQuestion::fuzzQclass(bool fuzz)
+{
+    _fuzzQclass = fuzz;
     this->fuzz();
 }
 
 string DnsQuestion::to_string() const
 {
-
     return _qdomain_str + "/" + qtypeStr() + "/" + qclassStr();
 }
 
 size_t DnsQuestion::parse(char* buf, unsigned offset)
 {
     unsigned i;
+
+    this->clear();
 
     i = Dines::domainDecode(buf, offset, _qdomain_enc, _qdomain_str);
 
@@ -192,4 +203,12 @@ bool DnsQuestion::empty() const
 void DnsQuestion::logger(Dines::LogFunc l)
 {
     _log = l;
+}
+
+void DnsQuestion::clear()
+{
+    _qdomain_enc.clear();
+    _qdomain_str.clear();
+    _qtype = 1;
+    _qclass = 1;
 }

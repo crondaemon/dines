@@ -45,8 +45,11 @@ public:
     DnsQuestion& fuzz();
 
     void fuzzQdomain(unsigned len);
-    void fuzzQtype();
-    void fuzzQclass();
+    bool fuzzQdomain() const;
+    void fuzzQtype(bool fuzz);
+    bool fuzzQtype() const;
+    void fuzzQclass(bool fuzz);
+    bool fuzzQclass() const;
 
     std::string to_string() const;
 
@@ -56,6 +59,8 @@ public:
 
     //! Set the logger
     void logger(Dines::LogFunc l);
+
+    void clear();
 };
 
 #endif

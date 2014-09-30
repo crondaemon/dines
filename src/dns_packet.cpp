@@ -73,27 +73,24 @@ DnsPacket& DnsPacket::operator=(const DnsPacket& p)
     _fuzzSrcIp = p._fuzzSrcIp;
     _fuzzSport = p._fuzzSport;
     _log = p._log;
+    _spoofing = p._spoofing;
 
     return *this;
 }
 
 string DnsPacket::data() const
 {
-    string out = "";
+    string out = _dnsHdr.data();
 
-    out += _dnsHdr.data();
-
-    if (!_question.empty())
+    if (!_question.empty()) {
         out += _question.data();
-
+    }
     for (vector<ResourceRecord>::const_iterator itr = _answers.begin();
             itr != _answers.end(); ++itr)
         out += itr->data();
-
     for (vector<ResourceRecord>::const_iterator itr = _authorities.begin();
             itr != _authorities.end(); ++itr)
         out += itr->data();
-
     for (vector<ResourceRecord>::const_iterator itr = _additionals.begin();
             itr != _additionals.end(); ++itr)
         out += itr->data();
@@ -273,10 +270,11 @@ void DnsPacket::_socketCreateUdp()
         BASIC_EXCEPTION_THROW("setsockopt");
 }
 
-void DnsPacket::sendNet(bool doCksum)
+DnsPacket* DnsPacket::sendNet(bool doCksum)
 {
     int ret;
     string api;
+    DnsPacket* p = NULL;
 
     // the remote/source sockaddr is put here
     struct sockaddr_in peeraddr;
@@ -327,7 +325,7 @@ void DnsPacket::sendNet(bool doCksum)
 
     // When not spoofing we have to get the packet back
     if (!_spoofing) {
-        DnsPacket p;
+        p = new DnsPacket();
 
         // Control buffer
         char cmbuf[0x100];
@@ -347,10 +345,10 @@ void DnsPacket::sendNet(bool doCksum)
             BASIC_EXCEPTION_THROW("recvmsg");
 
         // Parse the packet into a DnsPacket
-        p.parse((char*)mh.msg_iov[0].iov_base);
-        p.ipFrom(peeraddr.sin_addr.s_addr);
-        p.sport(ntohs(peeraddr.sin_port));
-        p.dport(ntohs(_udpHdr.source));
+        p->parse((char*)mh.msg_iov[0].iov_base);
+        p->ipFrom(peeraddr.sin_addr.s_addr);
+        p->sport(ntohs(peeraddr.sin_port));
+        p->dport(ntohs(_udpHdr.source));
 
         // Get a control buffer and get destination ip from it
         for (struct cmsghdr *cmsg = CMSG_FIRSTHDR(&mh); cmsg != NULL; cmsg = CMSG_NXTHDR(&mh, cmsg)) {
@@ -359,16 +357,18 @@ void DnsPacket::sendNet(bool doCksum)
                 continue;
             }
             struct in_pktinfo *pi = (struct in_pktinfo*)CMSG_DATA(cmsg);
-            p.ipTo(pi->ipi_spec_dst.s_addr);
+            p->ipTo(pi->ipi_spec_dst.s_addr);
         }
 
         // Print the result
         if (_log)
-            _log(string("Received ") + p.to_string());
+            _log(string("Received ") + p->to_string());
 
         free(iov[0].iov_base);
     }
     _packets--;
+
+    return p;
 }
 
 string DnsPacket::ipFrom() const
@@ -401,6 +401,17 @@ string DnsPacket::to_string(bool dnsonly) const
     s += "txid: 0x" + Dines::toHex(_dnsHdr.txid());
 
     s += isQuestion() ? " Q " : " R ";
+
+    s += string("NUM=");
+
+    if (_question.empty())
+        s += "0";
+    else
+        s+= "1";
+
+    s += string(",") + std::to_string(_answers.size()) + "," +
+        std::to_string(_authorities.size()) + "," + std::to_string(_additionals.size()) + " ";
+
     if (!_question.empty())
         s += "[Question:" + _question.to_string() + "]";
 
@@ -577,7 +588,6 @@ void DnsPacket::ipTo(string ip_to)
 
 void DnsPacket::ipTo(uint32_t ip)
 {
-    _spoofing = true;
     _ipHdr.daddr = ip;
 }
 
@@ -757,4 +767,18 @@ void DnsPacket::sport(uint16_t sport)
 void DnsPacket::dport(uint16_t dport)
 {
     _udpHdr.dest = htons(dport);
+}
+
+void DnsPacket::clear()
+{
+    _question.clear();
+
+    for (vector<ResourceRecord>::iterator itr = _answers.begin(); itr != _answers.end(); ++itr)
+        itr->clear();
+
+    for (vector<ResourceRecord>::iterator itr = _authorities.begin(); itr != _authorities.end(); ++itr)
+        itr->clear();
+
+    for (vector<ResourceRecord>::iterator itr = _additionals.begin(); itr != _additionals.end(); ++itr)
+        itr->clear();
 }

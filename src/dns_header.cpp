@@ -75,7 +75,9 @@ DnsHeader& DnsHeader::operator=(const DnsHeader& h)
 
 string DnsHeader::data() const
 {
-    string out = "";
+    string out;
+
+    out.clear();
 
     out += string((char*)&_txid, 2);
     out += string((char*)&_flags, 2);

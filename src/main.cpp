@@ -33,6 +33,7 @@ struct option opts[] = {
     {"auth", 1, NULL, 10},
     {"num-add", 1, NULL, 11},
     {"additional", 1, NULL, 12},
+    {"upstream", 1, NULL, 13},
     // some space here for new params
     {"no-rd", 0, NULL, 28},
     {"server", 2, NULL, 29},
@@ -117,6 +118,7 @@ int main(int argc, char* argv[])
     ResourceRecord rr;
     unsigned temp;
     vector<string> tokens;
+    uint32_t upstream = 0;
 
     cout << "\nDines " << PACKAGE_VERSION << " - The definitive DNS packet forger.\n\n";
 
@@ -179,8 +181,8 @@ int main(int argc, char* argv[])
                     tokens.clear();
                     tokens = tokenize(optarg, ",");
                     tokens.resize(3);
-                    p.addQuestion(tokens.at(0), tokens.at(1), tokens.at(2));
 
+                    p.addQuestion(tokens.at(0), tokens.at(1), tokens.at(2));
                     break;
 
                 case 8: // answer
@@ -234,6 +236,10 @@ int main(int argc, char* argv[])
                     } else {
                         forged_nrecords.at(Dines::R_AUTHORITIES) = stoul(optarg);
                     }
+                    break;
+
+                case 13: // upstream
+                    upstream = Dines::stringToIp32(optarg);
                     break;
 
                 case 28: // no-rd
@@ -300,7 +306,17 @@ int main(int argc, char* argv[])
                 return 1;
             }
 
-            Server server(&p, server_port);
+            Server server(p, server_port);
+
+            if (upstream > 0)
+                server.upstream(upstream);
+
+            if (server.invalid()) {
+                cerr << "Invalid parameters:\n\n";
+                cerr << server.invalidMsg() << endl;
+                return 1;
+            }
+
             if (verbose == true)
                 server.logger(logger);
             server.launch();
@@ -333,7 +349,7 @@ int main(int argc, char* argv[])
                 if (p.packets() > 0)
                     nanosleep(&delay, NULL);
             }
-            cout << endl;
+            cout << "\n";
         }
 #ifndef DEBUG
     } catch(exception& e) {

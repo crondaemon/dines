@@ -14,18 +14,14 @@
 
 using namespace std;
 
-Server::Server(const DnsPacket* packet, uint16_t port, bool autoanswer)
+Server::Server(const DnsPacket& packet, uint16_t port, bool autoanswer)
 {
     _log = NULL;
     _port = port;
     _autoanswer = autoanswer;
     _packets = -1;
-    if (packet) {
-        _outgoing = *packet;
-        if (_outgoing.nRecord(Dines::R_QUESTION) > 0) {
-            throw runtime_error("Can't specify question when running in server mode");
-        }
-    }
+    _outgoing = packet;
+    _upstream = 0;
 }
 
 void Server::logger(Dines::LogFunc l)
@@ -80,19 +76,55 @@ void Server::launch()
             if (_incoming.dnsHdr().rd() == true) {
                 _outgoing.dnsHdr().ra(true);
             }
-            _outgoing.dnsHdr().txid(_incoming.dnsHdr().txid());
-            _outgoing.question(_incoming.question());
-            _outgoing.isQuestion(false);
 
-            if (sendto(servSock, _outgoing.data().data(), _outgoing.data().size(), 0, (struct sockaddr*)&peer,
-                    sockaddr_len) == -1) {
-                BASIC_EXCEPTION_THROW("sendto");
+            if (_upstream > 0 && (_incoming.question() != _outgoing.question())) {
+                if (_log)
+                    _log("Recursion activated towards " + Dines::ip32ToString(_upstream));
+                this->_recursion(servSock, peer);
+            } else {
+                this->_directAnswer(servSock, peer);
             }
-
-            _outgoing.fuzz();
         }
         _packets--;
+        _incoming.clear();
     }
+}
+
+void Server::_recursion(int sock, struct sockaddr_in peer)
+{
+    // Create a new packet
+    DnsPacket upstream_packet;
+    // Set the question as the incoming question
+    upstream_packet.question(_incoming.question());
+    // Set the server as upstream
+    upstream_packet.ipTo(_upstream);
+    // Inject the packet and get the response back
+    DnsPacket* return_packet = upstream_packet.sendNet();
+    // Force the txid in the response
+    return_packet->txid(_incoming.txid());
+
+    // Send the payload back
+    if (sendto(sock, return_packet->data().data(), return_packet->data().size(), 0, (struct sockaddr*)&peer,
+            sizeof(peer)) == -1) {
+        BASIC_EXCEPTION_THROW("sendto");
+    }
+}
+
+void Server::_directAnswer(int sock, struct sockaddr_in peer)
+{
+    unsigned sockaddr_len = sizeof(struct sockaddr_in);
+
+    _outgoing.dnsHdr().txid(_incoming.dnsHdr().txid());
+    _outgoing.question(_incoming.question());
+    _outgoing.isQuestion(false);
+
+    if (sendto(sock, _outgoing.data().data(), _outgoing.data().size(), 0, (struct sockaddr*)&peer,
+            sockaddr_len) == -1) {
+        BASIC_EXCEPTION_THROW("sendto");
+    }
+
+    _outgoing.fuzz();
+    _outgoing.question().clear();
 }
 
 void Server::packets(uint64_t p)
@@ -103,4 +135,30 @@ void Server::packets(uint64_t p)
 void Server::port(uint16_t p)
 {
     _port = p;
+}
+
+bool Server::invalid() const
+{
+    if (this->invalidMsg() != "")
+        return true;
+    return false;
+}
+
+string Server::invalidMsg() const
+{
+    if ((_outgoing.nRecord(Dines::R_QUESTION) > 0 && _upstream ==0) ||
+            (_outgoing.nRecord(Dines::R_QUESTION) == 0 && _upstream > 0)) {
+        throw runtime_error("--question and --upstream must be specified together in server mode");
+    }
+    return "";
+}
+
+void Server::upstream(uint32_t ups)
+{
+    _upstream = ups;
+}
+
+string Server::upstream() const
+{
+    return Dines::ip32ToString(_upstream);
 }

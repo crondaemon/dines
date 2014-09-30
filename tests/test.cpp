@@ -361,23 +361,27 @@ int test_fuzz_header()
 
 int test_fuzz_question()
 {
-    DnsQuestion q("F10", "F", "F");
+    DnsQuestion q1("F10", "F", "F");
 
     uint16_t x;
 
-    string d = q.qdomain();
-    q.fuzz();
-    CHECK(d != q.qdomain());
+    string d = q1.qdomain();
+    q1.fuzz();
+    CHECK(d != q1.qdomain());
 
-    x = q.qtype();
-    q.fuzz();
-    CHECK(x != q.qtype());
+    x = q1.qtype();
+    q1.fuzz();
+    CHECK(x != q1.qtype());
 
-    x = q.qclass();
-    q.fuzz();
-    CHECK(x != q.qclass());
+    x = q1.qclass();
+    q1.fuzz();
+    CHECK(x != q1.qclass());
 
     CATCH_EXCEPTION(DnsQuestion("Ferror", "A", "IN"));
+
+    DnsQuestion q2("www.test.com");
+    q2.fuzz();
+    CHECK(q2.fuzzQtype() == false);
 
     return 0;
 }
@@ -552,6 +556,18 @@ int test_parse()
     CHECK(q.qdomain() == "www.test.com");
     CHECK(q.qtype() == 1);
     CHECK(q.qclass() == 1);
+
+    char* rrpayload = (char*)"\xd9\x63\x81\x80\x00\x01\x00\x02\x00\x02\x00\x00\x03\x77\x77\x77\x04\x74"
+        "\x65\x73\x74\x03\x63\x6f\x6d\x00\x00\x01\x00\x01\xc0\x0c\x00\x05\x00\x01\x00\x00\x09\x9d\x00"
+        "\x10\x04\x74\x65\x73\x74\x08\x62\x6c\x6f\x63\x6b\x64\x6f\x73\xc0\x15\xc0\x2a\x00\x01\x00\x01"
+        "\x00\x00\x00\x6f\x00\x04\xd0\x40\x79\xbc\xc0\x2f\x00\x02\x00\x01\x00\x00\x00\x6f\x00\x08\x05"
+        "\x62\x6c\x63\x63\x31\xc0\x2f\xc0\x2f\x00\x02\x00\x01\x00\x00\x00\x6f\x00\x08\x05\x62\x6c\x63"
+        "\x63\x32\xc0\x2f";
+
+    ResourceRecord rr;
+    rr.parse(rrpayload, 30);
+    CHECK(rr.rrDomain() == "www.test.com");
+
     return 0;
 }
 
@@ -590,12 +606,12 @@ int test_dns_packet()
     p.dport("53");
     p.txid("100");
     p.addQuestion(q);
-    CHECK(p.to_string() == "1.2.3.4:100 -> 2.3.4.5:53 txid: 0x64 Q [Question:www.polito.it/A/IN]");
+    CHECK(p.to_string() == "1.2.3.4:100 -> 2.3.4.5:53 txid: 0x64 Q NUM=1,0,0,0 [Question:www.polito.it/A/IN]");
     p.addRR(Dines::R_ANSWER, rr);
     p.addRR(Dines::R_ADDITIONAL, rr);
     p.addRR(Dines::R_AUTHORITIES, rr);
-    CHECK(p.to_string() == "1.2.3.4:100 -> 2.3.4.5:53 txid: 0x64 R [Question:www.polito.it/A/IN][Answers:www.polito.it/A/IN/64/1.2.3.4][Authorities:www.polito.it/A/IN/64/1.2.3.4][Additionals:www.polito.it/A/IN/64/1.2.3.4]");
-    CHECK(p.to_string(true) == "txid: 0x64 R [Question:www.polito.it/A/IN][Answers:www.polito.it/A/IN/64/1.2.3.4][Authorities:www.polito.it/A/IN/64/1.2.3.4][Additionals:www.polito.it/A/IN/64/1.2.3.4]");
+    CHECK(p.to_string() == "1.2.3.4:100 -> 2.3.4.5:53 txid: 0x64 R NUM=1,1,1,1 [Question:www.polito.it/A/IN][Answers:www.polito.it/A/IN/64/1.2.3.4][Authorities:www.polito.it/A/IN/64/1.2.3.4][Additionals:www.polito.it/A/IN/64/1.2.3.4]");
+    CHECK(p.to_string(true) == "txid: 0x64 R NUM=1,1,1,1 [Question:www.polito.it/A/IN][Answers:www.polito.it/A/IN/64/1.2.3.4][Authorities:www.polito.it/A/IN/64/1.2.3.4][Additionals:www.polito.it/A/IN/64/1.2.3.4]");
     return 0;
 }
 
@@ -608,6 +624,7 @@ int test_domain_decode()
     char* buf1 = (char*)"\x03\x77\x77\x77\x06\x70\x6f\x6c\x69\x74\x6f\x02\x69\x74\x00";
     b = Dines::domainDecode(buf1, 0, encoded, decoded);
     CHECK(decoded == "www.polito.it");
+    CHECK(encoded == string("\x03\x77\x77\x77\x06\x70\x6f\x6c\x69\x74\x6f\x02\x69\x74\x00", 15));
     CHECK(b == 15);
 
     char* buf2 = (char*)

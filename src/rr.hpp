@@ -32,7 +32,6 @@ public:
 
     ResourceRecord& operator=(const ResourceRecord& rr);
 
-
     std::string data() const;
 
     void rrDomain(std::string domain);
@@ -70,6 +69,8 @@ public:
 
     //! Parse from a buffer
     size_t parse(char* buf, unsigned offset);
+
+    void clear();
 };
 
 #endif

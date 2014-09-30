@@ -46,7 +46,7 @@ std::string toHex(uint32_t value);
 
 std::string ipToString(uint32_t ip);
 
-std::string bufToHex(char* buf, size_t len, std::string sep = ":");
+std::string bufToHex(const char* buf, size_t len, std::string sep = ":");
 
 std::string stringToHex(std::string source, std::string sep = ":");
 

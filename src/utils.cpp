@@ -79,6 +79,7 @@ unsigned domainDecode(char* base, unsigned offset, std::string& encoded, std::st
     if (base[offset] == '\0') {
         if (decoded.size() > 0)
             decoded.erase(decoded.size() - 1, decoded.size());
+        encoded += string("\x00", 1);
         return 1;
     }
 
@@ -239,10 +240,10 @@ std::string toHex(uint32_t value)
     return oss.str();
 }
 
-string bufToHex(char* buf, size_t len, string sep)
+string bufToHex(const char* buf, size_t len, string sep)
 {
     unsigned i;
-    string out = "";
+    string out;
     char frag[4];
     for (i = 0; i < len; i++) {
         snprintf(frag, 4, "%.2X%s", *((u_char*)&((char*)buf)[i]), sep.data());
@@ -253,7 +254,7 @@ string bufToHex(char* buf, size_t len, string sep)
 
 string stringToHex(string source, string sep)
 {
-    string out = "";
+    string out;
     char frag[4];
     for (string::iterator i = source.begin(); i != source.end(); ++i) {
         snprintf(frag, 4, "%.2X%s", *(u_char*)&i, sep.data());

@@ -107,9 +107,10 @@ ResourceRecord& ResourceRecord::operator=(const ResourceRecord& rr)
 
 string ResourceRecord::data() const
 {
-    string out = "";
-
+    string out;
     uint16_t size;
+
+    out.clear();
 
     out += _rrDomain_enc;
     out += string((char*)&_rrType, 2);
@@ -243,7 +244,7 @@ void ResourceRecord::rrDomain(string domain)
 
 string ResourceRecord::to_string() const
 {
-    string out = "";
+    string out;
 
     out = _rrDomain_str + "/" + this->rrTypeStr() + "/" + this->rrClassStr() + "/" +
         std::to_string(this->ttl());
@@ -268,6 +269,9 @@ size_t ResourceRecord::parse(char* buf, unsigned offset)
     unsigned len;
     unsigned i;
 
+    _rrDomain_enc.clear();
+    _rrDomain_str.clear();
+
     i = Dines::domainDecode(buf, offset, _rrDomain_enc, _rrDomain_str);
 
     memcpy(&_rrType, buf + offset + i, 2);
@@ -277,4 +281,14 @@ size_t ResourceRecord::parse(char* buf, unsigned offset)
     len = ntohs(len);
     _rData = string(buf + offset + i + 10, len);
     return (i + 10 + len);
+}
+
+void ResourceRecord::clear()
+{
+    _rrDomain_enc.clear();
+    _rrDomain_str.clear();
+    _rrType = 1;
+    _rrClass = 1;
+    _ttl = 0;
+    _rData.clear();
 }

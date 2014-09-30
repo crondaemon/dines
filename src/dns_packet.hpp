@@ -81,7 +81,7 @@ public:
     std::string data() const;
 
     //! Sends the packet into the network
-    void sendNet(bool doCksum = true);
+    DnsPacket* sendNet(bool doCksum = true);
 
     //! to_string
     std::string to_string(bool dnsonly = false) const;
@@ -187,6 +187,9 @@ public:
 
     //! Parse a message from a buffer. The buffer must point to the start of the dns packet
     void parse(char* buf);
+
+    //! Clear the packet
+    void clear();
 };
 
 
