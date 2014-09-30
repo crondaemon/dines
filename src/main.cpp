@@ -88,9 +88,10 @@ void usage(string s)
     cout << "--verbose: be verbose\n";
     cout << "--help: this help\n";
     cout << "\nExamples:\n";
+    cout << "\t./dines --question=www.example.com 1.2.3.4\n";
     cout << "\tsudo ./dines --server\n";
     cout << "\tsudo ./dines --server --answer=www.example.com,A,IN,64,1.2.3.4\n";
-    cout << "\tsudo ./dines --question=www.example.com 1.2.3.4\n";
+    cout << "\tsudo ./dines --server --question www.example.com --answer www.example.com,A,IN,64,1.2.3.4 --upstream --verbose\n";
     cout << "\n";
 }
 
