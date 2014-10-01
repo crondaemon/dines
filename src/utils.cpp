@@ -240,6 +240,7 @@ std::string toHex(uint32_t value)
     return oss.str();
 }
 
+#ifdef DEBUG
 string bufToHex(const char* buf, size_t len, string sep)
 {
     unsigned i;
@@ -262,5 +263,5 @@ string stringToHex(string source, string sep)
     }
     return out;
 }
-
+#endif
 }; // namespace

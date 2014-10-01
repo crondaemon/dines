@@ -122,6 +122,11 @@ int test_header()
     h3.ra(false);
     CHECK(h3.ra() == false);
 
+    DnsHeader h5;
+    char* buf = (char*)"\xaa\xbb\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+    h5.parse(buf, 0);
+    CHECK(h5.txid() == 0xaabb);
+
     return 0;
 }
 
