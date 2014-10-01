@@ -1,7 +1,7 @@
 # Dines
 
 [![Build Status](https://travis-ci.org/crondaemon/dines.png)](https://travis-ci.org/crondaemon/dines)
-[![Coverage Status](https://coveralls.io/repos/crondaemon/dines/badge.png?branch=coverage)](https://coveralls.io/r/crondaemon/dines)
+[![Coverage Status](https://coveralls.io/repos/crondaemon/dines/badge.png)](https://coveralls.io/r/crondaemon/dines)
 
 Dines is the definitive answer to DNS testing. It allows the creation of any DNS packet with the possibility to fuzz some fields. Used in shell scripts allows also the creation of fake DNS servers that answer in custom ways.
 
