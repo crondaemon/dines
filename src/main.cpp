@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
                     if (optarg[0] == 'F') {
                         p.fuzzSrcIp();
                     } else {
-                        p.ipFrom(optarg);
+                        p.from(optarg);
                     }
                     break;
 
@@ -299,7 +299,7 @@ int main(int argc, char* argv[])
                 return 1;
             }
 
-            p.ipTo("255.255.255.255");
+            p.to("255.255.255.255");
 
             if (p.invalid()) {
                 cerr << "Invalid parameters:\n\n";
@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
             }
 
             // The rest of the cmdline contains the addresses to scan
-            p.ipTo(argv[optind]);
+            p.to(argv[optind]);
 
             if (p.invalid()) {
                 cerr << "Invalid parameters:\n\n";

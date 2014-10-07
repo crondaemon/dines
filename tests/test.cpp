@@ -41,10 +41,10 @@ void dummylog(string s)
 int test_ip()
 {
     DnsPacket p;
-    p.ipFrom("1.2.3.4");
-    p.ipTo("2.3.4.5");
-    CHECK(p.ipFrom() == "1.2.3.4");
-    CHECK(p.ipTo() == "2.3.4.5");
+    p.from("1.2.3.4");
+    p.to("2.3.4.5");
+    CHECK(p.from() == "1.2.3.4");
+    CHECK(p.to() == "2.3.4.5");
     return 0;
 }
 
@@ -544,12 +544,12 @@ int test_logging()
 int test_copy_constructor_and_assignment()
 {
     DnsPacket p1;
-    p1.ipFrom("1.2.3.4");
+    p1.from("1.2.3.4");
     DnsPacket p2(p1);
     DnsPacket p3;
     p3 = p1;
-    CHECK(p2.ipFrom() == "1.2.3.4");
-    CHECK(p3.ipFrom() == "1.2.3.4");
+    CHECK(p2.from() == "1.2.3.4");
+    CHECK(p3.from() == "1.2.3.4");
     return 0;
 }
 
@@ -594,7 +594,7 @@ int test_invalid()
     DnsPacket p;
     CHECK(p.invalid() == true);
     CHECK(p.invalidMsg() == "You must specify destination ip");
-    p.ipTo("1.2.3.4");
+    p.to("1.2.3.4");
     CHECK(p.invalid() == false);
     CHECK(p.invalidMsg() == "");
     return 0;
@@ -605,9 +605,9 @@ int test_dns_packet()
     DnsQuestion q("www.polito.it", "A", "IN");
     ResourceRecord rr("www.polito.it", "A", "IN", "64", "\x01\x02\x03\x04");
     DnsPacket p;
-    p.ipFrom("1.2.3.4");
+    p.from("1.2.3.4");
     p.sport("100");
-    p.ipTo("2.3.4.5");
+    p.to("2.3.4.5");
     p.dport("53");
     p.txid("100");
     p.addQuestion(q);

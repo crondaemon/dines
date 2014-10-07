@@ -86,17 +86,17 @@ public:
     //! to_string
     std::string to_string(bool dnsonly = false) const;
 
-    void ipFrom(std::string ip_from);
-    void ipFrom(uint32_t ip);
+    void from(std::string ip_from);
+    void from(uint32_t ip_from);
 
-    void ipTo(std::string ip_to);
-    void ipTo(uint32_t ip);
+    void to(std::string ip_to);
+    void to(uint32_t ip_to);
 
     //! IP source as string
-    std::string ipFrom() const;
+    std::string from() const;
 
     //! IP dest as string
-    std::string ipTo() const;
+    std::string to() const;
 
     uint16_t sport() const;
 

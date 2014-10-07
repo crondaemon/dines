@@ -309,10 +309,10 @@ DnsPacket* DnsPacket::sendNet(bool doCksum)
         mh.msg_controllen = 0;
 
         ret = sendmsg(_socket, &mh, 0);
-        api = "sendmsg()";
+        api = "sendmsg";
     } else {
         ret = send(_socket, output.data(), output.size(), 0);
-        api = "send()";
+        api = "send";
     }
 
     if (ret < 0) {
@@ -346,7 +346,7 @@ DnsPacket* DnsPacket::sendNet(bool doCksum)
 
         // Parse the packet into a DnsPacket
         p->parse((char*)mh.msg_iov[0].iov_base);
-        p->ipFrom(peeraddr.sin_addr.s_addr);
+        p->from(peeraddr.sin_addr.s_addr);
         p->sport(ntohs(peeraddr.sin_port));
         p->dport(ntohs(_udpHdr.source));
 
@@ -357,7 +357,7 @@ DnsPacket* DnsPacket::sendNet(bool doCksum)
                 continue;
             }
             struct in_pktinfo *pi = (struct in_pktinfo*)CMSG_DATA(cmsg);
-            p->ipTo(pi->ipi_spec_dst.s_addr);
+            p->to(pi->ipi_spec_dst.s_addr);
         }
 
         // Print the result
@@ -371,7 +371,7 @@ DnsPacket* DnsPacket::sendNet(bool doCksum)
     return p;
 }
 
-string DnsPacket::ipFrom() const
+string DnsPacket::from() const
 {
     char buf[INET_ADDRSTRLEN];
 
@@ -379,7 +379,7 @@ string DnsPacket::ipFrom() const
     return string(buf);
 }
 
-string DnsPacket::ipTo() const
+string DnsPacket::to() const
 {
     char buf[INET_ADDRSTRLEN];
 
@@ -392,9 +392,9 @@ string DnsPacket::to_string(bool dnsonly) const
     string s;
 
     if (dnsonly == false) {
-        s += this->ipFrom() + ":" + std::to_string(this->sport());
+        s += this->from() + ":" + std::to_string(this->sport());
         s += " -> ";
-        s += this->ipTo() + ":" + std::to_string(this->dport());
+        s += this->to() + ":" + std::to_string(this->dport());
         s += " ";
     }
 
@@ -569,26 +569,26 @@ const ResourceRecord& DnsPacket::authorities(unsigned n) const
     return _authorities.at(n);
 }
 
-void DnsPacket::ipFrom(uint32_t ip)
+void DnsPacket::from(uint32_t ip_from)
 {
     _spoofing = true;
-    _ipHdr.saddr = ip;
+    _ipHdr.saddr = ip_from;
 }
 
-void DnsPacket::ipFrom(string ip_from)
+void DnsPacket::from(string ip_from)
 {
     _spoofing = true;
-    _ipHdr.saddr = inet_addr(ip_from.data());
+    _ipHdr.saddr = Dines::stringToIp32(ip_from);
 }
 
-void DnsPacket::ipTo(string ip_to)
+void DnsPacket::to(string ip_to)
 {
-    _ipHdr.daddr = inet_addr(ip_to.data());
+    _ipHdr.daddr = Dines::stringToIp32(ip_to.data());
 }
 
-void DnsPacket::ipTo(uint32_t ip)
+void DnsPacket::to(uint32_t ip_to)
 {
-    _ipHdr.daddr = ip;
+    _ipHdr.daddr = ip_to;
 }
 
 uint16_t DnsPacket::sport() const

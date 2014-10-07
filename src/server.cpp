@@ -97,7 +97,7 @@ void Server::_recursion(int sock, struct sockaddr_in peer)
     // Set the question as the incoming question
     upstream_packet.question(_incoming.question());
     // Set the server as upstream
-    upstream_packet.ipTo(_upstream);
+    upstream_packet.to(_upstream);
     // Inject the packet and get the response back
     DnsPacket* return_packet = upstream_packet.sendNet();
     if (_log) {
