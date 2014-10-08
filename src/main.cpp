@@ -255,7 +255,6 @@ int main(int argc, char* argv[])
                     break;
                 case 30: // num
                     num = stoul(optarg);
-                    p.packets(num);
                     break;
 
                 case 31: // delay
@@ -309,6 +308,9 @@ int main(int argc, char* argv[])
 
             Server server(p, server_port);
 
+            if (verbose == true)
+                server.logger(logger);
+
             if (upstream > 0)
                 server.upstream(upstream);
 
@@ -318,8 +320,10 @@ int main(int argc, char* argv[])
                 return 1;
             }
 
-            if (verbose == true)
-                server.logger(logger);
+            // Set the number of packets
+            if (num > 0)
+                server.packets(num);
+
             server.launch();
         } else {
             // Client mode
@@ -331,6 +335,10 @@ int main(int argc, char* argv[])
 
             // The rest of the cmdline contains the addresses to scan
             p.to(argv[optind]);
+
+            // Set the packets to send
+            if (num > 0)
+                p.packets(num);
 
             if (p.invalid()) {
                 cerr << "Invalid parameters:\n\n";

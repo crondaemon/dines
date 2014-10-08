@@ -133,11 +133,15 @@ void Server::_directAnswer(int sock, struct sockaddr_in peer)
 
 void Server::packets(uint64_t p)
 {
+    if (_log)
+        _log("Setting packets to " + to_string(p));
     _packets = p;
 }
 
 void Server::port(uint16_t p)
 {
+    if (_log)
+        _log("Setting port to " + to_string(p));
     _port = p;
 }
 
