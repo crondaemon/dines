@@ -263,6 +263,14 @@ void DnsPacket::_socketCreateUdp()
     sa.sin_port = _udpHdr.source;
     sa.sin_addr.s_addr = htonl(INADDR_ANY);
 
+    // Set a standard timeout (3 sec)
+    struct timeval tv;
+    tv.tv_sec = 3;
+    tv.tv_usec = 0;
+    if (setsockopt(_socket, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+        BASIC_EXCEPTION_THROW("setsockopt");
+    }
+
     if (bind(_socket, (struct sockaddr *)&sa, sizeof(struct sockaddr)) == -1)
         BASIC_EXCEPTION_THROW("bind");
 
