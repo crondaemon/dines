@@ -264,4 +264,14 @@ string stringToHex(string source, string sep)
     return out;
 }
 #endif
+
+
+void logger(string s)
+{
+    const time_t t = time(NULL);
+    char buf[30];
+    ctime_r(&t, buf);
+    buf[strlen(buf)-1] = '\0';
+    cout << "[" << buf << "] " << s << endl;
+}
 }; // namespace

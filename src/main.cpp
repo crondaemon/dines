@@ -95,15 +95,6 @@ void usage(string s)
     cout << "\n";
 }
 
-void logger(string s)
-{
-    const time_t t = time(NULL);
-    char buf[30];
-    ctime_r(&t, buf);
-    buf[strlen(buf)-1] = '\0';
-    cout << "[" << buf << "] " << s << endl;
-}
-
 int main(int argc, char* argv[])
 {
     int c = 0;
@@ -131,8 +122,8 @@ int main(int argc, char* argv[])
     // first, scan the argv looking for verbose mode
     for (int i = 0; i < argc; i++) {
         if (string(argv[i]) == "--verbose") {
-            logger("Verbose mode on");
-            p.logger(logger);
+            Dines::logger("Verbose mode on");
+            p.logger(Dines::logger);
             verbose = true;
         }
     }
@@ -260,7 +251,7 @@ int main(int argc, char* argv[])
                 case 31: // delay
                     temp = stoul(optarg);
                     delay = { .tv_sec = temp / 1000000, .tv_nsec = temp % 1000000 };
-                    logger(string("Inter packet gap set to ")  + std::to_string(delay.tv_sec) +
+                    Dines::logger(string("Inter packet gap set to ")  + std::to_string(delay.tv_sec) +
                         " sec, " + std::to_string(delay.tv_nsec) + " nsec");
                     break;
 
@@ -309,7 +300,7 @@ int main(int argc, char* argv[])
             Server server(p, server_port);
 
             if (verbose == true)
-                server.logger(logger);
+                server.logger(Dines::logger);
 
             if (upstream > 0)
                 server.upstream(upstream);
@@ -346,7 +337,7 @@ int main(int argc, char* argv[])
                 return 1;
             }
 
-            logger(string("Sending ") + p.packetsStr() + " datagram" + (p.packets() > 1 ? "s" : ""));
+            Dines::logger(string("Sending ") + p.packetsStr() + " datagram" + (p.packets() > 1 ? "s" : ""));
 
             while (p.packets() > 0) {
                 p.fuzz();
@@ -362,7 +353,7 @@ int main(int argc, char* argv[])
         }
 #ifndef DEBUG
     } catch(exception& e) {
-        logger(string("Runtime error: ") + e.what());
+        Dines::logger(string("Runtime error: ") + e.what());
         return 1;
     }
 #endif

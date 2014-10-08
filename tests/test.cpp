@@ -4,6 +4,9 @@
 #include <iostream>
 #include <string.h>
 #include <utils.hpp>
+#include <server.hpp>
+#include <unistd.h>
+#include <signal.h>
 
 using namespace std;
 
@@ -686,6 +689,91 @@ int test_domain_decode()
     return 0;
 }
 
+int test_server_1()
+{
+    pid_t pid = fork();
+    if (pid == 0) {
+        DnsPacket server_answer;
+        server_answer.addRR(Dines::R_ANSWER, "www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+        Server server(server_answer, 20000);
+        server.logger(dummylog);
+        server.packets(1);
+        server.launch();
+        exit(0);
+    }
+
+    sleep(1);
+    DnsPacket question;
+    question.addQuestion("www.test.com", "A", "IN");
+    question.to("127.0.0.1");
+    question.dport(20000);
+
+    DnsPacket* client_answer;
+    client_answer = question.sendNet();
+
+    CHECK(client_answer->answers(0).rrDomain() == "www.test.com");
+    CHECK(client_answer->answers(0).rrType() == 1);
+    CHECK(client_answer->answers(0).rrClass() == 1);
+    CHECK(client_answer->answers(0).ttl() == 64);
+    CHECK(client_answer->answers(0).rData() == "1.2.3.4");
+
+    kill(pid, SIGTERM);
+
+    return 0;
+}
+
+int test_server_2()
+{
+    // In this test I'm going to create 2 servers and 1 client.
+    // final: is the final server
+    // relayer: is an intermediate server
+
+    pid_t servers_pid = fork();
+    if (servers_pid == 0) {
+        // This branch is for servers
+
+        pid_t final_pid = fork();
+        if (final_pid == 0) {
+            // FINAL
+            DnsPacket server_answer;
+            server_answer.addRR(Dines::R_ANSWER, "www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+            Server server(server_answer, 20000);
+            server.logger(dummylog);
+            server.packets(1);
+            server.launch();
+            exit(0);
+        }
+        // RELAYER
+        DnsPacket server_answer;
+        server_answer.addRR(Dines::R_ANSWER, "another.record.com", "A", "IN", "64", "\x01\x02\x03\x04");
+        Server server(server_answer, 30000);
+        server.logger(dummylog);
+        server.upstream(Dines::stringToIp32("127.0.0.1"), 20000);
+        server.packets(1);
+        server.launch();
+        kill(final_pid, SIGTERM);
+    }
+
+    sleep(1);
+    DnsPacket question;
+    question.addQuestion("www.test.com", "A", "IN");
+    question.to("127.0.0.1");
+    question.dport(20000);
+
+    DnsPacket* client_answer;
+    client_answer = question.sendNet();
+
+    CHECK(client_answer->answers(0).rrDomain() == "www.test.com");
+    CHECK(client_answer->answers(0).rrType() == 1);
+    CHECK(client_answer->answers(0).rrClass() == 1);
+    CHECK(client_answer->answers(0).ttl() == 64);
+    CHECK(client_answer->answers(0).rData() == "1.2.3.4");
+
+    kill(servers_pid, SIGTERM);
+
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     cout << "Tests running";
@@ -713,6 +801,8 @@ int main(int argc, char* argv[])
     TEST(test_invalid());
     TEST(test_dns_packet());
     TEST(test_domain_decode());
+    TEST(test_server_1());
+//    TEST(test_server_2());
 
     cout << "done" << "\n";
 }

@@ -14,14 +14,14 @@
 
 using namespace std;
 
-Server::Server(const DnsPacket& packet, uint16_t port, bool autoanswer)
+Server::Server(const DnsPacket& packet, uint16_t port)
 {
     _log = NULL;
-    _port = port;
-    _autoanswer = autoanswer;
-    _packets = -1;
+    this->port(port);
+    this->packets(-1);
     _outgoing = packet;
     _upstream = 0;
+    _upstream_port = htons(port);
 }
 
 void Server::logger(Dines::LogFunc l)
@@ -31,14 +31,9 @@ void Server::logger(Dines::LogFunc l)
         _log("Activating logger");
 }
 
-void Server::autoanswer(bool a)
-{
-    _autoanswer = a;
-}
-
 void Server::launch()
 {
-    if (_autoanswer && _log)
+    if (_log)
         _log("Serving record: " + _outgoing.to_string(true) + " on port " + std::to_string(_port));
 
     int servSock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -72,19 +67,18 @@ void Server::launch()
         if (_log)
             _log("Incoming packet: " + _incoming.to_string(true));
 
-        if (_autoanswer) {
-            if (_incoming.dnsHdr().rd() == true) {
-                _outgoing.dnsHdr().ra(true);
-            }
-
-            if (_upstream > 0 && (_incoming.question() != _outgoing.question())) {
-                if (_log)
-                    _log("Recursion activated towards " + Dines::ip32ToString(_upstream));
-                this->_recursion(servSock, peer);
-            } else {
-                this->_directAnswer(servSock, peer);
-            }
+        if (_incoming.dnsHdr().rd() == true) {
+            _outgoing.dnsHdr().ra(true);
         }
+
+        if (_upstream > 0 && (_incoming.question() != _outgoing.question())) {
+            if (_log)
+                _log("Recursion activated towards " + Dines::ip32ToString(_upstream));
+            this->_recursion(servSock, peer);
+        } else {
+            this->_directAnswer(servSock, peer);
+        }
+
         _packets--;
         _incoming.clear();
     }
@@ -98,6 +92,7 @@ void Server::_recursion(int sock, struct sockaddr_in peer)
     upstream_packet.question(_incoming.question());
     // Set the server as upstream
     upstream_packet.to(_upstream);
+    upstream_packet.dport(ntohs(_upstream_port));
     // Inject the packet and get the response back
     DnsPacket* return_packet = upstream_packet.sendNet();
     if (_log) {
@@ -161,9 +156,10 @@ string Server::invalidMsg() const
     return "";
 }
 
-void Server::upstream(uint32_t ups)
+void Server::upstream(uint32_t ups, uint16_t port)
 {
     _upstream = ups;
+    _upstream_port = htons(port);
 }
 
 string Server::upstream() const

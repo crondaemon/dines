@@ -72,7 +72,6 @@ public:
     DnsHeader& dnsHdr();
     void question(const DnsQuestion& q);
     DnsQuestion& question();
-    ResourceRecord& rr(Dines::RecordSection section, unsigned n) const;
 
     //! Compute the UDP checksum
     void doUdpCksum();
