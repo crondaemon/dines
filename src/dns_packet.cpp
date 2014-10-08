@@ -18,6 +18,7 @@
 #include <sstream>
 #include <ifaddrs.h>
 #include <netdb.h>
+#include <resolv.h>
 
 using namespace std;
 
@@ -581,9 +582,26 @@ void DnsPacket::from(string ip_from)
     _ipHdr.saddr = Dines::stringToIp32(ip_from);
 }
 
-void DnsPacket::to(string ip_to)
+void DnsPacket::to(string dest)
 {
-    _ipHdr.daddr = Dines::stringToIp32(ip_to.data());
+    try {
+        _ipHdr.daddr = Dines::stringToIp32(dest);
+        return;
+    } catch(exception& e) {
+        // Provided ip was not an ip. We try to resolve it into an ip
+        if (res_init() == -1) {
+            BASIC_EXCEPTION_THROW("res_init");
+        }
+
+        u_char ans[65535];
+
+        if (res_search(dest.data(), C_IN, T_A, ans, 65535) == -1) {
+            throw runtime_error("Can't resolve " + dest);
+        }
+        DnsPacket p;
+        p.parse((char*)ans);
+        _ipHdr.daddr = Dines::stringToIp32(p.answers(0).rData());
+    }
 }
 
 void DnsPacket::to(uint32_t ip_to)

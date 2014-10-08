@@ -89,7 +89,7 @@ public:
     void from(std::string ip_from);
     void from(uint32_t ip_from);
 
-    void to(std::string ip_to);
+    void to(std::string dest);
     void to(uint32_t ip_to);
 
     //! IP source as string
