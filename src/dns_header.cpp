@@ -19,6 +19,7 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
     _txid = htons(txid);
     memset(&_flags, 0x0, sizeof(DnsHeaderFlags));
     _flags.rd = 1;
+    _flags.auth = 0;
     _nRecord[Dines::R_QUESTION] = htons(nquest);
     _nRecord[Dines::R_ANSWER] = htons(nans);
     _nRecord[Dines::R_ADDITIONAL] = htons(nadd);

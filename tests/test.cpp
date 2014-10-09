@@ -737,7 +737,7 @@ int test_server_2()
             // FINAL
             DnsPacket server_answer;
             server_answer.addRR(Dines::R_ANSWER, "www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
-            Server server(server_answer, 20000);
+            Server server(server_answer, 50000);
             server.logger(dummylog);
             server.packets(1);
             server.launch();
@@ -748,17 +748,18 @@ int test_server_2()
         server_answer.addRR(Dines::R_ANSWER, "another.record.com", "A", "IN", "64", "\x01\x02\x03\x04");
         Server server(server_answer, 30000);
         server.logger(dummylog);
-        server.upstream(Dines::stringToIp32("127.0.0.1"), 20000);
+        server.upstream(Dines::stringToIp32("127.0.0.1"), 50000);
         server.packets(1);
         server.launch();
         kill(final_pid, SIGTERM);
+        exit(0);
     }
 
-    sleep(1);
+    sleep(2);
     DnsPacket question;
     question.addQuestion("www.test.com", "A", "IN");
     question.to("127.0.0.1");
-    question.dport(20000);
+    question.dport(30000);
 
     DnsPacket* client_answer;
     client_answer = question.sendNet();
@@ -802,7 +803,7 @@ int main(int argc, char* argv[])
     TEST(test_dns_packet());
     TEST(test_domain_decode());
     TEST(test_server_1());
-//    TEST(test_server_2());
+    TEST(test_server_2());
 
     cout << "done" << "\n";
 }

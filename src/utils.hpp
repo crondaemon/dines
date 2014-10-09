@@ -60,7 +60,7 @@ std::string stringToHex(std::string source, std::string sep = ":");
 
 //! Throws an exception for a given function, printing the errno as string
 #define BASIC_EXCEPTION_THROW(function) \
-    throw runtime_error(string(function) + "() error: " + strerror(errno));
+    throw runtime_error(string(__func__) + " " + string(function) + "() error: " + strerror(errno));
 
 };
 

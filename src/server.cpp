@@ -73,7 +73,8 @@ void Server::launch()
 
         if (_upstream > 0 && (_incoming.question() != _outgoing.question())) {
             if (_log)
-                _log("Recursion activated towards " + Dines::ip32ToString(_upstream));
+                _log("Recursion activated towards " + Dines::ip32ToString(_upstream) +
+                    + ":" + to_string(ntohs(_upstream_port)));
             this->_recursion(servSock, peer);
         } else {
             this->_directAnswer(servSock, peer);
@@ -93,7 +94,9 @@ void Server::_recursion(int sock, struct sockaddr_in peer)
     // Set the server as upstream
     upstream_packet.to(_upstream);
     upstream_packet.dport(ntohs(_upstream_port));
+    upstream_packet.sport(rand() % 0xFFFF);
     // Inject the packet and get the response back
+
     DnsPacket* return_packet = upstream_packet.sendNet();
     if (_log) {
         _log("Recursion out " + upstream_packet.to_string());

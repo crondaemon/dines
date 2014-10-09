@@ -74,22 +74,23 @@ Params:
 Examples:
 	./dines --question=www.example.com 1.2.3.4
 	sudo ./dines --server
-	sudo ./dines --server --answer=www.example.com,A,IN,64,1.2.3.4
-	sudo ./dines --server --question www.example.com --answer www.example.com,A,IN,64,1.2.3.4 --upstream --verbose
+	./dines --server=30000
+	./dines --server --answer=www.example.com,A,IN,64,1.2.3.4
+	sudo ./dines --server --question www.example.com --answer www.example.com,A,IN,64,1.2.3.4 --upstream 8.8.8.8 --verbose
 ```
 <!--- HELP END --->
 
 To generate a question, issue the following command:
 
 ```
-sudo ./dines --src-ip 192.168.1.2 --question www.test.com,A,IN --num 1 192.168.1.1
+./dines --question www.test.com,A,IN --num 1 192.168.1.1
 ```
 
 that asks for domain www.test.com, sending 1 packet only. To generate an answer, one can use the following
 command
 
 ```
-sudo ./dines --src-ip 192.168.1.1 --question www.test.com,1,1 --num 1
+sudo ./dines --question www.test.com,1,1 --num 1
     --answer www.test.com,1,1,256,192.168.1.1
     --answer www.test.com,1,1,256,192.168.1.2 192.168.1.2
 ```
@@ -100,7 +101,7 @@ as an IP address, NS as a DNS name, and so on. To inject binary data directly, t
 as in the following example
 
 ```
-sudo ./dines --src-ip 192.168.1.1 --question www.test.com,NULL,IN --num 1
+./dines --question www.test.com,NULL,IN --num 1
     --answer www.test.com,NULL,IN,0,10,$'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a'
     192.168.1.2
 ```

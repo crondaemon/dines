@@ -19,6 +19,7 @@
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <resolv.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -271,8 +272,9 @@ void DnsPacket::_socketCreateUdp()
         BASIC_EXCEPTION_THROW("setsockopt");
     }
 
-    if (bind(_socket, (struct sockaddr *)&sa, sizeof(struct sockaddr)) == -1)
+    if (bind(_socket, (struct sockaddr *)&sa, sizeof(struct sockaddr)) == -1) {
         BASIC_EXCEPTION_THROW("bind");
+    }
 
     int opt = 1;
     if (setsockopt(_socket, IPPROTO_IP, IP_PKTINFO, &opt, sizeof(opt)) == -1)
