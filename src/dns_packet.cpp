@@ -465,6 +465,9 @@ DnsQuestion& DnsPacket::addQuestion(const std::string qdomain, const std::string
     _dnsHdr.nRecordAdd(Dines::R_QUESTION, 1);
     _question = DnsQuestion(qdomain, qtype, qclass);
 
+    if (_log)
+        _question.logger(_log);
+
     return _question;
 }
 
@@ -472,12 +475,16 @@ DnsQuestion& DnsPacket::addQuestion(const std::string qdomain, unsigned qtype, u
 {
     _dnsHdr.nRecordAdd(Dines::R_QUESTION, 1);
     _question = DnsQuestion(qdomain, qtype, qclass);
+    if (_log)
+        _question.logger(_log);
     return _question;
 }
 
 DnsQuestion& DnsPacket::addQuestion(const DnsQuestion& q)
 {
     _question = q;
+    if (_log)
+        _question.logger(_log);
     _dnsHdr.nRecord(Dines::R_QUESTION, 1);
     return _question;
 }
@@ -504,8 +511,11 @@ ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const ResourceRec
         _dnsHdr.nRecordAdd(section, 1);
 
     rrPtr->push_back(rr);
+    ResourceRecord& newrr = rrPtr->front();
     isQuestion(false);
-    return rrPtr->front();
+    if (_log)
+        newrr.logger(_log);
+    return newrr;
 }
 
 ResourceRecord& DnsPacket::addRR(Dines::RecordSection section, const std::string& rrDomain,
@@ -721,6 +731,13 @@ void DnsPacket::fuzzSport()
 void DnsPacket::logger(Dines::LogFunc l)
 {
     _log = l;
+    _question.logger(l);
+    for (vector<ResourceRecord>::iterator itr = _answers.begin(); itr != _answers.end(); ++itr)
+        itr->logger(l);
+    for (vector<ResourceRecord>::iterator itr = _authorities.begin(); itr != _authorities.end(); ++itr)
+        itr->logger(l);
+    for (vector<ResourceRecord>::iterator itr = _additionals.begin(); itr != _additionals.end(); ++itr)
+        itr->logger(l);
 }
 
 void DnsPacket::packets(unsigned num)

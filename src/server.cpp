@@ -38,7 +38,7 @@ void Server::launch()
 
     int servSock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (servSock == -1)
-        throw runtime_error(string(__func__) + ": can't create socket");
+        BASIC_EXCEPTION_THROW("socket");
 
     struct sockaddr_in servaddr;
     memset(&servaddr, 0, sizeof(servaddr));
@@ -60,7 +60,7 @@ void Server::launch()
     while(_packets > 0) {
         datalen = recvfrom(servSock, buf, buflen, 0, (struct sockaddr*)&peer, &sockaddr_len);
         if (datalen == -1) {
-            throw runtime_error(string(__func__) + ": can't recvfrom()");
+            BASIC_EXCEPTION_THROW("recvfrom");
         }
 
         _incoming.parse(buf);
