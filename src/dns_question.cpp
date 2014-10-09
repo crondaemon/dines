@@ -21,6 +21,8 @@ DnsQuestion::DnsQuestion(const string qdomain, const string qtype, const string 
     if (qclass == "F") {
         this->fuzzQclass(true);
     }
+    _fuzzQtype = false;
+    _fuzzQclass = false;
 }
 
 DnsQuestion::DnsQuestion(const string qdomain, uint16_t qtype, uint16_t qclass)
