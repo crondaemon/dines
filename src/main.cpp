@@ -58,7 +58,6 @@ void usage(string s)
     cout << "Params:\n";
     cout << "\n[IP]\n";
     cout << "--src-ip=<ip>: Source IP (AF)\n";
-    cout << "--dst-ip=<ip>: Destination IP\n";
     cout << "\n[UDP]\n";
     cout << "--sport=<port>: source port (A)\n";
     cout << "--dport=<port>: destination port (A)\n";

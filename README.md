@@ -9,13 +9,17 @@ Dines is the definitive answer to DNS testing. It allows the creation of any DNS
 
 To compile dines:
 
-    autoreconf -i
-    ./configure
-    make
+```
+autoreconf -i
+./configure
+make
+```
 
 To run dines tests:
 
-    make tests
+```
+make tests
+```
 
 ## Usage
 
@@ -39,7 +43,6 @@ Params:
 
 [IP]
 --src-ip=<ip>: Source IP (AF)
---dst-ip=<ip>: Destination IP
 
 [UDP]
 --sport=<port>: source port (A)
