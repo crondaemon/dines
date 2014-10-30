@@ -707,7 +707,36 @@ void create_server(uint16_t port)
     server.launch();
 }
 
+void create_relayer(uint16_t listen_port, uint16_t upstream_port)
+{
+    DnsPacket server_answer;
+    server_answer.addRR(Dines::R_ANSWER, "another.record.com", "A", "IN", "64", "\x01\x02\x03\x04");
+    Server server(server_answer, listen_port);
+    server.logger(dummylog);
+    server.upstream(Dines::stringToIp32("127.0.0.1"), upstream_port);
+    server.packets(1);
+    server.launch();
+}
+
 int test_server_1()
+{
+    DnsPacket p1;
+    Server s1(p1);
+    s1.upstream(Dines::stringToIp32("127.0.0.1"), 10000);
+    CHECK(s1.upstream() == "127.0.0.1");
+    CHECK(s1.invalid());
+    CHECK(s1.invalidMsg() == "--question and --upstream must be specified together in server mode");
+
+    DnsPacket p2;
+    p2.addQuestion("www.test.com", "a", "in");
+    Server s2(p2);
+    s2.upstream(Dines::stringToIp32("127.0.0.1"), 10000);
+    CHECK(!s2.invalid());
+    CHECK(s2.invalidMsg() == "");
+    return 0;
+}
+
+int test_server_2()
 {
     uint16_t port = 20000;
     std::thread server(create_server, port);
@@ -731,18 +760,7 @@ int test_server_1()
     return 0;
 }
 
-void create_relayer(uint16_t listen_port, uint16_t upstream_port)
-{
-    DnsPacket server_answer;
-    server_answer.addRR(Dines::R_ANSWER, "another.record.com", "A", "IN", "64", "\x01\x02\x03\x04");
-    Server server(server_answer, listen_port);
-    server.logger(dummylog);
-    server.upstream(Dines::stringToIp32("127.0.0.1"), upstream_port);
-    server.packets(1);
-    server.launch();
-}
-
-int test_server_2()
+int test_server_3()
 {
     // In this test I'm going to create 2 servers and 1 client.
     // final: is the final server
@@ -802,6 +820,7 @@ int main(int argc, char* argv[])
     TEST(test_domain_decode());
     TEST(test_server_1());
     TEST(test_server_2());
+    TEST(test_server_3());
 
     cout << "done" << "\n";
 }
