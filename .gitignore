@@ -42,6 +42,7 @@ stamp-h1
 *.gcno
 *.gcda
 *.gcov
+coverage.info
 
 # exe
 dines
