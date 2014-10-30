@@ -154,7 +154,7 @@ bool Server::invalid() const
 
 string Server::invalidMsg() const
 {
-    if ((_outgoing.nRecord(Dines::R_QUESTION) > 0 && _upstream ==0) ||
+    if ((_outgoing.nRecord(Dines::R_QUESTION) > 0 && _upstream == 0) ||
             (_outgoing.nRecord(Dines::R_QUESTION) == 0 && _upstream > 0)) {
         throw runtime_error("--question and --upstream must be specified together in server mode");
     }
