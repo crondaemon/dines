@@ -7,6 +7,7 @@
 #include <server.hpp>
 #include <unistd.h>
 #include <signal.h>
+#include <thread>
 
 using namespace std;
 
@@ -695,27 +696,29 @@ int test_domain_decode()
     return 0;
 }
 
+void create_server(uint16_t port)
+{
+    // Create a server
+    DnsPacket server_answer;
+    server_answer.addRR(Dines::R_ANSWER, "www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+    Server server(server_answer, port);
+    server.logger(dummylog);
+    server.packets(1);
+    server.launch();
+}
+
 int test_server_1()
 {
-    pid_t pid = fork();
-    if (pid == 0) {
-        DnsPacket server_answer;
-        server_answer.addRR(Dines::R_ANSWER, "www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
-        Server server(server_answer, 20000);
-        server.logger(dummylog);
-        server.packets(1);
-        server.launch();
-        exit(0);
-    }
+    uint16_t port = 20000;
+    std::thread server(create_server, port);
 
-    sleep(1);
-    DnsPacket question;
-    question.addQuestion("www.test.com", "A", "IN");
-    question.to("127.0.0.1");
-    question.dport(20000);
+    // Create a client
+    DnsPacket query;
+    query.addQuestion("www.test.com", "A", "IN");
+    query.to("127.0.0.1");
+    query.dport(port);
 
-    DnsPacket* client_answer;
-    client_answer = question.sendNet();
+    DnsPacket* client_answer = query.sendNet();
 
     CHECK(client_answer->answers(0).rrDomain() == "www.test.com");
     CHECK(client_answer->answers(0).rrType() == 1);
@@ -723,9 +726,20 @@ int test_server_1()
     CHECK(client_answer->answers(0).ttl() == 64);
     CHECK(client_answer->answers(0).rData() == "1.2.3.4");
 
-    kill(pid, SIGTERM);
+    server.join();
 
     return 0;
+}
+
+void create_relayer(uint16_t listen_port, uint16_t upstream_port)
+{
+    DnsPacket server_answer;
+    server_answer.addRR(Dines::R_ANSWER, "another.record.com", "A", "IN", "64", "\x01\x02\x03\x04");
+    Server server(server_answer, listen_port);
+    server.logger(dummylog);
+    server.upstream(Dines::stringToIp32("127.0.0.1"), upstream_port);
+    server.packets(1);
+    server.launch();
 }
 
 int test_server_2()
@@ -734,41 +748,18 @@ int test_server_2()
     // final: is the final server
     // relayer: is an intermediate server
 
-    pid_t servers_pid = fork();
-    if (servers_pid == 0) {
-        // This branch is for servers
+    std::thread final_server(create_server, 30000);
+    std::thread relayer(create_relayer, 20000, 30000);
 
-        pid_t final_pid = fork();
-        if (final_pid == 0) {
-            // FINAL
-            DnsPacket server_answer;
-            server_answer.addRR(Dines::R_ANSWER, "www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
-            Server server(server_answer, 50000);
-            server.logger(dummylog);
-            server.packets(1);
-            server.launch();
-            exit(0);
-        }
-        // RELAYER
-        DnsPacket server_answer;
-        server_answer.addRR(Dines::R_ANSWER, "another.record.com", "A", "IN", "64", "\x01\x02\x03\x04");
-        Server server(server_answer, 30000);
-        server.logger(dummylog);
-        server.upstream(Dines::stringToIp32("127.0.0.1"), 50000);
-        server.packets(1);
-        server.launch();
-        kill(final_pid, SIGTERM);
-        exit(0);
-    }
+    DnsPacket query;
+    query.addQuestion("www.test.com", "A", "IN");
+    query.to("127.0.0.1");
+    query.dport(20000);
 
-    sleep(2);
-    DnsPacket question;
-    question.addQuestion("www.test.com", "A", "IN");
-    question.to("127.0.0.1");
-    question.dport(30000);
+    // Wait some time for servers setup
+    sleep(1);
 
-    DnsPacket* client_answer;
-    client_answer = question.sendNet();
+    DnsPacket* client_answer = query.sendNet();
 
     CHECK(client_answer->answers(0).rrDomain() == "www.test.com");
     CHECK(client_answer->answers(0).rrType() == 1);
@@ -776,7 +767,8 @@ int test_server_2()
     CHECK(client_answer->answers(0).ttl() == 64);
     CHECK(client_answer->answers(0).rData() == "1.2.3.4");
 
-    kill(servers_pid, SIGTERM);
+    final_server.join();
+    relayer.join();
 
     return 0;
 }
