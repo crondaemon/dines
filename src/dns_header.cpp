@@ -32,10 +32,8 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
     _fuzzNRecord[2] = false;
     _fuzzNRecord[3] = false;
 
-    srand(time(NULL));
-
     if (_txid == 0)
-        _txid = rand();
+        _txid = Dines::random_16();
 }
 
 DnsHeader::DnsHeader(const DnsHeader& h)
@@ -149,31 +147,30 @@ void DnsHeader::_checkSection(unsigned section) const
 
 void DnsHeader::fuzz()
 {
-    unsigned seed = time(NULL);
     if (_fuzzTxid == true) {
-        _txid = rand_r(&seed);
+        _txid = Dines::random_16();
     }
 
     if (_fuzzFlags == true) {
-        uint16_t v = rand();
+        uint16_t v = Dines::random_16();
         DnsHeaderFlags* f = (DnsHeaderFlags*)(u_char*)(&v);
         _flags = *f;
     }
 
     if (_fuzzNRecord[Dines::R_QUESTION] == true) {
-        _nRecord[Dines::R_QUESTION] = rand();
+        _nRecord[Dines::R_QUESTION] = Dines::random_16();
     }
 
     if (_fuzzNRecord[Dines::R_ANSWER] == true) {
-        _nRecord[Dines::R_ANSWER] = rand();
+        _nRecord[Dines::R_ANSWER] = Dines::random_16();
     }
 
     if (_fuzzNRecord[Dines::R_ADDITIONAL] == true) {
-        _nRecord[Dines::R_ADDITIONAL] = rand();
+        _nRecord[Dines::R_ADDITIONAL] = Dines::random_16();
     }
 
     if (_fuzzNRecord[Dines::R_AUTHORITIES] == true) {
-        _nRecord[Dines::R_AUTHORITIES] = rand();
+        _nRecord[Dines::R_AUTHORITIES] = Dines::random_16();
     }
 }
 

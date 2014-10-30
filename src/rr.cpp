@@ -48,7 +48,6 @@ ResourceRecord::ResourceRecord(const string& rrDomain, uint16_t rrType,
     _fuzzRRtype = false;
     _fuzzRRclass = false;
     _fuzzTTL = false;
-    srand(time(NULL));
 }
 
 ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
@@ -179,13 +178,13 @@ ResourceRecord& ResourceRecord::fuzz()
     }
 
     if (_fuzzRRtype)
-        _rrType = rand();
+        _rrType = Dines::random_16();
 
     if (_fuzzRRclass)
-        _rrClass = rand();
+        _rrClass = Dines::random_16();
 
     if (_fuzzTTL)
-        _ttl = rand();
+        _ttl = Dines::random_32();
 
     return *this;
 }

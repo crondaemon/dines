@@ -136,11 +136,11 @@ DnsQuestion& DnsQuestion::fuzz()
     }
 
     if (_fuzzQtype == true) {
-        _qtype = rand() % 0xFFFF;
+        _qtype = Dines::random_16();
     }
 
     if (_fuzzQclass == true) {
-        _qclass = rand() % 0xFFFF;
+        _qclass = Dines::random_16();
     }
 
     return *this;

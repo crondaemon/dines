@@ -45,8 +45,6 @@ DnsPacket::DnsPacket()
     _socket = -1;
     _recvSocket = -1;
 
-    srand(time(NULL));
-
     _fuzzSrcIp = false;
     _fuzzSport = false;
 
@@ -178,12 +176,12 @@ void DnsPacket::_socketCreate()
         this->_getFirstIP();
 
     if (_udpHdr.source == 0)
-        _udpHdr.source = rand();
+        _udpHdr.source = Dines::random_16();
     if (_udpHdr.dest == 0)
         _udpHdr.dest = htons(53); // put 53 if no port specified
 
     if (_dnsHdr.txid() == 0)
-        _dnsHdr.txid(rand());
+        _dnsHdr.txid(Dines::random_16());
 
     if (_spoofing)
         _socketCreateRaw();
@@ -221,7 +219,7 @@ string DnsPacket::_outputPackRaw(bool doCksum)
     string dns_dgram = this->data();
 
     // ip id
-    _ipHdr.id = rand();
+    _ipHdr.id = Dines::random_16();
 
     // Adjust lenghts
     _udpHdr.len = htons(sizeof(_udpHdr) + dns_dgram.length());
@@ -685,11 +683,11 @@ void DnsPacket::isQuestion(bool isQuestion)
 void DnsPacket::fuzz()
 {
     if (_fuzzSrcIp) {
-        _ipHdr.saddr = rand();
+        _ipHdr.saddr = Dines::random_32();
     }
 
     if (_fuzzSport) {
-        _udpHdr.source = rand();
+        _udpHdr.source = Dines::random_16();
     }
 
     _dnsHdr.fuzz();
