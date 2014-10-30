@@ -60,7 +60,15 @@ std::string stringToHex(std::string source, std::string sep = ":");
 
 //! Throws an exception for a given function, printing the errno as string
 #define BASIC_EXCEPTION_THROW(function) \
-    throw runtime_error(string(__func__) + " " + string(function) + "() error: " + strerror(errno));
+    throw runtime_error(string(__PRETTY_FUNCTION__) + ":" + std::to_string(__LINE__) \
+    + " " + string(function) + "() error: " + strerror(errno));
+
+//! Utility that generates a random number of 16 bits
+uint16_t random_16();
+
+//! Utility that generates a random number of 32 bits
+uint32_t random_32();
+
 
 };
 

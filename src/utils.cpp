@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <sstream>
 #include <string.h>
+#include <random>
 
 using namespace std;
 
@@ -38,7 +39,7 @@ static std::vector<char> charset()
     });
 };
 
-// Internal randon string generator
+// Internal random string generator
 static std::string random_string_int( size_t length, std::function<char(void)> rand_char )
 {
     std::string str(length, 0);
@@ -274,4 +275,21 @@ void logger(string s)
     buf[strlen(buf)-1] = '\0';
     cout << "[" << buf << "] " << s << endl;
 }
+
+uint16_t random_16()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<uint16_t> dis(1, 0xFFFF);
+    return dis(gen);
+}
+
+uint32_t random_32()
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<uint32_t> dis(1, 0xFFFFFFFF);
+    return dis(gen);
+}
+
 }; // namespace
