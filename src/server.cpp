@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include <errno.h>
 #include <utils.hpp>
+#include <unistd.h>
 
 using namespace std;
 
@@ -83,6 +84,7 @@ void Server::launch()
         _packets--;
         _incoming.clear();
     }
+    close(servSock);
 }
 
 void Server::_recursion(int sock, struct sockaddr_in peer)
@@ -94,7 +96,7 @@ void Server::_recursion(int sock, struct sockaddr_in peer)
     // Set the server as upstream
     upstream_packet.to(_upstream);
     upstream_packet.dport(ntohs(_upstream_port));
-    upstream_packet.sport(rand() % 0xFFFF);
+    upstream_packet.sport(Dines::random_16());
     // Inject the packet and get the response back
 
     DnsPacket* return_packet = upstream_packet.sendNet();
