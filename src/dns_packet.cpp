@@ -812,6 +812,7 @@ void DnsPacket::dport(uint16_t dport)
 
 void DnsPacket::clear()
 {
+    _dnsHdr.clear();
     _question.clear();
 
     for (vector<ResourceRecord>::iterator itr = _answers.begin(); itr != _answers.end(); ++itr)

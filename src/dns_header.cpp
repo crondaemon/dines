@@ -242,3 +242,8 @@ void DnsHeader::ra(bool rec_avail)
 {
     _flags.ra = (rec_avail == true ? 1 : 0);
 }
+
+void DnsHeader::clear()
+{
+    *this = DnsHeader();
+}

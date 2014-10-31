@@ -47,5 +47,6 @@ coverage.info
 # exe
 dines
 test_dines
+test_root_dines
 dines.html
 dines_html/

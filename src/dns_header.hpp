@@ -89,6 +89,8 @@ public:
     void fuzzNRecord(unsigned section);
 
     size_t parse(char* buf, unsigned offset);
+
+    void clear();
 };
 
 #endif 

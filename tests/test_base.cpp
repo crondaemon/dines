@@ -89,6 +89,10 @@ int test_header()
     h5.parse(buf, 0);
     CHECK(h5.txid() == 0xaabb);
 
+    DnsPacket p;
+    p.dnsHdr(h5);
+    CHECK(p.dnsHdr().txid() == 0xaabb);
+
     return 0;
 }
 
@@ -391,8 +395,14 @@ int test_fuzz_packet()
 {
     DnsPacket p;
     p.addQuestion("www.test.com", "1", "1");
-    DnsHeader& h = p.dnsHdr();
-    h.fuzzTxid();
+    ResourceRecord rr("www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+    p.addRR(Dines::R_ANSWER, rr);
+    p.addRR(Dines::R_AUTHORITIES, rr);
+    p.addRR(Dines::R_ADDITIONAL, rr);
+
+    p.dnsHdr().fuzzTxid();
+    p.fuzzSrcIp();
+    p.fuzzSport();
     uint16_t txid1 = p.txid();
     p.fuzz();
     uint16_t txid2 = p.txid();
@@ -503,8 +513,12 @@ int test_logging()
 {
     log_done = false;
     DnsPacket p;
-    p.logger(dummylog);
     p.addQuestion("www.test.com", "a", "in");
+    ResourceRecord rr("www.polito.it", "A", "IN", "64", "\x01\x02\x03\x04");
+    p.addRR(Dines::R_ANSWER, rr);
+    p.addRR(Dines::R_AUTHORITIES, rr);
+    p.addRR(Dines::R_ADDITIONAL, rr);
+    p.logger(dummylog);
     p.nRecord(Dines::R_ADDITIONAL, 1);
     CHECK(log_done == true);
     return 0;
@@ -792,6 +806,20 @@ int test_cksum()
     return 0;
 }
 
+int test_clear()
+{
+    DnsPacket p;
+    p.addQuestion("www.test.com", "a", "in");
+    ResourceRecord rr("www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+    p.addRR(Dines::R_ANSWER, rr);
+    p.addRR(Dines::R_AUTHORITIES, rr);
+    p.addRR(Dines::R_ADDITIONAL, rr);
+    CHECK(p.nRecord(Dines::R_ADDITIONAL) == 1);
+    p.clear();
+    CHECK(p.nRecord(Dines::R_ADDITIONAL) == 0);
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     cout << "Tests running";
@@ -823,6 +851,7 @@ int main(int argc, char* argv[])
     TEST(test_server_2());
     TEST(test_server_3());
     TEST(test_cksum());
+    TEST(test_clear());
 
     cout << "done" << "\n";
 }
