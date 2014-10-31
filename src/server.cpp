@@ -23,6 +23,7 @@ Server::Server(const DnsPacket& packet, uint16_t port)
     _outgoing = packet;
     _upstream = 0;
     _upstream_port = htons(port);
+    _ready = false;
 }
 
 void Server::logger(Dines::LogFunc l)
@@ -47,8 +48,9 @@ void Server::launch()
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     servaddr.sin_port = htons(_port);
 
-    if (bind(servSock, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0 )
+    if (bind(servSock, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0 ) {
         BASIC_EXCEPTION_THROW("bind");
+    }
 
     const unsigned buflen = 65535;
     char buf[buflen];
@@ -59,6 +61,7 @@ void Server::launch()
     int datalen;
 
     while(_packets > 0) {
+        _ready = true;
         datalen = recvfrom(servSock, buf, buflen, 0, (struct sockaddr*)&peer, &sockaddr_len);
         if (datalen == -1) {
             BASIC_EXCEPTION_THROW("recvfrom");
@@ -170,4 +173,9 @@ void Server::upstream(uint32_t ups, uint16_t port)
 string Server::upstream() const
 {
     return Dines::ip32ToString(_upstream);
+}
+
+bool Server::ready() const
+{
+    return _ready;
 }

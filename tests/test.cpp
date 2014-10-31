@@ -11,6 +11,9 @@
 
 using namespace std;
 
+// The time the servers needs to startup
+const unsigned server_startup_time = 3;
+
 #define TEST(func) { if ((func) != 0) return 1; }
 
 #define CHECK(test) { \
@@ -718,6 +721,11 @@ void create_relayer(uint16_t listen_port, uint16_t upstream_port)
     server.launch();
 }
 
+void run_server(Server* s)
+{
+    s->launch();
+}
+
 int test_server_1()
 {
     DnsPacket p1;
@@ -739,13 +747,24 @@ int test_server_1()
 int test_server_2()
 {
     uint16_t port = 20000;
-    std::thread server(create_server, port);
+    // Create a server
+    DnsPacket answer;
+    answer.addRR(Dines::R_ANSWER, "www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+    Server server(answer, port);
+    server.logger(dummylog);
+    server.packets(1);
+
+    std::thread server_th(run_server, &server);
 
     // Create a client
     DnsPacket query;
     query.addQuestion("www.test.com", "A", "IN");
     query.to("127.0.0.1");
     query.dport(port);
+
+    // Wait for server to start
+    while (!server.ready())
+        ;
 
     DnsPacket* client_answer = query.sendNet();
 
@@ -755,7 +774,7 @@ int test_server_2()
     CHECK(client_answer->answers(0).ttl() == 64);
     CHECK(client_answer->answers(0).rData() == "1.2.3.4");
 
-    server.join();
+    server_th.join();
 
     return 0;
 }
@@ -766,8 +785,21 @@ int test_server_3()
     // final: is the final server
     // relayer: is an intermediate server
 
-    std::thread final_server(create_server, 30000);
-    std::thread relayer(create_relayer, 20000, 30000);
+    DnsPacket answer_test_com;
+    answer_test_com.addRR(Dines::R_ANSWER, "www.test.com", "A", "IN", "64", "\x01\x02\x03\x04");
+    Server final_server(answer_test_com, 30000);
+    final_server.logger(dummylog);
+    final_server.packets(1);
+
+    DnsPacket answer_another_record;
+    answer_another_record.addRR(Dines::R_ANSWER, "another.record.com", "A", "IN", "64", "\x01\x02\x03\x04");
+    Server relayer(answer_another_record, 20000);
+    relayer.logger(dummylog);
+    relayer.upstream(Dines::stringToIp32("127.0.0.1"), 30000);
+    relayer.packets(1);
+
+    std::thread final_server_th(run_server, &final_server);
+    std::thread relayer_th(run_server,&relayer);
 
     DnsPacket query;
     query.addQuestion("www.test.com", "A", "IN");
@@ -775,7 +807,10 @@ int test_server_3()
     query.dport(20000);
 
     // Wait some time for servers setup
-    sleep(1);
+    while (!final_server.ready())
+        ;
+    while (!relayer.ready())
+        ;
 
     DnsPacket* client_answer = query.sendNet();
 
@@ -785,8 +820,8 @@ int test_server_3()
     CHECK(client_answer->answers(0).ttl() == 64);
     CHECK(client_answer->answers(0).rData() == "1.2.3.4");
 
-    final_server.join();
-    relayer.join();
+    final_server_th.join();
+    relayer_th.join();
 
     return 0;
 }

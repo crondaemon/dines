@@ -15,6 +15,7 @@ class Server {
     uint16_t _upstream_port;
     void _directAnswer(int sock, struct sockaddr_in peer);
     void _recursion(int sock, struct sockaddr_in peer);
+    bool _ready;
 public:
     Server(const DnsPacket& packet, uint16_t port = 53);
     void port(uint16_t p);
@@ -25,6 +26,7 @@ public:
     std::string invalidMsg() const;
     void upstream(uint32_t ups, uint16_t port = 53);
     std::string upstream() const;
+    bool ready() const;
 };
 
 #endif
