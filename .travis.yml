@@ -16,4 +16,4 @@ script:
     - autoreconf -i && ./configure --enable-gcov && make && make tests
 
 after_success:
-    - cpp-coveralls --gcov /usr/bin/gcov-4.8 --gcov-options '\-lp'
+    - cpp-coveralls --gcov /usr/bin/gcov-4.8 --gcov-options '\-lp' --exclude tests

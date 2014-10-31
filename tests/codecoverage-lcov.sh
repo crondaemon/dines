@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# before lauching this, compile dines with
+# before lauching this, run
 # ./configure --enable-gcov
 
 make -j && \
