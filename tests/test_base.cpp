@@ -1,50 +1,5 @@
 
-#include <dns_packet.hpp>
-#include <debug.hpp>
-#include <iostream>
-#include <string.h>
-#include <utils.hpp>
-#include <server.hpp>
-#include <unistd.h>
-#include <signal.h>
-#include <thread>
-
-using namespace std;
-
-// The time the servers needs to startup
-const unsigned server_startup_time = 3;
-
-#define TEST(func) { if ((func) != 0) return 1; }
-
-#define CHECK(test) { \
-    if (!(test)) { \
-        cerr << "[ERROR] " << __FILE__ << ":" << __LINE__ << " (" << __func__ << ")\n"; \
-        return 1; \
-    } \
-    cout << "." << flush; \
-}
-
-#define CATCH_EXCEPTION(statement) { \
-    bool invalid = false; \
-    try { \
-        statement; \
-    } catch(exception& e) { \
-        invalid = true; \
-    } \
-    if (invalid == false) { \
-        cerr << "[ERROR] " << __FILE__ << ":" << __LINE__ << " (" << __func__ << ")\n"; \
-        return 1; \
-    } \
-    cout << "." << flush; \
-}
-
-// A dummy log function to avoid output when running tests
-bool log_done;
-void dummylog(string s)
-{
-    log_done = true;
-}
-
+#include <test.hpp>
 int test_ip()
 {
     DnsPacket p;
@@ -549,6 +504,7 @@ int test_logging()
     log_done = false;
     DnsPacket p;
     p.logger(dummylog);
+    p.addQuestion("www.test.com", "a", "in");
     p.nRecord(Dines::R_ADDITIONAL, 1);
     CHECK(log_done == true);
     return 0;
@@ -826,6 +782,16 @@ int test_server_3()
     return 0;
 }
 
+int test_cksum()
+{
+    DnsPacket p;
+    p.addQuestion("www.test.com", "a", "in");
+    p.txid(1);
+    p.doUdpCksum();
+    CHECK(p.udpSum() == 0xc5a1);
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     cout << "Tests running";
@@ -856,6 +822,7 @@ int main(int argc, char* argv[])
     TEST(test_server_1());
     TEST(test_server_2());
     TEST(test_server_3());
+    TEST(test_cksum());
 
     cout << "done" << "\n";
 }

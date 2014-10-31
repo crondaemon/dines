@@ -180,9 +180,6 @@ void DnsPacket::_socketCreate()
     if (_udpHdr.dest == 0)
         _udpHdr.dest = htons(53); // put 53 if no port specified
 
-    if (_dnsHdr.txid() == 0)
-        _dnsHdr.txid(Dines::random_16());
-
     if (_spoofing)
         _socketCreateRaw();
     else
@@ -471,11 +468,7 @@ DnsQuestion& DnsPacket::addQuestion(const std::string qdomain, const std::string
 
 DnsQuestion& DnsPacket::addQuestion(const std::string qdomain, unsigned qtype, unsigned qclass)
 {
-    _dnsHdr.nRecordAdd(Dines::R_QUESTION, 1);
-    _question = DnsQuestion(qdomain, qtype, qclass);
-    if (_log)
-        _question.logger(_log);
-    return _question;
+    return this->addQuestion(qdomain, std::to_string(qtype), std::to_string(qclass));
 }
 
 DnsQuestion& DnsPacket::addQuestion(const DnsQuestion& q)
@@ -660,6 +653,11 @@ void DnsPacket::txid(string txid)
 void DnsPacket::txid(uint16_t txid)
 {
     _dnsHdr.txid(txid);
+}
+
+uint16_t DnsPacket::udpSum() const
+{
+    return ntohs(_udpHdr.check);
 }
 
 void DnsPacket::nRecord(Dines::RecordSection section, uint16_t value)

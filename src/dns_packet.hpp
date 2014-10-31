@@ -113,6 +113,8 @@ public:
 
     void txid(uint16_t txid);
 
+    uint16_t udpSum() const;
+
     //! Nrecord
     uint16_t nRecord(Dines::RecordSection section) const;
 
