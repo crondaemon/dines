@@ -48,6 +48,8 @@ ResourceRecord::ResourceRecord(const string& rrDomain, uint16_t rrType,
     _fuzzRRtype = false;
     _fuzzRRclass = false;
     _fuzzTTL = false;
+
+    _log = NULL;
 }
 
 ResourceRecord::ResourceRecord(const string& rrDomain, const string& rrType,
@@ -263,15 +265,27 @@ void ResourceRecord::logger(Dines::LogFunc l)
     _log = l;
 }
 
-size_t ResourceRecord::parse(char* buf, unsigned offset)
+size_t ResourceRecord::parse(char* buf, unsigned buflen, unsigned offset)
 {
+    if (buflen == 0) {
+        if (_log)
+            _log(string(__func__) + ": not enough data");
+        return 0;
+    }
+
     unsigned len;
     unsigned i;
 
     _rrDomain_enc.clear();
     _rrDomain_str.clear();
 
-    i = Dines::domainDecode(buf, offset, _rrDomain_enc, _rrDomain_str);
+    i = Dines::domainDecode(buf, buflen, offset, _rrDomain_enc, _rrDomain_str);
+
+    if (buflen - i < 10) {
+        if (_log)
+            _log(string(__func__) + ": Not enough data");
+        return i;
+    }
 
     memcpy(&_rrType, buf + offset + i, 2);
     memcpy(&_rrClass, buf + offset + i + 2, 2);
@@ -284,7 +298,7 @@ size_t ResourceRecord::parse(char* buf, unsigned offset)
 
     switch (ntohs(_rrType)) {
         case Dines::QTYPE_NS:
-            Dines::domainDecode(buf, offset + i + 10, enc, dec);
+            Dines::domainDecode(buf, buflen - i - 10, offset + i + 10, enc, dec);
             _rData = enc;
             break;
         default:

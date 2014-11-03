@@ -67,7 +67,7 @@ void Server::launch()
             BASIC_EXCEPTION_THROW("recvfrom");
         }
 
-        _incoming.parse(buf);
+        _incoming.parse(buf, datalen);
         if (_log)
             _log("Incoming packet: " + _incoming.to_string(true));
 

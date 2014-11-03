@@ -154,7 +154,7 @@ public:
 
         DnsHeader h5;
         char* buf = (char*)"\xaa\xbb\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00";
-        h5.parse(buf, 0);
+        h5.parse(buf, 12, 0);
         CPPUNIT_ASSERT_EQUAL(uint16_t(0xaabb), h5.txid());
 
         DnsPacket p;
@@ -583,9 +583,12 @@ public:
 
     void test_parse()
     {
+        DnsHeader h;
+        CPPUNIT_ASSERT_EQUAL(size_t(0), h.parse((char*)"\x01", 1, 0));
+
         DnsQuestion q;
         char* payload = (char*)"\x03www\x04test\x03""com\x00\x00\x01\x00\x01";
-        q.parse(payload);
+        q.parse(payload, 18);
         CPPUNIT_ASSERT_EQUAL(string("www.test.com"), q.qdomain());
         CPPUNIT_ASSERT_EQUAL(uint16_t(1), q.qtype());
         CPPUNIT_ASSERT_EQUAL(uint16_t(1), q.qclass());
@@ -598,9 +601,16 @@ public:
             "\x63\x32\xc0\x2f";
 
         ResourceRecord rr;
-        rr.parse(rrpayload, 30);
+        rr.parse(rrpayload, 118, 30);
         CPPUNIT_ASSERT_EQUAL(string("www.test.com"), rr.rrDomain());
 
+        char* packet_payload = (char*)"\x00\x01\x81\x80\x00\x01\x00\x02\x00\x00\x00\x00\x03\x77\x77\x77\x04"
+            "\x74\x65\x73\x74\x03\x63\x6f\x6d\x00\x00\x01\x00\x01\x03\x77\x77\x77\x04\x74\x65\x73\x74\x03"
+            "\x63\x6f\x6d\x00\x00\x01\x00\x01\x00\x00\x00\x40\x00\x04\x01\x02\x03\x04";
+
+        DnsPacket p;
+        p.parse(packet_payload, 58);
+        CPPUNIT_ASSERT_EQUAL(uint16_t(2), p.nRecord(Dines::R_ANSWER));
     }
 
     void test_packets()
@@ -651,7 +661,7 @@ public:
         string decoded;
 
         char* buf1 = (char*)"\x03\x77\x77\x77\x06\x70\x6f\x6c\x69\x74\x6f\x02\x69\x74\x00";
-        b = Dines::domainDecode(buf1, 0, encoded, decoded);
+        b = Dines::domainDecode(buf1, 15, 0, encoded, decoded);
         CPPUNIT_ASSERT_EQUAL(string("www.polito.it"), decoded);
         CPPUNIT_ASSERT_EQUAL(string("\x03\x77\x77\x77\x06\x70\x6f\x6c\x69\x74\x6f\x02\x69\x74\x00", 15), encoded);
         CPPUNIT_ASSERT_EQUAL(15, b);
@@ -685,25 +695,25 @@ public:
 
         encoded = "";
         decoded = "";
-        b = Dines::domainDecode(buf2, 12, encoded, decoded);
+        b = Dines::domainDecode(buf2, 248, 12, encoded, decoded);
         CPPUNIT_ASSERT_EQUAL(string("www.polito.it"), decoded);
         CPPUNIT_ASSERT_EQUAL(15, b);
 
         encoded = "";
         decoded = "";
-        b = Dines::domainDecode(buf2, 31, encoded, decoded);
+        b = Dines::domainDecode(buf2, 248, 31, encoded, decoded);
         CPPUNIT_ASSERT_EQUAL(string("www.polito.it"), decoded);
         CPPUNIT_ASSERT_EQUAL(2, b);
 
         encoded = "";
         decoded = "";
-        b = Dines::domainDecode(buf2, 53, encoded, decoded);
+        b = Dines::domainDecode(buf2, 248, 53, encoded, decoded);
         CPPUNIT_ASSERT_EQUAL(string("webfarm.polito.it"), decoded);
         CPPUNIT_ASSERT_EQUAL(2, b);
 
         encoded = "";
         decoded = "";
-        b = Dines::domainDecode(buf2, 92, encoded, decoded);
+        b = Dines::domainDecode(buf2, 248, 92, encoded, decoded);
         CPPUNIT_ASSERT_EQUAL(string("polito.it"), decoded);
         CPPUNIT_ASSERT_EQUAL(2, b);
 

@@ -37,6 +37,8 @@ DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t 
     _fuzzNRecord[2] = false;
     _fuzzNRecord[3] = false;
 
+    _log = NULL;
+
     if (_txid == 0)
         _txid = Dines::random_16();
 }
@@ -220,8 +222,14 @@ bool operator!=(const DnsHeaderFlags& f1, const DnsHeaderFlags& f2)
     return !(f1 == f2);
 }
 
-size_t DnsHeader::parse(char* buf, unsigned offset)
+size_t DnsHeader::parse(char* buf, unsigned buflen, unsigned offset)
 {
+    if (buflen < DnsHeader::length) {
+        if (_log)
+            _log(string(__func__) + ": Not enough data");
+        return 0;
+    }
+
     memcpy(&_txid, buf + offset, 2);
     memcpy(&_flags, buf + offset + 2, 2);
     memcpy(&_nRecord, buf + offset + 4, 8);
@@ -267,4 +275,9 @@ string DnsHeader::to_string() const
     s.at(s.size()-1) = ' ';
 
     return s;
+}
+
+void DnsHeader::logger(Dines::LogFunc l)
+{
+    _log = l;
 }

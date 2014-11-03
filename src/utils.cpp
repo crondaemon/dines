@@ -72,7 +72,7 @@ std::string domainEncode(const std::string s)
     return out;
 }
 
-unsigned domainDecode(char* base, unsigned offset, std::string& encoded, std::string & decoded)
+unsigned domainDecode(char* base, unsigned baselen, unsigned offset, std::string& encoded, std::string& decoded)
 {
     uint16_t jump;
     unsigned len;
@@ -84,6 +84,8 @@ unsigned domainDecode(char* base, unsigned offset, std::string& encoded, std::st
         return 1;
     }
 
+    unsigned rem_len = baselen;
+
     if (((u_char*)base)[offset] >> 6 == 3) {
         // Compressed
         memcpy(&jump, base + offset, 2);
@@ -92,14 +94,16 @@ unsigned domainDecode(char* base, unsigned offset, std::string& encoded, std::st
         len = base[jump];
         encoded += string(base + jump, len + 1);
         decoded += string(base + jump + 1, len) + ".";
-        domainDecode(base, jump + 1 + len, encoded, decoded);
+        rem_len -= jump + 1 + len;
+        domainDecode(base, rem_len, jump + 1 + len, encoded, decoded);
         return 2;
     } else {
         // Not compressed
         len = base[offset];
         encoded += string(base + offset, len + 1);
         decoded += string(base + 1 + offset, len) + ".";
-        return (len + 1 + domainDecode(base, offset + 1 + len, encoded, decoded));
+        rem_len -= offset + 1 + len;
+        return (len + 1 + domainDecode(base, rem_len, offset + 1 + len, encoded, decoded));
     }
 }
 

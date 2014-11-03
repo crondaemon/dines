@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string>
 #include <ostream>
+#include <utils.hpp>
 
 #pragma pack(1)
 typedef struct {
@@ -44,10 +45,13 @@ class DnsHeader {
     bool _fuzzFlags;
     bool _fuzzTxid;
     bool _fuzzNRecord[4];
+    Dines::LogFunc _log;
 
     void _checkSection(unsigned section) const;
 
 public:
+    static const unsigned length = 12;
+
     DnsHeader(const uint16_t txid = 0, const uint32_t nquest = 0, const uint32_t nans = 0,
         const uint32_t nadd = 0, const uint32_t nauth = 0);
     DnsHeader(const DnsHeader& h);
@@ -89,11 +93,14 @@ public:
     void fuzzTxid();
     void fuzzNRecord(unsigned section);
 
-    size_t parse(char* buf, unsigned offset);
+    size_t parse(char* buf, unsigned buflen, unsigned offset);
 
     void clear();
 
     std::string to_string() const;
+
+    //! Set the logger
+    void logger(Dines::LogFunc l);
 };
 
 std::ostream& operator<<(std::ostream& o, const DnsHeader& h);

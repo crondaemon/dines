@@ -181,13 +181,19 @@ string DnsQuestion::to_string() const
     return _qdomain_str + "/" + qtypeStr() + "/" + qclassStr();
 }
 
-size_t DnsQuestion::parse(char* buf, unsigned offset)
+size_t DnsQuestion::parse(char* buf, unsigned buflen, unsigned offset)
 {
     unsigned i;
 
     this->clear();
 
-    i = Dines::domainDecode(buf, offset, _qdomain_enc, _qdomain_str);
+    i = Dines::domainDecode(buf, buflen, offset, _qdomain_enc, _qdomain_str);
+
+    if (buflen - i < 4) {
+        if (_log)
+            _log(string(__func__) + ": Not enough data");
+        return i;
+    }
 
     memcpy(&_qtype, buf + offset + i, 2);
     memcpy(&_qclass, buf + offset + i + 2, 2);

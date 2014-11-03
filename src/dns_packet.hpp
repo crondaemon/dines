@@ -187,7 +187,7 @@ public:
     std::string invalidMsg() const;
 
     //! Parse a message from a buffer. The buffer must point to the start of the dns packet
-    void parse(char* buf);
+    void parse(char* buf, unsigned buflen);
 
     //! Clear the packet
     void clear();

@@ -53,7 +53,7 @@ public:
 
     std::string to_string() const;
 
-    size_t parse(char* buf, unsigned offset = 0);
+    size_t parse(char* buf, unsigned buflen, unsigned offset = 0);
 
     bool empty() const;
 

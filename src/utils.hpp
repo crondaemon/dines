@@ -29,7 +29,7 @@ std::string random_string(size_t length);
 std::string domainEncode(const std::string s);
 
 //! Decodes a DNS domain name into a string
-unsigned domainDecode(char* base, unsigned offset, std::string& encoded, std::string & decoded);
+unsigned domainDecode(char* base, unsigned baselen, unsigned offset, std::string& encoded, std::string & decoded);
 
 //! Converts a string into an integer qtype. It accepts both symbolic values, (as "TXT"),
 //! and string numbers (as "1");

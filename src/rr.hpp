@@ -68,7 +68,7 @@ public:
     void logger(Dines::LogFunc l);
 
     //! Parse from a buffer
-    size_t parse(char* buf, unsigned offset);
+    size_t parse(char* buf, unsigned buflen, unsigned offset);
 
     void clear();
 };

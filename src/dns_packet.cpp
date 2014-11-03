@@ -351,7 +351,7 @@ DnsPacket* DnsPacket::sendNet(bool doCksum)
             BASIC_EXCEPTION_THROW("recvmsg");
 
         // Parse the packet into a DnsPacket
-        p->parse((char*)mh.msg_iov[0].iov_base);
+        p->parse((char*)mh.msg_iov[0].iov_base, mh.msg_iov[0].iov_len);
         p->from(peeraddr.sin_addr.s_addr);
         p->sport(ntohs(peeraddr.sin_port));
         p->dport(ntohs(_udpHdr.source));
@@ -594,11 +594,12 @@ void DnsPacket::to(string dest)
 
         u_char ans[65535];
 
-        if (res_search(dest.data(), C_IN, T_A, ans, 65535) == -1) {
+        int len = res_search(dest.data(), C_IN, T_A, ans, 65535);
+        if (len == -1) {
             throw runtime_error("Can't resolve " + dest);
         }
         DnsPacket p;
-        p.parse((char*)ans);
+        p.parse((char*)ans, len);
         _ipHdr.daddr = Dines::stringToIp32(p.answers(0).rData());
     }
 }
@@ -715,6 +716,7 @@ void DnsPacket::fuzzSport()
 void DnsPacket::logger(Dines::LogFunc l)
 {
     _log = l;
+    _dnsHdr.logger(l);
     _question.logger(l);
     for (vector<ResourceRecord>::iterator itr = _answers.begin(); itr != _answers.end(); ++itr)
         itr->logger(l);
@@ -759,31 +761,31 @@ string DnsPacket::invalidMsg() const
     return "";
 }
 
-void DnsPacket::parse(char* buf)
+void DnsPacket::parse(char* buf, unsigned buflen)
 {
     unsigned i;
     unsigned offset = 0;
-    offset += _dnsHdr.parse(buf, offset);
-    offset += _question.parse(buf, offset);
+    offset += _dnsHdr.parse(buf, buflen, offset);
+    offset += _question.parse(buf, buflen - offset, offset);
 
     // Parse answers
     for (i = 0; i < _dnsHdr.nRecord(Dines::R_ANSWER); i++) {
         ResourceRecord rr;
-        offset += rr.parse(buf, offset);
+        offset += rr.parse(buf, buflen - offset, offset);
         this->addRR(Dines::R_ANSWER, rr, false);
     }
 
     // Parse auth
     for (i = 0; i < _dnsHdr.nRecord(Dines::R_AUTHORITIES); i++) {
         ResourceRecord rr;
-        offset += rr.parse(buf, offset);
+        offset += rr.parse(buf, buflen - offset, offset);
         this->addRR(Dines::R_AUTHORITIES, rr, false);
     }
 
     // Parse add
     for (i = 0; i < _dnsHdr.nRecord(Dines::R_ADDITIONAL); i++) {
         ResourceRecord rr;
-        offset += rr.parse(buf, offset);
+        offset += rr.parse(buf, buflen - offset, offset);
         this->addRR(Dines::R_ADDITIONAL, rr, false);
     }
 }
