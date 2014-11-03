@@ -331,6 +331,7 @@ DnsPacket* DnsPacket::sendNet(bool doCksum)
 
     // When not spoofing we have to get the packet back
     if (!_spoofing) {
+        int len;
         p = new DnsPacket();
 
         // Control buffer
@@ -347,11 +348,12 @@ DnsPacket* DnsPacket::sendNet(bool doCksum)
         mh.msg_controllen = sizeof(cmbuf);
 
         // Get the response
-        if (recvmsg(_socket, &mh, 0) == -1)
+        len = recvmsg(_socket, &mh, 0);
+        if (len == -1)
             BASIC_EXCEPTION_THROW("recvmsg");
 
         // Parse the packet into a DnsPacket
-        p->parse((char*)mh.msg_iov[0].iov_base, mh.msg_iov[0].iov_len);
+        p->parse((char*)mh.msg_iov[0].iov_base, len);
         p->from(peeraddr.sin_addr.s_addr);
         p->sport(ntohs(peeraddr.sin_port));
         p->dport(ntohs(_udpHdr.source));
@@ -765,28 +767,45 @@ void DnsPacket::parse(char* buf, unsigned buflen)
 {
     unsigned i;
     unsigned offset = 0;
-    offset += _dnsHdr.parse(buf, buflen, offset);
-    offset += _question.parse(buf, buflen - offset, offset);
+    unsigned remaining = buflen;
+    unsigned len;
+
+    len = _dnsHdr.parse(buf, remaining, offset);
+    offset += len;
+    remaining -= len;
+
+    len = _question.parse(buf, remaining, offset);
+    offset += len;
+    remaining -= len;
 
     // Parse answers
     for (i = 0; i < _dnsHdr.nRecord(Dines::R_ANSWER); i++) {
         ResourceRecord rr;
-        offset += rr.parse(buf, buflen - offset, offset);
-        this->addRR(Dines::R_ANSWER, rr, false);
+        len = rr.parse(buf, remaining, offset);
+        offset += len;
+        remaining -= len;
+        if (len > 0)
+            this->addRR(Dines::R_ANSWER, rr, false);
     }
 
     // Parse auth
     for (i = 0; i < _dnsHdr.nRecord(Dines::R_AUTHORITIES); i++) {
         ResourceRecord rr;
-        offset += rr.parse(buf, buflen - offset, offset);
-        this->addRR(Dines::R_AUTHORITIES, rr, false);
+        len += rr.parse(buf, buflen - offset, offset);
+        offset += len;
+        remaining -= len;
+        if (len > 0)
+            this->addRR(Dines::R_AUTHORITIES, rr, false);
     }
 
     // Parse add
     for (i = 0; i < _dnsHdr.nRecord(Dines::R_ADDITIONAL); i++) {
         ResourceRecord rr;
-        offset += rr.parse(buf, buflen - offset, offset);
-        this->addRR(Dines::R_ADDITIONAL, rr, false);
+        len = rr.parse(buf, buflen - offset, offset);
+        offset += len;
+        remaining -= len;
+        if (len > 0)
+             this->addRR(Dines::R_ADDITIONAL, rr, false);
     }
 }
 
