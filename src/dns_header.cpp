@@ -13,6 +13,11 @@
 
 using namespace std;
 
+ostream& operator<<(ostream& o, const DnsHeader& h)
+{
+    return o << h.to_string();
+}
+
 DnsHeader::DnsHeader(const uint16_t txid, const uint32_t nquest, const uint32_t nans,
         const uint32_t nadd, const uint32_t nauth)
 {
@@ -41,12 +46,12 @@ DnsHeader::DnsHeader(const DnsHeader& h)
     *this = h;
 }
 
-bool DnsHeader::operator==(const DnsHeader& h)
+bool DnsHeader::operator==(const DnsHeader& h) const
 {
     return !(*this != h);
 }
 
-bool DnsHeader::operator!=(const DnsHeader& h)
+bool DnsHeader::operator!=(const DnsHeader& h) const
 {
     if (_txid != h._txid)
         return true;
@@ -246,4 +251,20 @@ void DnsHeader::ra(bool rec_avail)
 void DnsHeader::clear()
 {
     *this = DnsHeader();
+}
+
+string DnsHeader::to_string() const
+{
+    string s;
+    s += "txid: 0x" + Dines::toHex(txid());
+    s += isQuestion() ? " Q " : " R ";
+    s += string("NUM=");
+
+    for (unsigned i =0; i < 4; i++) {
+        s += std::to_string(ntohs(_nRecord[i])) + ",";
+    }
+
+    s.at(s.size()-1) = ' ';
+
+    return s;
 }

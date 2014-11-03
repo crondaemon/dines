@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <ostream>
 
 #pragma pack(1)
 typedef struct {
@@ -53,9 +54,9 @@ public:
 
     DnsHeader& operator=(const DnsHeader& h);
 
-    bool operator==(const DnsHeader& h);
+    bool operator==(const DnsHeader& h) const;
 
-    bool operator!=(const DnsHeader& h);
+    bool operator!=(const DnsHeader& h) const;
 
     void nRecord(unsigned section, uint16_t value);
 
@@ -91,6 +92,10 @@ public:
     size_t parse(char* buf, unsigned offset);
 
     void clear();
+
+    std::string to_string() const;
 };
+
+std::ostream& operator<<(std::ostream& o, const DnsHeader& h);
 
 #endif 

@@ -1,26 +1,54 @@
 
-#include <test.hpp>
+#include <cppunit/Test.h>
+#include <cppunit/TestSuite.h>
+#include <cppunit/TestFixture.h>
+#include <cppunit/TestAssert.h>
+#include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/TestCaller.h>
+#include <cppunit/extensions/HelperMacros.h>
+#include <iostream>
+#include <unistd.h>
 
-int test_spoofing()
-{
-    DnsPacket p1;
-    p1.addQuestion("www.test.com", "a", "in");
-    p1.from("127.0.0.2");
-    p1.to("127.0.0.1");
+#include <dns_packet.hpp>
 
-    // This packet will not get an aswer
-    DnsPacket* p2 = p1.sendNet();
-    CHECK(p2 == NULL);
-    return 0;
-}
+using namespace std;
 
-int main(int argc, char* argv[])
+class DinesRootTest : public CppUnit::TestFixture {
+public:
+    void setUp()
+    {
+    }
+
+    void tearDown()
+    {
+    }
+
+    CPPUNIT_TEST_SUITE(DinesRootTest);
+    CPPUNIT_TEST(test_spoofing);
+    CPPUNIT_TEST_SUITE_END();
+
+    void test_spoofing()
+    {
+        DnsPacket p1;
+        p1.addQuestion("www.test.com", "a", "in");
+        p1.from("127.0.0.2");
+        p1.to("127.0.0.1");
+
+        DnsPacket* p2 = p1.sendNet();
+        CPPUNIT_ASSERT_EQUAL((void*)NULL, (void*)p2);
+    }
+};
+
+int main( int argc, char **argv)
 {
     if (getuid() != 0) {
         cout << "You need to be root to run those tests\n";
         return 1;
     }
-    cout << "Tests running";
-    TEST(test_spoofing());
-    cout << "done" << "\n";
+
+    CppUnit::TextUi::TestRunner runner;
+    runner.addTest(DinesRootTest::suite());
+    runner.run();
+
+    return 0;
 }

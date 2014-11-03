@@ -404,19 +404,7 @@ string DnsPacket::to_string(bool dnsonly) const
         s += " ";
     }
 
-    s += "txid: 0x" + Dines::toHex(_dnsHdr.txid());
-
-    s += isQuestion() ? " Q " : " R ";
-
-    s += string("NUM=");
-
-    if (_question.empty())
-        s += "0";
-    else
-        s+= "1";
-
-    s += string(",") + std::to_string(_answers.size()) + "," +
-        std::to_string(_authorities.size()) + "," + std::to_string(_additionals.size()) + " ";
+    s += _dnsHdr.to_string();
 
     if (!_question.empty())
         s += "[Question:" + _question.to_string() + "]";

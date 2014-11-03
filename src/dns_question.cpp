@@ -214,3 +214,8 @@ void DnsQuestion::clear()
     _qtype = 1;
     _qclass = 1;
 }
+
+std::ostream& operator<<(std::ostream& o, const DnsQuestion& q)
+{
+    return o << q.to_string();
+}

@@ -63,4 +63,6 @@ public:
     void clear();
 };
 
+std::ostream& operator<<(std::ostream& o, const DnsQuestion& q);
+
 #endif
