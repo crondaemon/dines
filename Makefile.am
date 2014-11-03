@@ -17,6 +17,6 @@ test_root_dines_CXXFLAGS = -Itests
 test_root_dines_LDADD = -lresolv -lpthread -lcppunit
 
 tests: test_dines test_root_dines
-	./tests/readme_check.sh && ./test_dines && sudo ./test_root_dines
+	./tests/readme_check.sh && ./test_dines && sudo ./test_root_dines && ./tests/live_tests.sh
 clean-local:
 	for dir in . src tests; do rm -rf $$dir/*~ $$dir/*.csmes $$dir/*.csexe $$dir/*.gcno $$dir/*.gcda $$dir/*.gcov; done;
