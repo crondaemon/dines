@@ -3,13 +3,14 @@
 
 int test_spoofing()
 {
-    DnsPacket p;
-    p.addQuestion("www.test.com", "a", "in");
-    p.from("127.0.0.2");
-    p.to("127.0.0.1");
+    DnsPacket p1;
+    p1.addQuestion("www.test.com", "a", "in");
+    p1.from("127.0.0.2");
+    p1.to("127.0.0.1");
 
     // This packet will not get an aswer
-    p.sendNet();
+    DnsPacket* p2 = p1.sendNet();
+    CHECK(p2 == NULL);
     return 0;
 }
 
