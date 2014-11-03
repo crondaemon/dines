@@ -11,9 +11,6 @@
 
 using namespace std;
 
-// The time the servers needs to startup
-const unsigned server_startup_time = 3;
-
 #define TEST(func) { if ((func) != 0) return 1; }
 
 #define CHECK(test) { \
