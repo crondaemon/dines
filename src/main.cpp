@@ -252,7 +252,7 @@ int main(int argc, char* argv[])
                     temp = stoul(optarg);
                     delay = { .tv_sec = temp / 1000000, .tv_nsec = temp % 1000000 };
                     Dines::logger(string("Inter packet gap set to ")  + std::to_string(delay.tv_sec) +
-                        " sec, " + std::to_string(delay.tv_nsec) + " nsec");
+                        " sec, " + std::to_string(delay.tv_nsec) + " usec");
                     break;
 
                 case 32: // verbose (already processed)
