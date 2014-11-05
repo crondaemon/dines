@@ -13,7 +13,7 @@ before_install:
     - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
 
 script:
-    - autoreconf -i && ./configure --enable-gcov && make && make tests
+    - mkdir build && cd build && cmake .. && make test
 
 after_success:
     - cpp-coveralls --gcov /usr/bin/gcov-4.8 --gcov-options '\-lp' --exclude tests
