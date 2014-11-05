@@ -3,8 +3,10 @@
 # Make sure dines is compiled
 make dines
 
+README="`dirname $0`/../README.md"
+
 # First take the help from REAME
-readme=`cat README.md | sed -n "/HELP START/,/HELP END/p" | head -n-2 | tail -n+3`
+readme=`cat $README | sed -n "/HELP START/,/HELP END/p" | head -n-2 | tail -n+3`
 
 # Then take help from dines
 dines=`./dines --help`
