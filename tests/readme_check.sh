@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Make sure dines is compiled
-make dines
-
 VERSTRING="The definitive DNS packet forger"
 
 README="`dirname $0`/../README.md"

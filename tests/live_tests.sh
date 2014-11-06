@@ -42,15 +42,6 @@ set_gap()
     test_result $FUNCNAME "$exp" "$got"
 }
 
-# MAIN
-echo "Compiling dines"
-make >& /dev/null
-if [ "$?" != "0" ]
-then
-    echo "Compilation failed"
-    exit 1
-fi
-
 echo -n "Starting live tests"
 simple_query
 fake_num_answers
