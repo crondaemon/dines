@@ -22,6 +22,7 @@ using namespace std;
 
 struct option opts[] = {
     {"src-ip", 1, NULL, 0},
+    {"version", 0, NULL, 1},
     {"sport", 1, NULL, 2},
     {"dport", 1, NULL, 3},
     {"txid", 1, NULL, 4},
@@ -112,8 +113,6 @@ int main(int argc, char* argv[])
     vector<string> tokens;
     uint32_t upstream = 0;
 
-    cout << "\nDines " << PACKAGE_VERSION << " - The definitive DNS packet forger.\n\n";
-
     if (argc == 1) {
         usage(argv[0]);
         return 1;
@@ -137,6 +136,11 @@ int main(int argc, char* argv[])
                     } else {
                         p.from(optarg);
                     }
+                    break;
+
+                case 1: // version
+                    cout << string(PACKAGE_VERSION) << "\n";
+                    return 0;
                     break;
 
                 case 2: // sport
@@ -263,7 +267,6 @@ int main(int argc, char* argv[])
                     return 0;
 
                 default:
-                    cout << "Unknown option: " << optarg << endl;
                     return 1;
             }
         }
@@ -271,6 +274,8 @@ int main(int argc, char* argv[])
         cerr << "Invalid parameter: " << e.what() << endl;
         return 2;
     }
+
+    cout << "\nDines " << PACKAGE_VERSION << " - The definitive DNS packet forger.\n\n";
 
 #ifndef DEBUG
     try {
