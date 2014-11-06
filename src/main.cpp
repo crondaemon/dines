@@ -276,7 +276,6 @@ int main(int argc, char* argv[])
     }
 
     cout << "\nDines " << DINES_VERSION << " - The definitive DNS packet forger.\n\n";
-
 #ifndef DEBUG
     try {
 #endif
