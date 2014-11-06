@@ -139,7 +139,7 @@ int main(int argc, char* argv[])
                     break;
 
                 case 1: // version
-                    cout << string(PACKAGE_VERSION) << "\n";
+                    cout << string(DINES_VERSION) << "\n";
                     return 0;
                     break;
 
@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
         return 2;
     }
 
-    cout << "\nDines " << PACKAGE_VERSION << " - The definitive DNS packet forger.\n\n";
+    cout << "\nDines " << DINES_VERSION << " - The definitive DNS packet forger.\n\n";
 
 #ifndef DEBUG
     try {

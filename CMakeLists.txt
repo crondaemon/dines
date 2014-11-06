@@ -58,6 +58,7 @@ tests/test.hpp)
 
 include_directories(src)
 include_directories(.)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(tests)
 
 set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=c++11")
@@ -70,3 +71,16 @@ add_test(unit test_dines)
 add_test(readme ../tests/readme_check.sh)
 add_test(root sudo ./test_root_dines)
 add_test(live ../tests/live_tests.sh)
+
+# Store the git hash of the current head
+if(EXISTS "${PROJECT_SOURCE_DIR}/.git/HEAD")
+    execute_process(COMMAND git describe
+        OUTPUT_VARIABLE DINES_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+else()
+    execute_process(COMMAND cat ${CMAKE_CURRENT_SOURCE_DIR}/src/VERSION
+        OUTPUT_VARIABLE DINES_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+endif()
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
