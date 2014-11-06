@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
 project("Dines")
 
-set(Dines_VERSION_MAJOR 0)
-set(Dines_VERSION_MINOR 1)
-
 enable_testing()
 
 add_executable(dines
@@ -35,7 +32,6 @@ src/utils.cpp
 src/utils.hpp
 tests/test_base.cpp
 tests/test.hpp)
-
 
 add_executable(test_root_dines
 src/server.hpp
@@ -72,7 +68,7 @@ add_test(readme ../tests/readme_check.sh)
 add_test(root sudo ./test_root_dines)
 add_test(live ../tests/live_tests.sh)
 
-# Store the git hash of the current head
+# Store the git version
 if(EXISTS "${PROJECT_SOURCE_DIR}/.git/HEAD")
     execute_process(COMMAND git describe
         OUTPUT_VARIABLE DINES_VERSION
