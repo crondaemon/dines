@@ -9,20 +9,6 @@
 # logs
 *.log
 
-# autotools
-config.status
-*cache
-configure
-Makefile
-Makefile.in
-aclocal.m4
-config.h
-depcomp
-install-sh
-missing
-stamp-h1
-.dirstamp
-
 # Compiled Dynamic libraries
 *.so
 *.dylib
