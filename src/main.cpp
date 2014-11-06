@@ -45,8 +45,15 @@ struct option opts[] = {
     {NULL, 0, NULL, 0}
 };
 
+
+void print_header()
+{
+    cout << "\nDines " << DINES_VERSION << " - The definitive DNS packet forger.\n\n";
+}
+
 void usage(string s)
 {
+    print_header();
     cout << "Fields with (F) can be fuzzed. (Example --txid F)\n";
     cout << "Fields with (F<n>) can be fuzzed for a specific length (Example --question F20,A,IN)\n";
     cout << "Fields with (R) are repeatable. (Example --answer)\n";
@@ -275,7 +282,8 @@ int main(int argc, char* argv[])
         return 2;
     }
 
-    cout << "\nDines " << DINES_VERSION << " - The definitive DNS packet forger.\n\n";
+    print_header();
+
 #ifndef DEBUG
     try {
 #endif

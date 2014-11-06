@@ -80,6 +80,7 @@ Examples:
 	./dines --server=30000
 	./dines --server --answer=www.example.com,A,IN,64,1.2.3.4
 	sudo ./dines --server --question www.example.com --answer www.example.com,A,IN,64,1.2.3.4 --upstream 8.8.8.8 --verbose
+
 ```
 <!--- HELP END --->
 
