@@ -57,11 +57,15 @@ include_directories(.)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(tests)
 
-set(CMAKE_CXX_FLAGS "-g -Wall -Werror -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Wall -Werror -std=c++11")
 
 target_link_libraries(dines resolv)
 target_link_libraries(test_dines cppunit resolv pthread)
 target_link_libraries(test_root_dines cppunit resolv pthread)
+
+add_dependencies(dines resolv)
+add_dependencies(test_dines cppunit resolv pthread)
+add_dependencies(test_root_dines cppunit resolv pthread)
 
 add_test(unit test_dines)
 add_test(readme ../tests/readme_check.sh)
@@ -80,3 +84,9 @@ else()
 endif()
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+
+option(GCOV "Add gcov support" OFF)
+
+if (GCOV)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+endif()
