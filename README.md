@@ -27,9 +27,6 @@ This is the help from dines.
 
 <!--- HELP START --->
 ```
-
-Dines 0.5.4 - The definitive DNS packet forger.
-
 Fields with (F) can be fuzzed. (Example --txid F)
 Fields with (F<n>) can be fuzzed for a specific length (Example --question F20,A,IN)
 Fields with (R) are repeatable. (Example --answer)
